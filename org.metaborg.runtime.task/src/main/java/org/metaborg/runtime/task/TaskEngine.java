@@ -22,6 +22,9 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.Strategy;
 
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
+
 public class TaskEngine {
 	private final ITermFactory factory;
 	private final IStrategoConstructor resultConstructor;
@@ -39,8 +42,7 @@ public class TaskEngine {
 	private final ManyToManyMap<IStrategoInt, IStrategoTerm> toRead = ManyToManyMap.create();
 
 	/** Solutions of tasks. */
-	private final ConcurrentHashMap<IStrategoInt, IStrategoList> toResult =
-		new ConcurrentHashMap<IStrategoInt, IStrategoList>();
+	private final Multimap<IStrategoInt, IStrategoTerm> toResult = LinkedHashMultimap.create();
 
 	/** Tasks that have failed to produce a solution. */
 	private final Set<IStrategoInt> failed = new HashSet<IStrategoInt>();
@@ -131,11 +133,11 @@ public class TaskEngine {
 	 * @param partitions The partitions of the task
 	 * @param dependencies The dependencies of the task
 	 * @param reads The reads of the task.
-	 * @param results A list of results of the task, or an empty tuple if it has no results.
+	 * @param results The results of the task.
 	 * @param failed An integer value that indicates if the task had failed. A value of 1 indicates failure.
 	 */
 	public void addPersistedTask(IStrategoInt taskID, IStrategoTerm instruction, IStrategoList partitions,
-		IStrategoList dependencies, IStrategoList reads, IStrategoTerm results, IStrategoInt failed) {
+		IStrategoList dependencies, IStrategoList reads, IStrategoList results, IStrategoInt failed) {
 		toInstruction.put(taskID, instruction);
 		for(final IStrategoTerm partition : partitions)
 			toPartition.put(taskID, (IStrategoString) partition);
@@ -143,8 +145,8 @@ public class TaskEngine {
 			toDependency.put(taskID, (IStrategoInt) dependency);
 		for(final IStrategoTerm read : reads)
 			toRead.put(taskID, read);
-		if(results.getTermType() == IStrategoTerm.LIST)
-			toResult.put(taskID, (IStrategoList) results);
+		for(final IStrategoTerm result : results)
+			toResult.put(taskID, result);
 		if(failed.intValue() == 1)
 			this.failed.add(taskID);
 	}
@@ -170,21 +172,22 @@ public class TaskEngine {
 	 * changed by a read.
 	 * 
 	 * @param context The context to call the perform and insert strategies with.
-	 * @param performInstruction The strategy that performs an instruction.
+	 * @param collectResults The strategy that collects result IDs from an instruction.
 	 * @param insertResults The strategy that inserts results into an instruction.
+	 * @param performInstruction The strategy that performs an instruction.
 	 * @param changedReads A list of reads which have changed.
 	 * @return A tuple with a list of task identifiers that have failed to produce a result and the number of task
 	 *         evaluations.
 	 */
-	public IStrategoTuple evaluate(Context context, Strategy performInstruction, Strategy insertResults,
-		IStrategoList changedReads) {
+	public IStrategoTuple evaluate(Context context, Strategy collectResults, Strategy insertResults,
+		Strategy performInstruction, IStrategoList changedReads) {
 		// Schedule tasks and transitive dependent tasks that might have changed as a result of a change in reads.
 		for(final IStrategoTerm changedRead : changedReads) {
 			for(final IStrategoInt readTaskID : getRead(changedRead)) {
 				scheduleTransitiveReads(readTaskID);
 			}
 		}
-		return evaluator.evaluate(context, performInstruction, insertResults);
+		return evaluator.evaluate(context, collectResults, insertResults, performInstruction);
 	}
 
 	private void scheduleTransitiveReads(IStrategoInt readTaskID) {
@@ -233,15 +236,15 @@ public class TaskEngine {
 		return toRead.removeAll(taskID);
 	}
 
-	public void addResult(IStrategoInt taskID, IStrategoList resultList) {
-		toResult.put(taskID, resultList);
+	public void addResult(IStrategoInt taskID, IStrategoTerm result) {
+		toResult.put(taskID, result);
 	}
 
-	public IStrategoList removeResult(IStrategoInt taskID) {
-		return toResult.remove(taskID);
+	public Collection<IStrategoTerm> removeAllResults(IStrategoInt taskID) {
+		return toResult.removeAll(taskID);
 	}
 
-	public IStrategoList getResult(IStrategoInt taskID) {
+	public Collection<IStrategoTerm> getResults(IStrategoInt taskID) {
 		return toResult.get(taskID);
 	}
 
@@ -258,11 +261,11 @@ public class TaskEngine {
 	}
 
 	public boolean isSolved(IStrategoInt taskID) {
-		return getResult(taskID) != null || hasFailed(taskID) == true;
+		return getResults(taskID) != null || hasFailed(taskID) == true;
 	}
 
 	public void removeSolved(IStrategoInt taskID) {
-		removeResult(taskID);
+		removeAllResults(taskID);
 		removeFailed(taskID);
 	}
 

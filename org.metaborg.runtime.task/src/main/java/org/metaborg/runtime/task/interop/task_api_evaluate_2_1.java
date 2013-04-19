@@ -10,9 +10,9 @@ public class task_api_evaluate_2_1 extends Strategy {
 	public static task_api_evaluate_2_1 instance = new task_api_evaluate_2_1();
 
 	@Override
-	public IStrategoTerm invoke(Context context, IStrategoTerm current, Strategy performInstruction,
-		Strategy insertResults, IStrategoTerm changedReads) {
+	public IStrategoTerm invoke(Context context, IStrategoTerm current, Strategy collectResults,
+		Strategy insertResults, Strategy performInstruction, IStrategoTerm changedReads) {
 		return TaskManager.getInstance().getCurrent()
-			.evaluate(context, performInstruction, insertResults, (IStrategoList) changedReads);
+			.evaluate(context, collectResults, insertResults, performInstruction, (IStrategoList) changedReads);
 	}
 }

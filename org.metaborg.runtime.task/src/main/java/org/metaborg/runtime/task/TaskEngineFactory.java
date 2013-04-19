@@ -23,9 +23,11 @@ public class TaskEngineFactory {
 			final Collection<IStrategoString> partitions = taskEngine.getPartitionsOf(taskID);
 			final Collection<IStrategoInt> dependencies = taskEngine.getDependencies(taskID);
 			final Collection<IStrategoTerm> reads = taskEngine.getReads(taskID);
-			IStrategoTerm results = taskEngine.getResult(taskID);
-			if(results != null)
-				results = serializer.toAnnotations(results);
+			final Collection<IStrategoTerm> resultsCollection = taskEngine.getResults(taskID);
+			IStrategoList results = factory.makeList();
+			for(IStrategoTerm result : resultsCollection) {
+				results = factory.makeListCons(serializer.toAnnotations(result), results);
+			}
 			final boolean failed = taskEngine.hasFailed(taskID);
 			tasks =
 				factory.makeListCons(
@@ -44,7 +46,8 @@ public class TaskEngineFactory {
 			final IStrategoList partitions = (IStrategoList) task.getSubterm(2);
 			final IStrategoList dependencies = (IStrategoList) task.getSubterm(3);
 			final IStrategoList reads = (IStrategoList) task.getSubterm(4);
-			final IStrategoTerm results = serializer.fromAnnotations(task.getSubterm(5), false);
+			// TODO: are annotations properly restored? they are added to individual results but retrieved on a list.
+			final IStrategoList results = (IStrategoList) serializer.fromAnnotations(task.getSubterm(5), false);
 			final IStrategoInt failed = (IStrategoInt) task.getSubterm(6);
 			taskEngine.addPersistedTask(taskID, instruction, partitions, dependencies, reads, results, failed);
 			tasks = tasks.tail();
@@ -55,9 +58,9 @@ public class TaskEngineFactory {
 
 	private IStrategoAppl createTaskTerm(ITermFactory factory, IStrategoInt taskID, IStrategoTerm instruction,
 		Collection<IStrategoString> partitions, Collection<IStrategoInt> dependencies, Collection<IStrategoTerm> reads,
-		IStrategoTerm results, boolean failed) {
+		IStrategoList results, boolean failed) {
 		return factory.makeAppl(TASK_CONSTRUCTOR, taskID, instruction, factory.makeList(partitions),
-			factory.makeList(dependencies), factory.makeList(reads), results == null ? factory.makeTuple() : results,
+			factory.makeList(dependencies), factory.makeList(reads), results,
 			failed ? factory.makeInt(1) : factory.makeInt(0));
 	}
 }
