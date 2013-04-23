@@ -9,9 +9,18 @@ imports
   
 rules
 
-  nabl-match: ("constraint-error",   term, []) -> Error(<constraint-error> term)
-  nabl-match: ("constraint-warning", term, []) -> Warning(<constraint-warning> term)
-  nabl-match: ("constraint-note",    term, []) -> Note(<constraint-note> term)
+  nabl-match: 
+  	("constraint-error",   term, []) -> Error(term, message)
+	  where
+	  	(term, message) := <constraint-error> term
+  nabl-match: 
+  	("constraint-warning", term, []) -> Warning(term, message)
+	  where
+	  	(term, message) := <constraint-error> term
+  nabl-match: 
+  	("constraint-note",    term, []) -> Note(term, message)
+	  where
+	  	(term, message) := <constraint-error> term
   
   new-error-check(|task*)   = where(<new-task(|task*)> Match("constraint-error"  , [], <id>))
   new-warning-check(|task*) = where(<new-task(|task*)> Match("constraint-warning", [], <id>))

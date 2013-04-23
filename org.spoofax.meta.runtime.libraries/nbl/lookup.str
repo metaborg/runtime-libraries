@@ -11,18 +11,23 @@ imports
 
 rules // Lookup
 	
-	nabl-lookup(|ns, name):
-		scope* -> def*
+	nabl-lookup(|ns, name) = 
+		nabl-uri; nabl-lookup-uri(|ns, name)
+		
+	nabl-lookup-uri(|ns, name):
+		uri -> def*
 		with
-  		uri*  := <filter(nabl-uri)> scope*;
-  		uri'* := <map(nabl-extend-uri(|ns, name, ()))> uri*; 
-  		def*  := <mapconcat(nabl-get-all-definitions)> uri'*
+  		uri'  := <nabl-extend-uri(|ns, name, ())> uri; 
+  		def*  := <nabl-get-all-definitions> uri'
+
+  nabl-lookup-import(|ns, name) =
+  	nabl-uri; nabl-lookup-import-uri(|ns, name)
 			  		
-	nabl-lookup-import(|ns, name):
-		scope* -> import*
+	nabl-lookup-import-uri(|ns, name):
+		scope -> import*
 		with
-			uri*    := <filter(nabl-uri)> scope*;
-			import* := <mapconcat(nabl-lookup-import-one(|ns, name))> uri*
+			uri     := <nabl-uri> scope;
+			import* := <nabl-lookup-import-one(|ns, name)> uri
 			
 	nabl-lookup-import-one(|ns, name):
 		uri -> [namedImport*, unnamedImport*]

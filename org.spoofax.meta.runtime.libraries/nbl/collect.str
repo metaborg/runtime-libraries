@@ -229,7 +229,6 @@ rules // generic analysis of uses
     	
 	nabl-use-subtask-uri(|partition) =
 		switch id
-			case ?URI(_, _) => uri : ![uri]
 			case is-list           : <new-task(|partition)> Choice(<id>)
 			otherwise              : id
 		end 

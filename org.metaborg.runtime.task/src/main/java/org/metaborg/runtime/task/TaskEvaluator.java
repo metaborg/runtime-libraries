@@ -3,6 +3,7 @@ package org.metaborg.runtime.task;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -27,6 +28,7 @@ public class TaskEvaluator {
 	private final TaskEngine taskEngine;
 	private final ITermFactory factory;
 	private final IStrategoConstructor dependencyConstructor;
+	private final IStrategoConstructor singleConstructor;
 
 
 	/** Set of task that are scheduled for evaluation the next time evaluate is called. */
@@ -43,6 +45,7 @@ public class TaskEvaluator {
 		this.taskEngine = taskEngine;
 		this.factory = factory;
 		this.dependencyConstructor = factory.makeConstructor("Dependency", 1);
+		this.singleConstructor = factory.makeConstructor("Single", 1);
 	}
 
 	/**
@@ -151,6 +154,8 @@ public class TaskEvaluator {
 
 			final Collection<StrategoHashMap> resultCombinations = Utils.cartesianProduct(results);
 			for(StrategoHashMap mapping : resultCombinations) {
+				printMapping(mapping);
+				System.out.println("Inserting into task " + instruction);
 				instructions.add(insertResults(context, insertResults, instruction, mapping));
 			}
 		} else {
@@ -160,10 +165,17 @@ public class TaskEvaluator {
 				mapping.put(resultID, factory.makeList(results));
 			}
 
+			printMapping(mapping);
+			System.out.println("Inserting into combinator " + instruction);
 			instructions.add(insertResults(context, insertResults, instruction, mapping));
 		}
 
 		return instructions;
+	}
+	
+	private void printMapping(StrategoHashMap mapping) {
+		for(Entry<IStrategoTerm, IStrategoTerm> entry : mapping.entrySet())
+			System.out.println(entry.getKey() + " -> " + entry.getValue());
 	}
 
 	private IStrategoTerm insertResults(Context context, Strategy insertResults, IStrategoTerm instruction,
@@ -181,20 +193,31 @@ public class TaskEvaluator {
 	}
 
 	private ResultType handleResult(IStrategoInt taskID, final IStrategoTerm instruction, final IStrategoTerm result) {
-		if(result != null && Tools.isTermAppl(result)) {
-			// The task has dynamic dependencies.
-			final IStrategoAppl resultAppl = (IStrategoAppl) result;
-			if(resultAppl.getConstructor().equals(dependencyConstructor)) {
-				updateDelayedDependencies(taskID, (IStrategoList) resultAppl.getSubterm(0));
-				return ResultType.DynamicDependency;
+		if(result != null) {
+			if(Tools.isTermAppl(result)) {
+				final IStrategoAppl resultAppl = (IStrategoAppl) result;
+				if(resultAppl.getConstructor().equals(dependencyConstructor)) {
+					// The task has dynamic dependencies.
+					updateDelayedDependencies(taskID, (IStrategoList) resultAppl.getSubterm(0));
+					return ResultType.DynamicDependency;
+				} else if(resultAppl.getConstructor().equals(singleConstructor)) {
+					// The result must be treated as a single result.
+					taskEngine.addResult(taskID, result.getSubterm(0));
+					return ResultType.Success;
+				}
+			} else if (Tools.isTermList(result)) {
+				// The task produced multiple results.
+				for(IStrategoTerm resultsChild : result)
+					taskEngine.addResult(taskID, resultsChild);
+				return ResultType.Success;
+			} else {
+				// The task produced a single result.
+				taskEngine.addResult(taskID, result);
+				return ResultType.Success;
 			}
-		} else if(result == null) {
+		} else {
 			// The task failed to produce a result.
 			return ResultType.Fail;
-		} else {
-			// The task produced a result.
-			taskEngine.addResult(taskID, result);
-			return ResultType.Success;
 		}
 		return ResultType.Unknown;
 	}
@@ -233,7 +256,10 @@ public class TaskEvaluator {
 
 	private boolean isTaskCombinator(IStrategoTerm instruction) {
 		// TODO: extendible task combinators; use new-combinator instead of new-task and set a boolean?
-		return Tools.isTermAppl(instruction)
-			&& ((IStrategoAppl) instruction).getConstructor().getName().equals("Choice");
+		if(Tools.isTermAppl(instruction)) {
+			final String name = ((IStrategoAppl) instruction).getConstructor().getName();
+			return name.equals("Choice") || name.equals("PropConstraint");
+		}
+		return false;
 	}
 }

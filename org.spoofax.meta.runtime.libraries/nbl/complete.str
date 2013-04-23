@@ -24,7 +24,7 @@ rules // Code completion
     concat
     
   nabl-completion-defs:
-  	Result(taskID) -> <task-get-result>
+  	Result(taskID) -> <task-get-results>
 
   nabl-propose-completions:
     ast -> proposals'*

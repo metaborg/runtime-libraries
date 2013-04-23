@@ -20,14 +20,14 @@ signature
     PropConstraint : List(Prop) * List(Result)   -> Instruction
     PropCalc       : Property * Term             -> Instruction
         
-rules // Resolve
+rules // Resolve definition
   
   perform-task(|nr):
-  	Resolve(scope*@<with(is-list|"Expected a list of scopes.")>, ns, name) -> result
+  	Resolve(scope, ns, name) -> result
   	where
-  		uri* := <filter(nabl-uri)> scope*;
-  		def* := <nabl-lookup(|ns, name)> uri*;
-  		<map(nabl-extend-uri(|ns, name, ()); task-add-read(|nr))> uri*;
+  		uri  := <nabl-uri> scope;
+  		def* := <nabl-lookup-uri(|ns, name)> uri;
+  		<nabl-extend-uri(|ns, name, ()); task-add-read(|nr)> uri;
   		switch !def*
         case ?[]:
         	fail
@@ -35,12 +35,14 @@ rules // Resolve
         	!def*
 			end => result
 
+rules // Resolve imported definition
+
 	perform-task(|nr):
-		ResolveImport(scope*@<with(is-list|"Expected a list of scopes.")>, ns, name) -> result
+		ResolveImport(scope, ns, name) -> result
 		where
-			uri* := <filter(nabl-uri)> scope*;
-			import* := <nabl-lookup-import(|ns, name)> uri*;
-			<map(try(nabl-replace-uri-qualifier(|())); task-add-read(|nr))> uri*;
+			uri := <nabl-uri> scope;
+			import* := <nabl-lookup-import-uri(|ns, name)> uri;
+			<try(nabl-replace-uri-qualifier(|())); task-add-read(|nr)> uri;
       if <task-has-dependencies> import* then
       	result := <task-collect-dependencies> import*
       else
@@ -53,6 +55,8 @@ rules // Resolve
 	        	!def*
 				end => result
       end
+	  
+rules // Property constraint
 	  
   perform-task(|nr):
   	PropConstraint(prop*, res*) -> result
@@ -86,12 +90,13 @@ rules // Resolve
         entry' := <task-create-dependencies> value
       end
 
+rules // Property calculation
+
   perform-task(|nr): 
   	PropCalc(prop, term) -> result'
   	where
   		result := <calc-property> (prop, term);
   		switch !result
   			case task-collect-dependencies => d : !d
-      	case not(is-list)                   : ![result]
-      	otherwise                           : !result
+      	otherwise                           : id
 			end => result'

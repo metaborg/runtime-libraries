@@ -19,19 +19,20 @@ rules // Reference resolution
     get-annos;
     nabl-has-reference
   
-  // TODO: does not go through annotations?
+  // TODO: use task/utils collect-all-annos
 	nabl-collect-all-resolved-defs:
 		ast -> def*
 		with
 			if ast' := <insert-results> ast then
-				def* := <collect-all(?Def(_))> ast'
+				def* := <collect-all(?Def(_), union)> ast'
 			else
 				def* := []
 			end
 
+	// TODO: use task/utils collect-one-annos
 	nabl-collect-one-resolved-def =
 		insert-results-or-create-dependency;
-		oncetd-annos((?Def(_) <+ ?Dependency(_)); ?d); !d
+		oncetd-annos((); ?d); !d
 		
 	oncetd-annos(s) = s <+ has-annos; get-annos; one(oncetd-annos(s)) <+ one(oncetd-annos(s))
 	
