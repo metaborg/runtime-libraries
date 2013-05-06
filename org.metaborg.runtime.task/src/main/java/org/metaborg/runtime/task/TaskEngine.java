@@ -323,10 +323,12 @@ public class TaskEngine {
 	private void collectGarbage() {
 		// TODO: this iterates over the entire tasks collection?
 		final ArrayList<IStrategoInt> garbage = new ArrayList<IStrategoInt>(this.garbage);
-		tasks.removeAll(garbage);
-		solved.removeAll(garbage);
+		tasks.removeAll(garbage);  // toInstruction
+		solved.removeAll(garbage); // toResult
 		toMessage.remove(garbage);
 		failed.removeAll(garbage);
+		for(final IStrategoInt taskID : garbage)
+			toPartition.removeAll(taskID);
 		for(final IStrategoInt taskID : garbage)
 			toDependency.removeAll(taskID);
 		for(final IStrategoInt taskID : garbage)

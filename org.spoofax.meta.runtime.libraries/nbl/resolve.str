@@ -33,5 +33,9 @@ rules // Reference resolution
 		insert-results-or-create-dependency;
 		oncetd-annos((?Def(_) <+ ?Dependency(_)); ?d); !d
 		
+	nabl-collect-one-resolved-def-fail =
+		insert-results;
+		oncetd-annos(?Def(_); ?d); !d
+		
 	oncetd-annos(s) = s <+ has-annos; get-annos; one(oncetd-annos(s)) <+ one(oncetd-annos(s))
 	

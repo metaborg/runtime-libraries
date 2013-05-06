@@ -21,7 +21,7 @@ signature
 rules
   
   perform-task(|n): 
-  	PropLookup(kind, t) -> result
+  	PropLookup(kind, t) -> <debug(!"PropLookup: ")> result
   	where
   		resolved := <nabl-collect-one-resolved-def> t;
   		switch !resolved

@@ -14,7 +14,7 @@ rules // Unresolved
     has-annos;
     get-annos;
     nabl-has-reference;
-    not(nabl-collect-one-resolved-def)
+    not(nabl-collect-one-resolved-def-fail)
 
 rules // Ambiguities
   

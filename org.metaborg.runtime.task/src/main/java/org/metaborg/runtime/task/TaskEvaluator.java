@@ -1,8 +1,8 @@
 package org.metaborg.runtime.task;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -17,8 +17,6 @@ import org.spoofax.interpreter.terms.IStrategoTuple;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.strategoxt.lang.Context;
 import org.strategoxt.lang.Strategy;
-
-import com.google.common.collect.Iterables;
 
 public class TaskEvaluator {
 	private final TaskEngine taskEngine;
@@ -35,6 +33,7 @@ public class TaskEvaluator {
 	/** Dependencies of tasks which are updated during evaluation. */
 	private final ManyToManyMap<IStrategoInt, IStrategoInt> toRuntimeDependency = ManyToManyMap.create();
 
+	private final ManyToManyMap<IStrategoInt, IStrategoInt> hadDynamicDependency = ManyToManyMap.create();
 
 	public TaskEvaluator(TaskEngine taskEngine, ITermFactory factory) {
 		this.taskEngine = taskEngine;
@@ -52,7 +51,8 @@ public class TaskEvaluator {
 	}
 
 	private void queue(IStrategoInt taskID) {
-		evaluationQueue.add(taskID);
+		evaluationQueue.offer(taskID);
+		System.out.println("Queueing: " + taskID + " - " + taskEngine.getInstruction(taskID));
 	}
 
 	public IStrategoTuple evaluate(Context context, Strategy performInstruction, Strategy insertResults) {
@@ -73,7 +73,7 @@ public class TaskEvaluator {
 
 				// If the task has no unsolved dependencies, queue it for analysis.
 				if(dependencies.isEmpty()) {
-					evaluationQueue.add(taskID);
+					queue(taskID);
 				} else {
 					toRuntimeDependency.putAll(taskID, dependencies);
 				}
@@ -97,21 +97,52 @@ public class TaskEvaluator {
 				} else if(result == null) {
 					// The task failed to produce a result.
 					taskEngine.addFailed(taskID);
+					nextScheduled.remove(taskID);
+					hadDynamicDependency.removeAll(taskID);
 					tryScheduleNewTasks(taskID);
 				} else if(Tools.isTermList(result)) {
 					// The task produced a result.
 					taskEngine.addResult(taskID, (IStrategoList) result);
-					nextScheduled.remove(instruction);
+					nextScheduled.remove(taskID);
+					hadDynamicDependency.removeAll(taskID);
 					tryScheduleNewTasks(taskID);
 				} else {
 					throw new IllegalStateException("Unexpected result from perform-task(|taskID): " + result
 						+ ". Must be a list, Dependency(_) constructor or failure.");
 				}
 			}
-
+			
+			for(Entry<IStrategoInt, Collection<IStrategoInt>> i : hadDynamicDependency.asMap().entrySet()) {
+				System.err.println("Task " + i.getKey() + " - " + taskEngine.getInstruction(i.getKey()) + " still has dynamic dependencies on: " + factory.makeList(i.getValue()));
+			}
+			
+			Set<IStrategoInt> roots = new HashSet<IStrategoInt>();
+			Set<IStrategoInt> seen = new HashSet<IStrategoInt>();
+			for(IStrategoInt taskID : nextScheduled) {
+				findRoot(taskID, roots, seen);
+			}
+			
+			for(IStrategoInt root : roots) {
+				System.err.println("Task " + root + " - " + taskEngine.getInstruction(root) + " / " + factory.makeList(taskEngine.getDependencies(root)) + " is a root blocker.");
+			}
+			
 			return factory.makeTuple(factory.makeList(nextScheduled), factory.makeInt(numTasksEvaluated));
 		} finally {
 			reset();
+		}
+	}
+	
+	private void findRoot(IStrategoInt taskID, Set<IStrategoInt> roots, Set<IStrategoInt> seen) {
+		seen.add(taskID);
+		for(IStrategoInt dependency : taskEngine.getDependencies(taskID)) {
+			if(nextScheduled.contains(dependency)) {
+				if(seen.contains(dependency))
+					System.err.println("Cycle: " + taskID + " already seen " + dependency);
+				else
+					findRoot(dependency, roots, seen);
+			} else {
+				roots.add(dependency);
+			}
 		}
 	}
 
@@ -133,25 +164,24 @@ public class TaskEvaluator {
 
 	private void tryScheduleNewTasks(IStrategoInt solved) {
 		// Retrieve dependent tasks of the solved task.
-		final Collection<IStrategoInt> dependents = taskEngine.getDependent(solved);
+		final Set<IStrategoInt> dependents = new HashSet<IStrategoInt>(taskEngine.getDependent(solved));
 		// Make a copy for toRuntimeDependency because a remove operation can occur while iterating.
-		final Collection<IStrategoInt> runtimeDependents =
-			new ArrayList<IStrategoInt>(toRuntimeDependency.getInverse(solved));
+		dependents.addAll(toRuntimeDependency.getInverse(solved));
 
-		for(final IStrategoInt dependent : Iterables.concat(dependents, runtimeDependents)) {
+		for(final IStrategoInt dependent : dependents) {
 			// Retrieve dependencies for a dependent task.
 			Collection<IStrategoInt> dependencies = toRuntimeDependency.get(dependent);
-			int dependenciesSize = dependencies.size();
+			/*int dependenciesSize = dependencies.size();
 			if(dependenciesSize == 0) {
 				// If toRuntimeDependency does not contain dependencies for dependent yet, add them.
 				dependencies = taskEngine.getDependencies(dependent);
 				dependenciesSize = dependencies.size();
 				toRuntimeDependency.putAll(dependent, dependencies);
-			}
+			}*/
 
 			// Remove the dependency to the solved task. If that was the last dependency, schedule the task.
-			final boolean removed = toRuntimeDependency.remove(dependent, solved);
-			if(dependenciesSize == 1 && removed && !taskEngine.isSolved(dependent))
+			toRuntimeDependency.remove(dependent, solved);
+			if(dependencies.size() == 0 && !taskEngine.isSolved(dependent))
 				queue(dependent);
 		}
 	}
@@ -159,7 +189,15 @@ public class TaskEvaluator {
 	private void updateDelayedDependencies(IStrategoInt delayed, IStrategoList dependencies) {
 		// Sets the runtime dependencies for a task to the given dependency list.
 		toRuntimeDependency.removeAll(delayed);
-		for(final IStrategoTerm dependency : dependencies)
+		for(final IStrategoTerm dependency : dependencies) {
+			if(taskEngine.isSolved((IStrategoInt) dependency)) {
+				System.err.println("Task " + dependency + " is solved, it cannot be a dependency! From: " + taskEngine.getInstruction(delayed));
+			} 
+			
 			toRuntimeDependency.put(delayed, (IStrategoInt) dependency);
+			hadDynamicDependency.put(delayed, (IStrategoInt) dependency);
+		}
+		
+		System.out.println("DDep: " + delayed + " -  " + taskEngine.getInstruction(delayed) + " -> " + dependencies);
 	}
 }
