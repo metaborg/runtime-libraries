@@ -117,8 +117,8 @@ public class TaskEvaluator {
 			}
 			
 			Set<IStrategoInt> roots = new HashSet<IStrategoInt>();
-			Set<IStrategoInt> seen = new HashSet<IStrategoInt>();
 			for(IStrategoInt taskID : nextScheduled) {
+				Set<IStrategoInt> seen = new HashSet<IStrategoInt>();
 				findRoot(taskID, roots, seen);
 			}
 			
@@ -135,7 +135,7 @@ public class TaskEvaluator {
 	private void findRoot(IStrategoInt taskID, Set<IStrategoInt> roots, Set<IStrategoInt> seen) {
 		seen.add(taskID);
 		for(IStrategoInt dependency : taskEngine.getDependencies(taskID)) {
-			if(nextScheduled.contains(dependency)) {
+			if(!taskEngine.isSolved(dependency) && nextScheduled.contains(dependency)) {
 				if(seen.contains(dependency))
 					System.err.println("Cycle: " + taskID + " already seen " + dependency);
 				else
