@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.metaborg.runtime.task.digest.ITermDigester;
+import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoInt;
@@ -156,9 +157,10 @@ public class TaskEngine {
 		removedTasks.remove(taskID);
 
 		toPartition.put(taskID, partition);
-		for(final IStrategoTerm dependency : dependencies)
-			addDependency(taskID, dependency);
-
+		if(!TaskIdentification.isChoice(instruction)) {
+			for(final IStrategoTerm dependency : dependencies)
+				addDependency(taskID, dependency);
+		}
 		return createResult(taskID);
 	}
 

@@ -2,7 +2,10 @@ package org.metaborg.runtime.task;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -33,7 +36,10 @@ public class TaskEvaluator {
 
 	/** Dependencies of tasks which are updated during evaluation. */
 	private final ManyToManyMap<IStrategoTerm, IStrategoTerm> toRuntimeDependency = ManyToManyMap.create();
-
+	
+	/** Maps choice IDs to their choices iterator. **/
+	private final Map<IStrategoTerm, Iterator<IStrategoTerm>> choiceIterators = new HashMap<IStrategoTerm, Iterator<IStrategoTerm>>();
+	
 
 	public TaskEvaluator(TaskEngine taskEngine, ITermFactory factory) {
 		this.taskEngine = taskEngine;
@@ -83,29 +89,11 @@ public class TaskEvaluator {
 			for(IStrategoTerm taskID; (taskID = evaluationQueue.poll()) != null;) {
 				++numTasksEvaluated;
 				final IStrategoTerm instruction = taskEngine.getInstruction(taskID);
-				final IStrategoTerm result = solve(context, performInstruction, insertResults, taskID, instruction);
-				if(result != null && Tools.isTermAppl(result)) {
-					// The task has dynamic dependencies.
-					final IStrategoAppl resultAppl = (IStrategoAppl) result;
-					if(resultAppl.getConstructor().equals(dependencyConstructor)) {
-						updateDelayedDependencies(taskID, (IStrategoList) resultAppl.getSubterm(0));
-					} else { 
-						throw new IllegalStateException("Unexpected result from perform-task(|taskID): " + result
-							+ ". Must be a list, Dependency(_) constructor or failure.");
-					}
-				} else if(result == null) {
-					// The task failed to produce a result.
-					taskEngine.addFailed(taskID);
-					nextScheduled.remove(taskID);
-					tryScheduleNewTasks(taskID);
-				} else if(Tools.isTermList(result)) {
-					// The task produced a result.
-					taskEngine.addResult(taskID, (IStrategoList) result);
-					nextScheduled.remove(taskID);
-					tryScheduleNewTasks(taskID);
+				
+				if(TaskIdentification.isChoice(instruction)) {
+					evaluateChoice(context, performInstruction, insertResults, taskID, instruction);
 				} else {
-					throw new IllegalStateException("Unexpected result from perform-task(|taskID): " + result
-						+ ". Must be a list, Dependency(_) constructor or failure.");
+					evaluateInstruction(context, performInstruction, insertResults, taskID, instruction);
 				}
 			}
 
@@ -115,10 +103,82 @@ public class TaskEvaluator {
 		}
 	}
 
+	private void evaluateChoice(Context context, Strategy performInstruction, Strategy insertResults,
+		IStrategoTerm taskID, final IStrategoTerm instruction) {
+		Iterator<IStrategoTerm> choiceIter = choiceIterators.get(taskID);
+		if(choiceIter == null) {
+			choiceIter = instruction.getSubterm(0).iterator();
+			choiceIterators.put(taskID, choiceIter);
+		}
+			
+		// Fail the Choice if there are no choices to evaluate any more.
+		if(!choiceIter.hasNext()) {
+			taskEngine.addFailed(taskID);
+			nextScheduled.remove(taskID);
+			tryScheduleNewTasks(taskID); // TODO: should this activate tasks?
+			return;
+		}
+		final IStrategoTerm choiceTaskID = choiceIter.next();
+		
+		// Add a dependency on the choice task. If that task is solved the Choice is activated again.
+		toRuntimeDependency.put(taskID, choiceTaskID);
+		
+		// Check if task has failed.
+		if(taskEngine.hasFailed(choiceTaskID)) {
+			// Update dynamic dependencies because if any choice task fails or succeeds the Choice should be evaluated again.
+			toRuntimeDependency.remove(taskID, choiceTaskID);
+			// Try the next choice.
+			evaluateChoice(context, performInstruction, insertResults, taskID, instruction);
+			return;
+		}
+		
+		// Check if task has a result.
+		final IStrategoList choiceResults = taskEngine.getResult(choiceTaskID);
+		if(choiceResults != null) {
+			// Update dynamic dependencies because if any choice task fails or succeeds the Choice should be evaluated again.
+			toRuntimeDependency.remove(taskID, choiceTaskID); // TODO: is this required?
+			taskEngine.addResult(taskID, choiceResults);
+			nextScheduled.remove(taskID);
+			tryScheduleNewTasks(taskID);
+			return;
+		}
+		
+		// Otherwise wait for the task to be evaluated.
+	}
+	
+	private void evaluateInstruction(Context context, Strategy performInstruction, Strategy insertResults,
+		IStrategoTerm taskID, final IStrategoTerm instruction) {
+		final IStrategoTerm result = solve(context, performInstruction, insertResults, taskID, instruction);
+		if(result != null && Tools.isTermAppl(result)) {
+			// The task has dynamic dependencies.
+			final IStrategoAppl resultAppl = (IStrategoAppl) result;
+			if(resultAppl.getConstructor().equals(dependencyConstructor)) {
+				updateDelayedDependencies(taskID, (IStrategoList) resultAppl.getSubterm(0));
+			} else { 
+				throw new IllegalStateException("Unexpected result from perform-task(|taskID): " + result
+					+ ". Must be a list, Dependency(_) constructor or failure.");
+			}
+		} else if(result == null) {
+			// The task failed to produce a result.
+			taskEngine.addFailed(taskID);
+			nextScheduled.remove(taskID);
+			tryScheduleNewTasks(taskID);
+		} else if(Tools.isTermList(result)) {
+			// The task produced a result.
+			taskEngine.addResult(taskID, (IStrategoList) result);
+			nextScheduled.remove(taskID);
+			tryScheduleNewTasks(taskID);
+		} else {
+			throw new IllegalStateException("Unexpected result from perform-task(|taskID): " + result
+				+ ". Must be a list, Dependency(_) constructor or failure.");
+		}
+	}
+
 	public void reset() {
 		nextScheduled.clear();
 		evaluationQueue.clear();
 		toRuntimeDependency.clear();
+		choiceIterators.clear();
 	}
 
 	private IStrategoTerm solve(Context context, Strategy performInstruction, Strategy insertResults,
