@@ -50,7 +50,12 @@ rules // Resolve
 			if <Tl> def* then
 				result := <try(nabl-disambiguate(|prop*, namespace, name))> def*
 			else
-				result := def*
+				switch !def*
+	        case ?[]:
+	        	fail
+	        otherwise: 
+	        	!def* // TODO: id?
+				end => result
 			end
 
 	// Looks up named imports, active in scopes with namespace and name..
