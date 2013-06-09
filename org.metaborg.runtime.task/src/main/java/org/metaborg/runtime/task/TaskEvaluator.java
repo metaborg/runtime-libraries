@@ -39,7 +39,7 @@ public class TaskEvaluator {
 	
 	/** Maps choice IDs to their choices iterator. **/
 	private final Map<IStrategoTerm, Iterator<IStrategoTerm>> choiceIterators = new HashMap<IStrategoTerm, Iterator<IStrategoTerm>>();
-	
+	private final Map<IStrategoTerm, IStrategoTerm> currentChoice = new HashMap<IStrategoTerm, IStrategoTerm>();
 
 	public TaskEvaluator(TaskEngine taskEngine, ITermFactory factory) {
 		this.taskEngine = taskEngine;
@@ -102,7 +102,7 @@ public class TaskEvaluator {
 			reset();
 		}
 	}
-
+	
 	private void evaluateChoice(Context context, Strategy performInstruction, Strategy insertResults,
 		IStrategoTerm taskID, final IStrategoTerm instruction) {
 		Iterator<IStrategoTerm> choiceIter = choiceIterators.get(taskID);
@@ -111,14 +111,35 @@ public class TaskEvaluator {
 			choiceIterators.put(taskID, choiceIter);
 		}
 			
+		System.out.println("Choicez: " + taskID + " - " + instruction);
+		
+		// HACK: First need to check results of current, because a choice task will cause this Choice to be evaluated again.
+		// TODO: get rid of duplicate code.
+		final IStrategoTerm currentChoiceTaskID = currentChoice.get(taskID);
+		if(currentChoiceTaskID != null) {
+			final IStrategoList currentChoiceResults = taskEngine.getResult(currentChoiceTaskID);
+			if(currentChoiceResults != null) {
+				// Update dynamic dependencies because if any choice task fails or succeeds the Choice should be evaluated again.
+				toRuntimeDependency.remove(taskID, currentChoiceTaskID); // TODO: is this required?
+				taskEngine.addResult(taskID, currentChoiceResults);
+				nextScheduled.remove(taskID);
+				tryScheduleNewTasks(taskID);
+				System.out.println("Choice succeeded in current: " + taskID + " - " + instruction);
+				return;
+			}
+		}
+		
 		// Fail the Choice if there are no choices to evaluate any more.
 		if(!choiceIter.hasNext()) {
 			taskEngine.addFailed(taskID);
 			nextScheduled.remove(taskID);
 			tryScheduleNewTasks(taskID); // TODO: should this activate tasks?
+			System.out.println("Choice failed: " + taskID + " - " + instruction);
 			return;
 		}
-		final IStrategoTerm choiceTaskID = choiceIter.next();
+		
+		final IStrategoTerm choiceTaskID = choiceIter.next().getSubterm(0);
+		currentChoice.put(taskID, choiceTaskID);
 		
 		// Add a dependency on the choice task. If that task is solved the Choice is activated again.
 		toRuntimeDependency.put(taskID, choiceTaskID);
@@ -128,6 +149,7 @@ public class TaskEvaluator {
 			// Update dynamic dependencies because if any choice task fails or succeeds the Choice should be evaluated again.
 			toRuntimeDependency.remove(taskID, choiceTaskID);
 			// Try the next choice.
+			System.out.println("Recurse: " + taskID + " - " + instruction);
 			evaluateChoice(context, performInstruction, insertResults, taskID, instruction);
 			return;
 		}
@@ -140,10 +162,12 @@ public class TaskEvaluator {
 			taskEngine.addResult(taskID, choiceResults);
 			nextScheduled.remove(taskID);
 			tryScheduleNewTasks(taskID);
+			System.out.println("Choice succeeded: " + taskID + " - " + instruction);
 			return;
 		}
 		
 		// Otherwise wait for the task to be evaluated.
+		System.out.println("Wait: " + taskID + " - " + instruction);
 	}
 	
 	private void evaluateInstruction(Context context, Strategy performInstruction, Strategy insertResults,
