@@ -64,7 +64,12 @@ rules // Resolve
       if <task-has-dependencies> import* then
       	result := <task-collect-dependencies> import*
       else
-	      result := import*
+	      switch !import*
+	        case ?[]:
+	        	fail
+	        otherwise: 
+	        	!import* // TODO: id?
+				end => result
       end
 	
 	// Looks up wildcard imports for a namespace active in scopes.
@@ -75,6 +80,7 @@ rules // Resolve
 			import-uri* := <mapconcat(resolve-one-wildcard-import(|nr, ns))> uri*;
       switch id
       	case task-collect-dependencies => d : !d
+      	case ?[]                            : fail
       	otherwise                           : id
       end => result
 			
@@ -170,6 +176,7 @@ rules // Property constraints
   		filtered := <filter(nabl-resolve-constraint(|prop*))> res*;
       switch !filtered
       	case task-collect-dependencies => d: !d
+      	case ?[] : fail
       	otherwise: !filtered // TODO: id?
       end => result
   		
