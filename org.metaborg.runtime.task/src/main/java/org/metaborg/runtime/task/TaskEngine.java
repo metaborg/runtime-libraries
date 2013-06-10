@@ -77,14 +77,17 @@ public class TaskEngine {
 
 
 	/** Evaluates tasks to results. */
-	private final TaskEvaluator evaluator;
+	private ITaskEvaluator evaluator;
 
 
 	public TaskEngine(ITermFactory factory, ITermDigester digester) {
 		this.factory = factory;
 		this.digester = digester;
 		this.resultConstructor = factory.makeConstructor("Result", 1);
-		this.evaluator = new TaskEvaluator(this, factory);
+	}
+	
+	public void setEvaluator(ITaskEvaluator evaluator) {
+		this.evaluator = evaluator;
 	}
 
 	/**
@@ -379,7 +382,7 @@ public class TaskEngine {
 		removeFailed(taskID);
 	}
 
-	public TaskEvaluator getEvaluator() {
+	public ITaskEvaluator getEvaluator() {
 		return evaluator;
 	}
 
