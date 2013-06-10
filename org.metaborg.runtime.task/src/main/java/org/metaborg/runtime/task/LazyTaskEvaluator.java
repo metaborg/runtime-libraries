@@ -38,10 +38,12 @@ public class LazyTaskEvaluator implements ITaskEvaluator {
 	/** Dependencies of tasks which are updated during evaluation. */
 	private final ManyToManyMap<IStrategoTerm, IStrategoTerm> toRuntimeDependency = ManyToManyMap.create();
 	
+	
 	/** Maps choice IDs to their choices iterator. **/
 	private final Map<IStrategoTerm, Iterator<IStrategoTerm>> choiceIterators = new HashMap<IStrategoTerm, Iterator<IStrategoTerm>>();
 	private final Map<IStrategoTerm, IStrategoTerm> currentChoice = new HashMap<IStrategoTerm, IStrategoTerm>();
 
+	
 	public LazyTaskEvaluator(TaskEngine taskEngine, ITermFactory factory) {
 		this.taskEngine = taskEngine;
 		this.factory = factory;
@@ -53,13 +55,12 @@ public class LazyTaskEvaluator implements ITaskEvaluator {
 	}
 
 	private void queue(IStrategoTerm taskID) {
-		// HACK: Only queue choices.
-		if(TaskIdentification.isChoice(taskEngine.getInstruction(taskID)))
-			evaluationQueue.add(taskID);
+		evaluationQueue.add(taskID);
 	}
 
 	public IStrategoTuple evaluate(Context context, Strategy performInstruction, Strategy insertResults) {
 		try {
+			/*
 			// Remove solutions and reads for tasks that are scheduled for evaluation.
 			for(final IStrategoTerm taskID : nextScheduled) {
 				taskEngine.removeSolved(taskID);
@@ -81,7 +82,16 @@ public class LazyTaskEvaluator implements ITaskEvaluator {
 					toRuntimeDependency.putAll(taskID, dependencies);
 				}
 			}
-
+			*/
+			
+			for(final IStrategoTerm taskID : nextScheduled) {
+				if(TaskIdentification.isChoice(taskEngine.getInstruction(taskID))) {
+					taskEngine.removeSolved(taskID);
+					taskEngine.removeReads(taskID);
+					queue(taskID);
+				}
+			}
+			
 			// Evaluate each task in the queue.
 			int numTasksEvaluated = 0;
 			for(IStrategoTerm taskID; (taskID = evaluationQueue.poll()) != null;) {
