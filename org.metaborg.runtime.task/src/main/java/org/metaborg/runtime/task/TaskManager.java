@@ -50,7 +50,7 @@ public class TaskManager {
 
 	public TaskEngine createTaskEngine(ITermFactory factory) {
 		final TaskEngine taskEngine = new TaskEngine(factory, new NonDeterministicCountingTermDigester());
-		taskEngine.setEvaluator(new TaskEvaluator(taskEngine, factory));
+		taskEngine.setEvaluator(new LazyTaskEvaluator(taskEngine, factory));
 		return taskEngine;
 	}
 
