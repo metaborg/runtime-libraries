@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -57,7 +58,9 @@ public class TaskEvaluator {
 	}
 
 	private void queue(IStrategoTerm taskID) {
-		evaluationQueue.add(taskID);
+		// HACK: Only queue choices.
+		if(TaskIdentification.isChoice(taskEngine.getInstruction(taskID)))
+			evaluationQueue.add(taskID);
 	}
 
 	public IStrategoTuple evaluate(Context context, Strategy performInstruction, Strategy insertResults) {
@@ -67,7 +70,7 @@ public class TaskEvaluator {
 				taskEngine.removeSolved(taskID);
 				taskEngine.removeReads(taskID);
 			}
-
+			
 			// Fill toRuntimeDependency for scheduled tasks such that solving the task activates their dependent tasks.
 			for(final IStrategoTerm taskID : nextScheduled) {
 				final Set<IStrategoTerm> dependencies = new HashSet<IStrategoTerm>(taskEngine.getDependencies(taskID));
@@ -78,7 +81,7 @@ public class TaskEvaluator {
 
 				// If the task has no unsolved dependencies, queue it for analysis.
 				if(dependencies.isEmpty()) {
-					evaluationQueue.add(taskID);
+					queue(taskID);
 				} else {
 					toRuntimeDependency.putAll(taskID, dependencies);
 				}
@@ -142,6 +145,7 @@ public class TaskEvaluator {
 		currentChoice.put(taskID, choiceTaskID);
 		
 		// Add a dependency on the choice task. If that task is solved the Choice is activated again.
+		// TODO: Do we need to add a static dependency here for incremental analysis?
 		toRuntimeDependency.put(taskID, choiceTaskID);
 		
 		// Check if task has failed.
@@ -168,6 +172,7 @@ public class TaskEvaluator {
 		
 		// Otherwise wait for the task to be evaluated.
 		System.out.println("Wait: " + taskID + " - " + instruction);
+		// TODO: schedule evaluation for the choice task and its transitive dependencies.
 	}
 	
 	private void evaluateInstruction(Context context, Strategy performInstruction, Strategy insertResults,
@@ -215,6 +220,21 @@ public class TaskEvaluator {
 		return insertResults.invoke(context, instruction);
 	}
 
+	private void scheduleWithDependencies(IStrategoTerm taskID) {
+		final Set<IStrategoTerm> seen = new HashSet<IStrategoTerm>();
+		final Queue<IStrategoTerm> workList = new LinkedList<IStrategoTerm>();
+		workList.add(taskID);
+		for(IStrategoTerm scheduleTaskID; (scheduleTaskID = workList.poll()) != null;) {
+			evaluator.schedule(taskID);
+			seen.add(taskID);
+			Collection<IStrategoTerm> dependent = getDependent(taskID);
+			for(IStrategoTerm dependentTaskID : dependent) {
+				if(!seen.contains(dependentTaskID))
+					workList.offer(dependentTaskID);
+			}
+		}
+	}
+	
 	private void tryScheduleNewTasks(IStrategoTerm solved) {
 		// Retrieve dependent tasks of the solved task.
 		final Collection<IStrategoTerm> dependents = taskEngine.getDependent(solved);
