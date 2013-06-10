@@ -23,7 +23,7 @@ import org.strategoxt.lang.Strategy;
 
 import com.google.common.collect.Iterables;
 
-public class TaskEvaluator {
+public class TaskEvaluator implements ITaskEvaluator {
 	private final TaskEngine taskEngine;
 	private final ITermFactory factory;
 	private final IStrategoConstructor dependencyConstructor;
@@ -48,11 +48,6 @@ public class TaskEvaluator {
 		this.dependencyConstructor = factory.makeConstructor("Dependency", 1);
 	}
 
-	/**
-	 * Schedules a task with unknown dependencies for evaluation.
-	 * 
-	 * @param taskID Task identifier to schedule.
-	 */
 	public void schedule(IStrategoTerm taskID) {
 		nextScheduled.add(taskID);
 	}
