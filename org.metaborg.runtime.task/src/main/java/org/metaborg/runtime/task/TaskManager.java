@@ -9,7 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.metaborg.runtime.task.digest.NonDeterministicCountingTermDigester;
+import org.metaborg.runtime.task.digest.SHA1TermDigester;
 import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
@@ -48,8 +48,8 @@ public class TaskManager {
 				"Task engine has not been set-up, use task-setup(|project-path) to set up the task system before use.");
 	}
 
-	public TaskEngine createTaskEngine(ITermFactory factory) {
-		final TaskEngine taskEngine = new TaskEngine(factory, new NonDeterministicCountingTermDigester());
+	public TaskEngine createTaskEngine(ITermFactory factory) throws NoSuchAlgorithmException {
+		final TaskEngine taskEngine = new TaskEngine(factory, new SHA1TermDigester());
 		taskEngine.setEvaluator(new TaskEvaluator(taskEngine, factory));
 		return taskEngine;
 	}
