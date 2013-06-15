@@ -103,7 +103,7 @@ public class TaskManager {
 			IStrategoTerm tasks = new TermReader(factory).parseFromFile(file.toString());
 			return taskEngineFactory.fromTerms(taskEngine, tasks, factory);
 		} catch(Exception e) {
-			throw new RuntimeException("Could not load task engine from cache.", e);
+			return null;
 		}
 	}
 
