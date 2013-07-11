@@ -5,8 +5,6 @@ import java.util.List;
 
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import com.google.common.collect.Lists;
-
 public final class Task {
 	public final IStrategoTerm instruction;
 	public final boolean isCombinator;
@@ -32,8 +30,13 @@ public final class Task {
 	}
 
 	public void setResults(Iterable<IStrategoTerm> results) {
-		this.results = Lists.newLinkedList(results);
-		solved = true;
+		this.results.clear();
+		addResults(results);
+	}
+
+	public void setResult(IStrategoTerm result) {
+		this.results.clear();
+		addResult(result);
 	}
 
 	public void addResults(Iterable<IStrategoTerm> results) {

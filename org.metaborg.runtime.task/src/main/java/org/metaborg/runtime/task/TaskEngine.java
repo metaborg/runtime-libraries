@@ -174,6 +174,35 @@ public class TaskEngine {
 
 		return createResult(taskID);
 	}
+	
+	/**
+	 * Adds an instruction with dependencies from a partition and returns a unique task identifier for this instruction.
+	 * 
+	 * @param partition The partition where the task comes from.
+	 * @return A unique task identifier for given instruction.
+	 */
+	public IStrategoTerm addSolvedTask(IStrategoString partition, IStrategoTerm instruction, IStrategoTerm result) {
+		if(!inCollection.contains(partition))
+			throw new IllegalStateException(
+				"Collection has not been started yet. Call task-start-collection(|partition) before adding tasks.");
+		
+		final IStrategoList dependencies = factory.makeList();
+		final IStrategoTerm taskID = taskID(instruction, dependencies);
+
+		Task task = toTask.get(taskID);
+		if(task == null) {
+			task = new Task(instruction, false);
+			toTask.put(taskID, task);
+			addedTasks.add(taskID);
+		}
+		task.setResult(result);
+		removedTasks.remove(taskID);
+
+		toPartition.put(taskID, partition);
+		toInitialDependencies.put(taskID, dependencies);
+
+		return createResult(taskID);
+	}
 
 	private IStrategoAppl createResult(IStrategoTerm taskID) {
 		return factory.makeAppl(resultConstructor, taskID);
