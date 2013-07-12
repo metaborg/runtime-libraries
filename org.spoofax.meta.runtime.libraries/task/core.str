@@ -131,6 +131,9 @@ rules // API
 			otherwise            : task-api-get-results(|<id>)
 		end
 	
+	task-get-instruction-result =
+		task-instruction-id; task-api-get-results(|<id>); Hd
+	
 	task-has-failed =
 		switch id
 			case ?Result(taskID) : task-api-has-failed(|taskID)

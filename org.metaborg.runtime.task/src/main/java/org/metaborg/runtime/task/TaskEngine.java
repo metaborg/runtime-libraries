@@ -20,6 +20,7 @@ import org.spoofax.interpreter.terms.IStrategoInt;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.IStrategoTuple;
 import org.spoofax.interpreter.terms.ITermFactory;
 
 import com.google.common.collect.HashBasedTable;
@@ -67,10 +68,10 @@ public class TaskEngine {
 
 
 	/** New tasks that have been added since last call to {@link #startCollection(IStrategoString)}. */
-	private final Set<IStrategoTerm> addedTasks = new HashSet<IStrategoTerm>();
+	private final Set<IStrategoTerm> addedTaskIDs = new HashSet<IStrategoTerm>();
 
 	/** Tasks that have been removed when calling {@link #stopCollection(IStrategoString)}. */
-	private final Set<IStrategoTerm> removedTasks = new HashSet<IStrategoTerm>();
+	private final Set<IStrategoTerm> removedTaskIDs = new HashSet<IStrategoTerm>();
 
 	/** Partitions that are in process of task collection. */
 	private final Set<IStrategoString> inCollection = new HashSet<IStrategoString>();
@@ -104,9 +105,9 @@ public class TaskEngine {
 			throw new IllegalStateException(
 				"Collection has already been started. Call task-stop-collection(|partition) before starting a new collection.");
 
-		addedTasks.clear();
-		removedTasks.clear();
-		removedTasks.addAll(toPartition.getInverse(partition));
+		addedTaskIDs.clear();
+		removedTaskIDs.clear();
+		removedTaskIDs.addAll(toPartition.getInverse(partition));
 		inCollection.add(partition);
 	}
 
@@ -162,10 +163,10 @@ public class TaskEngine {
 
 		if(!toTask.containsKey(taskID)) {
 			toTask.put(taskID, new Task(instruction, combinator));
-			addedTasks.add(taskID);
+			addedTaskIDs.add(taskID);
 			schedule(taskID);
 		}
-		removedTasks.remove(taskID);
+		removedTaskIDs.remove(taskID);
 
 		toPartition.put(taskID, partition);
 		toInitialDependencies.put(taskID, dependencies);
@@ -193,10 +194,10 @@ public class TaskEngine {
 		if(task == null) {
 			task = new Task(instruction, false);
 			toTask.put(taskID, task);
-			addedTasks.add(taskID);
+			addedTaskIDs.add(taskID);
 		}
 		task.setResult(result);
-		removedTasks.remove(taskID);
+		removedTaskIDs.remove(taskID);
 
 		toPartition.put(taskID, partition);
 		toInitialDependencies.put(taskID, dependencies);
@@ -267,12 +268,25 @@ public class TaskEngine {
 	 * 
 	 * @param partition The partition to stop collecting tasks for.
 	 */
-	public void stopCollection(IStrategoString partition) {
+	public IStrategoTuple stopCollection(IStrategoString partition) {
 		if(!inCollection.contains(partition))
 			throw new IllegalStateException(
 				"Collection has not been started yet. Call task-start-collection(|partition) before stopping collection.");
 
-		for(final IStrategoTerm removed : removedTasks) {
+		IStrategoList removedList = factory.makeList();
+		for(IStrategoTerm taskID : removedTaskIDs) {
+			final Task task = getTask(taskID);
+			if(task.solved())
+				removedList = factory.makeListCons(task.instruction, removedList);
+		}
+		IStrategoList addedList = factory.makeList();
+		for(IStrategoTerm taskID : addedTaskIDs) {
+			final Task task = getTask(taskID);
+			if(task.solved())
+				addedList = factory.makeListCons(task.instruction, addedList);
+		}
+		
+		for(final IStrategoTerm removed : removedTaskIDs) {
 			toPartition.remove(removed, partition);
 			if(!toPartition.containsKey(removed))
 				garbage.add(removed);
@@ -280,6 +294,8 @@ public class TaskEngine {
 
 		inCollection.remove(partition);
 		collectGarbage();
+		
+		return factory.makeTuple(removedList, addedList);
 	}
 
 	private void collectGarbage() {
@@ -470,8 +486,8 @@ public class TaskEngine {
 
 	public void recover() {
 		evaluator.reset();
-		addedTasks.clear();
-		removedTasks.clear();
+		addedTaskIDs.clear();
+		removedTaskIDs.clear();
 		inCollection.clear();
 	}
 	
@@ -486,8 +502,8 @@ public class TaskEngine {
 		toRead.clear();
 		garbage.clear();
 		scheduled.clear();
-		addedTasks.clear();
-		removedTasks.clear();
+		addedTaskIDs.clear();
+		removedTaskIDs.clear();
 		inCollection.clear();
 	}
 }

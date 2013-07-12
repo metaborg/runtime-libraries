@@ -7,6 +7,7 @@ import org.spoofax.interpreter.library.AbstractPrimitive;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.IStrategoTuple;
 
 public class task_api_stop_collection_0_1 extends AbstractPrimitive {
 	public static task_api_stop_collection_0_1 instance = new task_api_stop_collection_0_1();
@@ -16,10 +17,10 @@ public class task_api_stop_collection_0_1 extends AbstractPrimitive {
 	}
 	
 	@Override
-	public boolean call(IContext env, Strategy[] svars, IStrategoTerm[] tvars)
-		throws InterpreterException {
+	public boolean call(IContext env, Strategy[] svars, IStrategoTerm[] tvars) throws InterpreterException {
 		final IStrategoTerm partition = tvars[0];
-		TaskManager.getInstance().getCurrent().stopCollection((IStrategoString) partition);
+		final IStrategoTuple diff = TaskManager.getInstance().getCurrent().stopCollection((IStrategoString) partition);
+		env.setCurrent(diff);
 		return true;
 	}
 }
