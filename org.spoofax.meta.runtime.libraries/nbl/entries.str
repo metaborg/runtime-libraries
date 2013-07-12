@@ -5,45 +5,49 @@ imports
   nbl/collect
   nbl/utils
   nbl/uri
-  index/core
+  task/core
   
 signature
 
   constructors
     
-    Def   : URI                    -> Entry
-    Alias : URI * URI              -> Entry
-    Use   : URI                    -> Entry
-    Prop  : URI * Property * Value -> Entry
+    Def   : URI            -> Key
+    Alias : URI            -> Key
+    Use   : URI            -> Key
+    Prop  : URI * Property -> Key
   
 rules
   
   new-def(|partition, uri):
-    x -> definition
+    x -> def-key
     with
-      definition := <force-origins(!Def(uri))> x;
-      <index-add(|partition)> definition;
+      def-key := Def(uri);
+      def-val := <force-origins(!uri)> x;
+      task-add-solved-task(|partition, def-key, def-val);
 			<new-alias(|partition, <nabl-nonunique-uri> uri, uri)> x
       
   new-alias(|partition, uri, alias-uri):
-    x -> alias
+    x -> alias-key
     with
-      alias := <force-origins(!Alias(uri, alias-uri))> x;
+      alias-key := Alias(uri);
+      alias-val := <force-origins(!alias-uri)> x;
       if <not(eq)> (uri, alias-uri) then
-      	<index-add(|partition)> alias
+      	task-add-solved-task(|partition, alias-key, alias-val)
       end
       
   new-use(|partition, uri):
-    x -> use
+    x -> use-key
     with
-      use := <force-origins(!Use(uri))> x;
-      <index-add(|partition)> use
+      use-key := Use(uri);
+      use-val := <force-origins(!uri)> x;
+      task-add-solved-task(|partition, use-key, use-val)
 
   new-prop(|partition, uri, kind, val):
-    x -> prop
+    x -> prop-key
     with
-      prop := <force-origins(!Prop(uri, kind, val))> x;
-      <index-add(|partition)> prop
+      prop-key := Prop(uri, kind);
+      prop-val := <force-origins(!val)> x;
+      task-add-solved-task(|partition, prop-key, prop-val)
       
 rules // index uri & value projections
   
@@ -53,7 +57,7 @@ rules // index uri & value projections
     
   /** @internal */
   nabl-uri-impl:
-    Alias(uri, _) -> uri
+    Alias(uri) -> uri
     
   /** @internal */  
   nabl-uri-impl:
@@ -63,6 +67,10 @@ rules // index uri & value projections
   nabl-uri-impl:
     Prop(uri, _, _) -> uri
     
+  /** @internal */  
+  nabl-uri-impl:
+    Prop(uri, _) -> uri
+    
     
   /** @internal */
   nabl-value-impl:
@@ -70,7 +78,7 @@ rules // index uri & value projections
     
   /** @internal */
   nabl-value-impl:
-    Alias(_, value) -> value
+    Alias(value) -> value
 
   /** @internal */
   nabl-value-impl:
@@ -79,3 +87,7 @@ rules // index uri & value projections
   /** @internal */
   nabl-value-impl:
     Prop(_, _, value) -> value
+
+  /** @internal */  
+  nabl-value-impl:
+    Prop(value, _) -> value
