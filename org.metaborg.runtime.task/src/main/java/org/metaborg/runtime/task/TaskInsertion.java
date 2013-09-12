@@ -1,21 +1,25 @@
 package org.metaborg.runtime.task;
 
-import static org.metaborg.runtime.task.util.InvokeStrategy.invoke;
 import static org.metaborg.runtime.task.util.ListBuilder.makeList;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.metaborg.runtime.task.util.SingletonIterable;
+import org.metaborg.runtime.task.util.Traversals;
 import org.spoofax.interpreter.core.IContext;
+import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.library.ssl.StrategoHashMap;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
@@ -23,6 +27,42 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 public final class TaskInsertion {
+	private static final class IsResultPredicate implements Predicate<IStrategoTerm> {
+		@Override
+		public boolean apply(IStrategoTerm input) {
+			return Tools.isTermAppl(input) && Tools.hasConstructor((IStrategoAppl) input, "Result", 1);
+		}
+	}
+
+	private static final IsResultPredicate isResultPredicate = new IsResultPredicate();
+
+
+	private static final class FirstSubtermFunction implements Function<IStrategoTerm, IStrategoTerm> {
+		@Override
+		public IStrategoTerm apply(IStrategoTerm input) {
+			return input.getSubterm(0);
+		}
+	}
+
+	private static final FirstSubtermFunction firstSubtermFunction = new FirstSubtermFunction();
+
+
+	private static final class MappingFunction implements Function<IStrategoTerm, IStrategoTerm> {
+		private final Map<IStrategoTerm, IStrategoTerm> mapping;
+
+		private MappingFunction(Map<IStrategoTerm, IStrategoTerm> mapping) {
+			this.mapping = mapping;
+		}
+
+		@Override
+		public IStrategoTerm apply(IStrategoTerm input) {
+			final IStrategoTerm value = mapping.get(input.getSubterm(0));
+			if(value == null)
+				return input;
+			return value;
+		}
+	}
+
 	/**
 	 * Returns all instruction permutations of given task based on its dependencies. For regular tasks,
 	 * {@link #instructionCombinations} is called. For task combinators, {@link #combinatorCombinations} is called. This
@@ -75,7 +115,7 @@ public final class TaskInsertion {
 
 		final Collection<IStrategoTerm> results = Lists.newLinkedList();
 		for(final IStrategoTerm result : task.results()) {
-			final Iterable<IStrategoTerm> nestedResultIDs = getResultIDs(context, collect, result);
+			final Iterable<IStrategoTerm> nestedResultIDs = getResultIDs(result);
 			if(Iterables.isEmpty(nestedResultIDs)) {
 				results.add(result);
 			} else {
@@ -92,8 +132,8 @@ public final class TaskInsertion {
 		return results;
 	}
 
-	private static Iterable<IStrategoTerm> getResultIDs(IContext context, Strategy collect, IStrategoTerm term) {
-		return invoke(context, collect, term);
+	private static Iterable<IStrategoTerm> getResultIDs(IStrategoTerm term) {
+		return Traversals.collectAll(isResultPredicate, firstSubtermFunction, term);
 	}
 
 	private static Multimap<IStrategoTerm, IStrategoTerm> createResultMapping(ITaskEngine taskEngine, IContext context,
@@ -117,7 +157,7 @@ public final class TaskInsertion {
 		final Collection<StrategoHashMap> resultCombinations = cartesianProduct(resultMapping);
 		final Collection<IStrategoTerm> instructions = Lists.newLinkedList();
 		for(StrategoHashMap mapping : resultCombinations) {
-			instructions.add(insertResults(context, insert, term, mapping));
+			instructions.add(insertResults(context.getFactory(), term, mapping));
 		}
 		return instructions;
 	}
@@ -133,7 +173,7 @@ public final class TaskInsertion {
 			mapping.put(resultID, makeList(factory, task.results()));
 		}
 
-		return new SingletonIterable<IStrategoTerm>(insertResults(context, insert, term, mapping));
+		return new SingletonIterable<IStrategoTerm>(insertResults(factory, term, mapping));
 	}
 
 	/**
@@ -160,13 +200,11 @@ public final class TaskInsertion {
 		return result;
 	}
 
-	private static IStrategoTerm insertResults(IContext context, Strategy insertResults, IStrategoTerm instruction,
-		StrategoHashMap resultCombinations) {
-		return invoke(context, insertResults, instruction,
-			createHashtableTerm(context.getFactory(), resultCombinations));
-	}
-
-	private static IStrategoAppl createHashtableTerm(ITermFactory factory, StrategoHashMap hashMap) {
-		return factory.makeAppl(factory.makeConstructor("Hashtable", 1), hashMap);
+	private static IStrategoTerm insertResults(ITermFactory factory, IStrategoTerm term,
+		Map<IStrategoTerm, IStrategoTerm> mapping) {
+		System.out.println("In : " + term);
+		term = Traversals.insert(factory, isResultPredicate, new MappingFunction(mapping), term);
+		System.out.println("Out: " + term);
+		return term;
 	}
 }
