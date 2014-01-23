@@ -1,19 +1,22 @@
 package org.metaborg.runtime.task;
 
+import java.util.Arrays;
 import java.util.List;
 
+import org.metaborg.runtime.task.definition.ITaskDefinition;
+import org.metaborg.runtime.task.util.Timer;
+import org.spoofax.interpreter.core.IContext;
+import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.google.common.collect.Lists;
 
 public final class Task {
-	public final IStrategoTerm instruction;
+	public final ITaskDefinition definition;
+	public final Strategy[] strategyParameters;
+	public final IStrategoTerm[] termParameters;
 	public final IStrategoList initialDependencies;
-
-	// TODO: move these to task (type) definition, this is wasting space.
-	public final boolean isCombinator;
-	public final boolean shortCircuit;
 
 	private List<IStrategoTerm> results = Lists.newLinkedList();
 	private TaskStatus status = TaskStatus.Unknown;
@@ -21,26 +24,33 @@ public final class Task {
 	private long time = -1;
 	private short evaluations = 0;
 
-	public Task(IStrategoTerm instruction, IStrategoList initialDependencies, boolean isCombinator, boolean shortCircuit) {
-		this.instruction = instruction;
+	public Task(ITaskDefinition definition, Strategy[] strategyParameters, IStrategoTerm[] termParameters,
+		IStrategoList initialDependencies) {
+		this.definition = definition;
+		this.strategyParameters = strategyParameters;
+		this.termParameters = termParameters;
 		this.initialDependencies = initialDependencies;
-
-		this.isCombinator = isCombinator;
-		this.shortCircuit = shortCircuit;
 	}
 
 	public Task(Task task) {
-		this.instruction = task.instruction;
+		this.definition = task.definition;
+		this.strategyParameters = task.strategyParameters;
+		this.termParameters = task.termParameters;
 		this.initialDependencies = task.initialDependencies;
-
-		this.isCombinator = task.isCombinator;
-		this.shortCircuit = task.shortCircuit;
 
 		this.results = Lists.newLinkedList(task.results);
 		this.status = task.status;
 		this.message = task.message;
 		this.time = task.time;
 		this.evaluations = task.evaluations;
+	}
+
+	public IStrategoTerm evaluate(IContext context, Timer timer, IStrategoTerm taskID) {
+		timer.start();
+		final IStrategoTerm result = definition.evaluate(context, taskID, strategyParameters, termParameters);
+		addTime(timer.stop());
+		addEvaluation();
+		return result;
 	}
 
 	public Iterable<IStrategoTerm> results() {
@@ -96,8 +106,11 @@ public final class Task {
 	}
 
 	public void unsolve() {
-		results.clear();
 		status = TaskStatus.Unknown;
+		results.clear();
+		clearMessage();
+		clearTime();
+		clearEvaluations();
 	}
 
 	public IStrategoTerm message() {
@@ -148,8 +161,10 @@ public final class Task {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((definition == null) ? 0 : definition.hashCode());
 		result = prime * result + ((initialDependencies == null) ? 0 : initialDependencies.hashCode());
-		result = prime * result + ((instruction == null) ? 0 : instruction.hashCode());
+		result = prime * result + Arrays.hashCode(strategyParameters);
+		result = prime * result + Arrays.hashCode(termParameters);
 		return result;
 	}
 
@@ -162,22 +177,20 @@ public final class Task {
 		if(getClass() != obj.getClass())
 			return false;
 		Task other = (Task) obj;
+		if(definition == null) {
+			if(other.definition != null)
+				return false;
+		} else if(!definition.equals(other.definition))
+			return false;
 		if(initialDependencies == null) {
 			if(other.initialDependencies != null)
 				return false;
 		} else if(!initialDependencies.equals(other.initialDependencies))
 			return false;
-		if(instruction == null) {
-			if(other.instruction != null)
-				return false;
-		} else if(!instruction.equals(other.instruction))
+		if(!Arrays.equals(strategyParameters, other.strategyParameters))
+			return false;
+		if(!Arrays.equals(termParameters, other.termParameters))
 			return false;
 		return true;
-	}
-
-	@Override
-	public String toString() {
-		return "Task [instruction=" + instruction + ", isCombinator=" + isCombinator + ", results=" + results
-			+ ", status=" + status + ", message=" + message + ", time=" + time + ", evaluations=" + evaluations + "]";
 	}
 }

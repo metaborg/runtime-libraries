@@ -4,7 +4,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.metaborg.runtime.task.digest.ITermDigester;
+import org.metaborg.runtime.task.definition.ITaskDefinitionRegistry;
+import org.metaborg.runtime.task.digest.ITaskDigester;
 import org.metaborg.runtime.task.evaluation.ITaskEvaluationFrontend;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.stratego.Strategy;
@@ -77,8 +78,13 @@ public class HierarchicalTaskEngine implements IHierarchicalTaskEngine {
 	}
 
 	@Override
-	public ITermDigester getDigester() {
+	public ITaskDigester getDigester() {
 		return current.getDigester();
+	}
+
+	@Override
+	public ITaskDefinitionRegistry getRegistry() {
+		return current.getRegistry();
 	}
 
 	@Override

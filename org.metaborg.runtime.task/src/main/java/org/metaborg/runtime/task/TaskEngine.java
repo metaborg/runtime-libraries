@@ -6,7 +6,9 @@ import java.util.Set;
 
 import org.metaborg.runtime.task.collection.BidirectionalLinkedHashMultimap;
 import org.metaborg.runtime.task.collection.BidirectionalSetMultimap;
-import org.metaborg.runtime.task.digest.ITermDigester;
+import org.metaborg.runtime.task.definition.ITaskDefinition;
+import org.metaborg.runtime.task.definition.ITaskDefinitionRegistry;
+import org.metaborg.runtime.task.digest.ITaskDigester;
 import org.metaborg.runtime.task.evaluation.ITaskEvaluationFrontend;
 import org.metaborg.runtime.task.util.TermTools;
 import org.spoofax.interpreter.core.IContext;
@@ -29,7 +31,8 @@ import com.google.common.collect.Table;
 public class TaskEngine implements ITaskEngine {
 	private ITaskEngine wrapper;
 	private final ITermFactory factory;
-	private final ITermDigester digester;
+	private final ITaskDigester digester;
+	private final ITaskDefinitionRegistry registry;
 	private ITaskEvaluationFrontend evaluationFrontend;
 	private final IStrategoConstructor resultConstructor;
 
@@ -69,16 +72,22 @@ public class TaskEngine implements ITaskEngine {
 	private final TaskCollection taskCollection;
 
 
-	public TaskEngine(ITermFactory factory, ITermDigester digester) {
+	public TaskEngine(ITermFactory factory, ITaskDigester digester, ITaskDefinitionRegistry registry) {
 		this.factory = factory;
 		this.digester = digester;
+		this.registry = registry;
 		this.taskCollection = new TaskCollection();
 		this.resultConstructor = factory.makeConstructor("Result", 1);
 	}
 
 	@Override
-	public ITermDigester getDigester() {
+	public ITaskDigester getDigester() {
 		return digester;
+	}
+
+	@Override
+	public ITaskDefinitionRegistry getRegistry() {
+		return registry;
 	}
 
 	@Override
@@ -101,7 +110,7 @@ public class TaskEngine implements ITaskEngine {
 	}
 
 	@Override
-	public IStrategoTerm createTaskID(IStrategoTerm instruction, IStrategoList dependencies) {
+	public IStrategoTerm createTaskID(Task task) {
 		IStrategoTerm taskID = wrapper.getTaskID(instruction, dependencies);
 		if(taskID != null)
 			return taskID;
@@ -120,13 +129,13 @@ public class TaskEngine implements ITaskEngine {
 	}
 
 	@Override
-	public IStrategoTerm addTask(IStrategoString partition, IStrategoList dependencies, IStrategoTerm instruction,
-		boolean isCombinator, boolean shortCircuit) {
+	public IStrategoTerm addTask(IStrategoString partition, ITaskDefinition definition, IStrategoList dependencies,
+		Strategy[] strategyParameters, IStrategoTerm[] termParameters) {
 		if(!taskCollection.inCollection(partition))
 			throw new IllegalStateException(
 				"Collection has not been started yet. Call task-start-collection(|partition) before adding tasks.");
 
-		dependencies = evaluationFrontend.adjustDependencies(dependencies, instruction);
+		dependencies = evaluationFrontend.adjustDependencies(dependencies, definition);
 
 		final IStrategoTerm taskID = createTaskID(instruction, dependencies);
 
@@ -230,7 +239,6 @@ public class TaskEngine implements ITaskEngine {
 			toTask.put(taskID, task);
 		}
 		task.unsolve();
-		task.clearMessage();
 		wrapper.removeReads(taskID);
 	}
 
@@ -466,6 +474,7 @@ public class TaskEngine implements ITaskEngine {
 	@Override
 	public void reset() {
 		digester.reset();
+		registry.reset();
 		evaluationFrontend.reset();
 		taskCollection.reset();
 

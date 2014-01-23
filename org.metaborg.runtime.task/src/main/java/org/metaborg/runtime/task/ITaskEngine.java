@@ -3,7 +3,9 @@ package org.metaborg.runtime.task;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.metaborg.runtime.task.digest.ITermDigester;
+import org.metaborg.runtime.task.definition.ITaskDefinition;
+import org.metaborg.runtime.task.definition.ITaskDefinitionRegistry;
+import org.metaborg.runtime.task.digest.ITaskDigester;
 import org.metaborg.runtime.task.evaluation.ITaskEvaluationFrontend;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.stratego.Strategy;
@@ -15,7 +17,12 @@ public interface ITaskEngine {
 	/**
 	 * Returns the term digester.
 	 */
-	public abstract ITermDigester getDigester();
+	public abstract ITaskDigester getDigester();
+
+	/**
+	 * Returns the task definition registry.
+	 */
+	public abstract ITaskDefinitionRegistry getRegistry();
 
 	/**
 	 * Returns the task evaluation frontend.
@@ -37,26 +44,25 @@ public interface ITaskEngine {
 
 
 	/**
-	 * Given an instruction and its initial dependencies, returns its identifier or creates a new identifier.
+	 * Given a task instance, returns its identifier or creates a new identifier.
 	 *
-	 * @param instruction The instruction.
-	 * @param dependencies The initial dependencies of the instruction.
+	 * @param task The task instance.
 	 */
-	public abstract IStrategoTerm createTaskID(IStrategoTerm instruction, IStrategoList dependencies);
+	public abstract IStrategoTerm createTaskID(Task task);
 
 	/**
-	 * Adds an instruction with dependencies from a partition and returns a unique task identifier for this instruction.
-	 *
-	 * @param partition The partition where the task comes from.
-	 * @param dependencies A list of task identifiers of the tasks that given instruction depends on,
-	 * @param instruction The instruction.
-	 * @param isCombinator Whether this task is a task combinator.
-	 * @param shortCircuit Whether evaluating this task stops after the first successful instruction has been executed.
-	 *
+	 * Instantiates a task and returns a unique task identifier for this instruction.
+	 * 
+	 * @param partition Partition where the task comes from.
+	 * @param definition Task definition to instantiate a task for.
+	 * @param dependencies A list of task identifiers of the tasks that the new task instance should depends on.
+	 * @param strategyParameters Strategy parameters.
+	 * @param termParameters Term parameters.
+	 * 
 	 * @return A unique task identifier for given instruction.
 	 */
-	public abstract IStrategoTerm addTask(IStrategoString partition, IStrategoList dependencies,
-		IStrategoTerm instruction, boolean isCombinator, boolean shortCircuit);
+	public abstract IStrategoTerm addTask(IStrategoString partition, ITaskDefinition definition,
+		IStrategoList dependencies, Strategy[] strategyParameters, IStrategoTerm[] termParameters);
 
 	/**
 	 * Adds a persisted task back to the task engine.
@@ -221,21 +227,21 @@ public interface ITaskEngine {
 
 	/**
 	 * Gets all other task identifiers that task with given identifier statically depends on.
-	 * 
+	 *
 	 * @param taskID The task identifier to get static dependencies for.
 	 */
 	public abstract Iterable<IStrategoTerm> getDependencies(IStrategoTerm taskID);
 
 	/**
 	 * Gets all other task identifiers that task with given identifier dynamically depends on.
-	 * 
+	 *
 	 * @param taskID The task identifier to get dynamic dependencies for.
 	 */
 	public abstract Iterable<IStrategoTerm> getDynamicDependencies(IStrategoTerm taskID);
 
 	/**
 	 * Gets all other task identifier that task with given identifier statically transitively depends on.
-	 * 
+	 *
 	 * @param taskID The task identifier to get static dependencies for.
 	 */
 	public abstract Set<IStrategoTerm> getTransitiveDependencies(IStrategoTerm taskID);

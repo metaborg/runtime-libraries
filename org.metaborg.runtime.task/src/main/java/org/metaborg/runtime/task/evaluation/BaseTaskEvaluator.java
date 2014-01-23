@@ -1,7 +1,5 @@
 package org.metaborg.runtime.task.evaluation;
 
-import static org.metaborg.runtime.task.util.InvokeStrategy.invoke;
-
 import java.util.Set;
 
 import org.metaborg.runtime.task.ITaskEngine;
@@ -91,7 +89,7 @@ public class BaseTaskEvaluator implements ITaskEvaluator {
 				if(cyclic)
 					instruction = factory.makeTuple(instruction, factory.makeString("cyclic"));
 
-				final IStrategoTerm result = solve(context, perform, taskID, task, instruction);
+				final IStrategoTerm result = task.evaluate(context, timer, taskID);
 				final TaskResultType resultType = handleResult(taskID, task, result, evaluationQueue);
 
 				boolean done = false;
@@ -142,18 +140,6 @@ public class BaseTaskEvaluator implements ITaskEvaluator {
 	public void reset() {
 		delayed = false;
 		timer.reset();
-	}
-
-	/**
-	 * Solves an instruction and returns its raw result.
-	 */
-	private IStrategoTerm solve(IContext context, Strategy performInstruction, IStrategoTerm taskID, Task task,
-		IStrategoTerm instruction) {
-		timer.start();
-		final IStrategoTerm result = invoke(context, performInstruction, instruction, taskID);
-		task.addTime(timer.stop());
-		task.addEvaluation();
-		return result;
 	}
 
 	/**

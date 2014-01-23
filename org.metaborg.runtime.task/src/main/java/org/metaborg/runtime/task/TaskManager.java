@@ -7,8 +7,10 @@ import java.lang.ref.WeakReference;
 import java.net.URI;
 import java.util.Map;
 
-import org.metaborg.runtime.task.digest.ITermDigester;
-import org.metaborg.runtime.task.digest.NonDeterministicCountingTermDigester;
+import org.metaborg.runtime.task.definition.ITaskDefinitionRegistry;
+import org.metaborg.runtime.task.definition.TaskDefinitionRegistry;
+import org.metaborg.runtime.task.digest.ITaskDigester;
+import org.metaborg.runtime.task.digest.CountingTaskDigester;
 import org.metaborg.runtime.task.evaluation.BaseTaskEvaluator;
 import org.metaborg.runtime.task.evaluation.ITaskEvaluationFrontend;
 import org.metaborg.runtime.task.evaluation.TaskEvaluationQueue;
@@ -67,7 +69,9 @@ public class TaskManager {
 
 	public ITaskEngine pushTaskEngine(ITermFactory factory) {
 		final ITaskEngine currentTaskEngine = getCurrent();
-		final ITaskEngine newTaskEngine = createTaskEngine(currentTaskEngine, factory, currentTaskEngine.getDigester());
+		final ITaskEngine newTaskEngine =
+			createTaskEngine(currentTaskEngine, factory, currentTaskEngine.getDigester(),
+				currentTaskEngine.getRegistry());
 		setCurrent(newTaskEngine);
 		return newTaskEngine;
 	}
@@ -116,26 +120,31 @@ public class TaskManager {
 	}
 
 	public ITaskEngine createTaskEngine(ITermFactory factory) {
-		return createTaskEngine(factory, createTermDigester());
+		return createTaskEngine(factory, createTermDigester(), createTaskDefinitionRegistry());
 	}
 
-	public ITaskEngine createTaskEngine(ITermFactory factory, ITermDigester digester) {
-		final TaskEngine taskEngine = new TaskEngine(factory, digester);
+	public ITaskEngine createTaskEngine(ITermFactory factory, ITaskDigester digester, ITaskDefinitionRegistry registry) {
+		final TaskEngine taskEngine = new TaskEngine(factory, digester, registry);
 		taskEngine.setEvaluationFrontend(createTaskEvaluationFrontend(taskEngine, factory));
 		taskEngine.setWrapper(taskEngine);
 		return taskEngine;
 	}
 
-	public ITaskEngine createTaskEngine(ITaskEngine parent, ITermFactory factory, ITermDigester digester) {
-		final TaskEngine taskEngine = new TaskEngine(factory, digester);
+	public ITaskEngine createTaskEngine(ITaskEngine parent, ITermFactory factory, ITaskDigester digester,
+		ITaskDefinitionRegistry registry) {
+		final TaskEngine taskEngine = new TaskEngine(factory, digester, registry);
 		final ITaskEngine hierarchicalTaskEngine = new HierarchicalTaskEngine(taskEngine, parent);
 		taskEngine.setEvaluationFrontend(createTaskEvaluationFrontend(hierarchicalTaskEngine, factory));
 		taskEngine.setWrapper(hierarchicalTaskEngine);
 		return hierarchicalTaskEngine;
 	}
 
-	public ITermDigester createTermDigester() {
-		return new NonDeterministicCountingTermDigester();
+	public ITaskDigester createTermDigester() {
+		return new CountingTaskDigester();
+	}
+
+	public ITaskDefinitionRegistry createTaskDefinitionRegistry() {
+		return new TaskDefinitionRegistry();
 	}
 
 	public ITaskEvaluationFrontend createTaskEvaluationFrontend(ITaskEngine taskEngine, ITermFactory factory) {
