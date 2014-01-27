@@ -25,16 +25,22 @@ public final class TaskDefinition implements ITaskDefinition {
 	}
 
 	@Override
-	public IStrategoTerm evaluate(IContext context, IStrategoTerm taskID, Strategy[] sp, IStrategoTerm[] tp) {
-		if(sp.length > identifier.strategyArity)
-			throw new RuntimeException("Task " + identifier.name + " expected strategy arity of "
-				+ identifier.strategyArity + ", got " + sp.length);
+	public boolean combinator() {
+		return isCombinator;
+	}
 
-		if(tp.length > identifier.termArity)
-			throw new RuntimeException("Task " + identifier.name + " expected term arity of " + identifier.termArity
+	@Override
+	public boolean shortCircuit() {
+		return shortCircuit;
+	}
+
+	@Override
+	public IStrategoTerm evaluate(IContext context, IStrategoTerm taskID, IStrategoTerm[] tp) {
+		if(tp.length > identifier.arity)
+			throw new RuntimeException("Task " + identifier.name + " expected term arity of " + identifier.arity
 				+ ", got " + tp.length);
 
-		return InvokeStrategy.invoke(context, strategy, taskID, sp, tp);
+		return InvokeStrategy.invoke(context, strategy, taskID, tp);
 	}
 
 	@Override

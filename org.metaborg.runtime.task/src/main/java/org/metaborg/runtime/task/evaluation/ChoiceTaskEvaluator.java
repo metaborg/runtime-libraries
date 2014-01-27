@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.metaborg.runtime.task.ITaskEngine;
 import org.metaborg.runtime.task.Task;
+import org.metaborg.runtime.task.definition.TaskDefinitionIdentifier;
 import org.spoofax.NotImplementedException;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.Tools;
@@ -42,7 +43,7 @@ public class ChoiceTaskEvaluator implements ITaskEvaluator {
 	public void queue(ITaskEngine taskEngine, ITaskEvaluationQueue evaluationQueue, Set<IStrategoTerm> scheduled) {
 		for(IStrategoTerm taskID : scheduled) {
 			final Task task = taskEngine.getTask(taskID);
-			if(ChoiceTaskEvaluator.isChoice(task.instruction)) {
+			if(ChoiceTaskEvaluator.isChoice(task)) {
 				evaluationQueue.queue(taskID);
 			}
 		}
@@ -68,7 +69,7 @@ public class ChoiceTaskEvaluator implements ITaskEvaluator {
 
 		Iterator<IStrategoTerm> iter = iterators.get(taskID);
 		if(iter == null) {
-			iter = task.instruction.getSubterm(0).iterator();
+			iter = task.arguments[0].iterator();
 			iterators.put(taskID, iter);
 		}
 
@@ -209,7 +210,7 @@ public class ChoiceTaskEvaluator implements ITaskEvaluator {
 
 		for(IStrategoTerm queueTaskID; (queueTaskID = queue.poll()) != null;) {
 			final Task task = taskEngine.getTask(queueTaskID);
-			if(ChoiceTaskEvaluator.isChoice(task.instruction)) {
+			if(ChoiceTaskEvaluator.isChoice(task)) {
 				continue;
 			}
 			for(IStrategoTerm dependency : taskEngine.getDependencies(queueTaskID)) {
@@ -222,7 +223,8 @@ public class ChoiceTaskEvaluator implements ITaskEvaluator {
 		return seen;
 	}
 
-	private static boolean isChoice(IStrategoTerm instruction) {
-		return Tools.isTermAppl(instruction) && Tools.hasConstructor((IStrategoAppl) instruction, "Choice", 1);
+	private static boolean isChoice(Task task) {
+		final TaskDefinitionIdentifier identifier = task.definition.identifier();
+		return identifier.name.equals("Choice") && identifier.arity == 1;
 	}
 }

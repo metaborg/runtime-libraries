@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.metaborg.runtime.task.ITaskEngine;
 import org.metaborg.runtime.task.Task;
+import org.metaborg.runtime.task.definition.TaskDefinitionIdentifier;
 import org.spoofax.NotImplementedException;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.Tools;
@@ -43,7 +44,7 @@ public class SequenceTaskEvaluator implements ITaskEvaluator {
 	public void queue(ITaskEngine taskEngine, ITaskEvaluationQueue evaluationQueue, Set<IStrategoTerm> scheduled) {
 		for(IStrategoTerm taskID : scheduled) {
 			final Task task = taskEngine.getTask(taskID);
-			if(SequenceTaskEvaluator.isSequence(task.instruction)) {
+			if(SequenceTaskEvaluator.isSequence(task)) {
 				evaluationQueue.queue(taskID);
 			}
 		}
@@ -54,7 +55,7 @@ public class SequenceTaskEvaluator implements ITaskEvaluator {
 		IContext context, Strategy collect, Strategy insert, Strategy perform) {
 		Iterator<IStrategoTerm> iter = iterators.get(taskID);
 		if(iter == null) {
-			iter = task.instruction.getSubterm(0).iterator();
+			iter = task.arguments[0].iterator();
 			iterators.put(taskID, iter);
 		}
 
@@ -214,7 +215,7 @@ public class SequenceTaskEvaluator implements ITaskEvaluator {
 
 		for(IStrategoTerm queueTaskID; (queueTaskID = queue.poll()) != null;) {
 			final Task task = taskEngine.getTask(queueTaskID);
-			if(SequenceTaskEvaluator.isSequence(task.instruction)) {
+			if(SequenceTaskEvaluator.isSequence(task)) {
 				continue;
 			}
 			for(IStrategoTerm dependency : taskEngine.getDependencies(queueTaskID)) {
@@ -227,7 +228,8 @@ public class SequenceTaskEvaluator implements ITaskEvaluator {
 		return seen;
 	}
 
-	private static boolean isSequence(IStrategoTerm instruction) {
-		return Tools.isTermAppl(instruction) && Tools.hasConstructor((IStrategoAppl) instruction, "Sequence", 1);
+	private static boolean isSequence(Task task) {
+		final TaskDefinitionIdentifier identifier = task.definition.identifier();
+		return identifier.name.equals("Sequence") && identifier.arity == 1;
 	}
 }

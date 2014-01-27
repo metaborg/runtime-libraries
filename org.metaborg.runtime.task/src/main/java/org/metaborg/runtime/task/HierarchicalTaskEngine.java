@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.metaborg.runtime.task.definition.ITaskDefinition;
 import org.metaborg.runtime.task.definition.ITaskDefinitionRegistry;
 import org.metaborg.runtime.task.digest.ITaskDigester;
 import org.metaborg.runtime.task.evaluation.ITaskEvaluationFrontend;
@@ -23,10 +24,16 @@ public class HierarchicalTaskEngine implements IHierarchicalTaskEngine {
 	private ITaskEngine parent;
 
 
-	/** Mapping from task identifiers to objects that contain the removal status of that task. */
+	/**
+	 * Mapping from task identifiers to objects that contain the removal status
+	 * of that task.
+	 */
 	private final Map<IStrategoTerm, TaskRemovalStatus> tasksRemovalStatus = Maps.newHashMap();
 
-	/** Predicate that decides whether a task identifier from the parent should be visible or not. */
+	/**
+	 * Predicate that decides whether a task identifier from the parent should
+	 * be visible or not.
+	 */
 	private final Predicate<IStrategoTerm> visible;
 	private final Predicate<Task> visibleTask;
 	private final Predicate<Entry<IStrategoTerm, Task>> visibleEntry;
@@ -105,14 +112,14 @@ public class HierarchicalTaskEngine implements IHierarchicalTaskEngine {
 	}
 
 	@Override
-	public IStrategoTerm createTaskID(IStrategoTerm instruction, IStrategoList dependencies) {
-		return current.createTaskID(instruction, dependencies);
+	public IStrategoTerm createTaskID(Task task) {
+		return current.createTaskID(task);
 	}
 
 	@Override
-	public IStrategoTerm addTask(IStrategoString partition, IStrategoList dependencies, IStrategoTerm instruction,
-		boolean isCombinator, boolean shortCircuit) {
-		return current.addTask(partition, dependencies, instruction, isCombinator, shortCircuit);
+	public IStrategoTerm addTask(IStrategoString partition, ITaskDefinition definition, IStrategoList dependencies,
+		IStrategoTerm[] arguments) {
+		return current.addTask(partition, definition, dependencies, arguments);
 	}
 
 	@Override
@@ -183,7 +190,7 @@ public class HierarchicalTaskEngine implements IHierarchicalTaskEngine {
 	@Override
 	public Task getTask(IStrategoTerm taskID) {
 		Task task = current.getTask(taskID);
-		if(task == null && parentTaskVisible(taskID))
+		if (task == null && parentTaskVisible(taskID))
 			task = parent.getTask(taskID);
 		return task;
 	}
@@ -191,16 +198,8 @@ public class HierarchicalTaskEngine implements IHierarchicalTaskEngine {
 	@Override
 	public IStrategoTerm getTaskID(Task task) {
 		IStrategoTerm taskID = current.getTaskID(task);
-		if(taskID == null && parentTaskVisible(taskID))
+		if (taskID == null && parentTaskVisible(taskID))
 			taskID = parent.getTaskID(task);
-		return taskID;
-	}
-
-	@Override
-	public IStrategoTerm getTaskID(IStrategoTerm instruction, IStrategoList dependencies) {
-		IStrategoTerm taskID = current.getTaskID(instruction, dependencies);
-		if(taskID == null) // TODO: this disregards the visibility of the task in the parent, is that OK?
-			taskID = parent.getTaskID(instruction, dependencies);
 		return taskID;
 	}
 
@@ -244,7 +243,7 @@ public class HierarchicalTaskEngine implements IHierarchicalTaskEngine {
 	@Override
 	public Set<IStrategoString> getPartitionsOf(IStrategoTerm taskID) {
 		final Set<IStrategoString> ownPartitions = current.getPartitionsOf(taskID);
-		if(parentTaskVisible(taskID) && parentPartitionsVisible(taskID))
+		if (parentTaskVisible(taskID) && parentPartitionsVisible(taskID))
 			return Sets.union(ownPartitions, parent.getPartitionsOf(taskID));
 		else
 			return ownPartitions;
@@ -265,10 +264,11 @@ public class HierarchicalTaskEngine implements IHierarchicalTaskEngine {
 
 	@Override
 	public void removeFromPartition(IStrategoTerm taskID, IStrategoString partition) {
-		if(parentPartitionsVisible(taskID)) {
-			// TODO: copying is not correct if the parent changes, need to keep a Set<Partition> that have been del.
+		if (parentPartitionsVisible(taskID)) {
+			// TODO: copying is not correct if the parent changes, need to keep
+			// a Set<Partition> that have been del.
 			removePartitionsOf(taskID);
-			for(IStrategoString copyPartition : parent.getPartitionsOf(taskID)) {
+			for (IStrategoString copyPartition : parent.getPartitionsOf(taskID)) {
 				addToPartition(taskID, copyPartition);
 			}
 		}
@@ -293,7 +293,7 @@ public class HierarchicalTaskEngine implements IHierarchicalTaskEngine {
 	@Override
 	public Iterable<IStrategoTerm> getDependencies(IStrategoTerm taskID) {
 		final Iterable<IStrategoTerm> ownTaskIDs = current.getDependencies(taskID);
-		if(parentTaskVisible(taskID) && parentDependenciesVisible(taskID))
+		if (parentTaskVisible(taskID) && parentDependenciesVisible(taskID))
 			return Iterables.concat(parent.getDependencies(taskID), ownTaskIDs);
 		else
 			return ownTaskIDs;
@@ -302,7 +302,7 @@ public class HierarchicalTaskEngine implements IHierarchicalTaskEngine {
 	@Override
 	public Iterable<IStrategoTerm> getDynamicDependencies(IStrategoTerm taskID) {
 		final Iterable<IStrategoTerm> ownTaskIDs = current.getDynamicDependencies(taskID);
-		if(parentTaskVisible(taskID) && parentDependenciesVisible(taskID))
+		if (parentTaskVisible(taskID) && parentDependenciesVisible(taskID))
 			return Iterables.concat(parent.getDynamicDependencies(taskID), ownTaskIDs);
 		else
 			return ownTaskIDs;
@@ -355,7 +355,7 @@ public class HierarchicalTaskEngine implements IHierarchicalTaskEngine {
 	@Override
 	public Iterable<IStrategoTerm> getReads(IStrategoTerm taskID) {
 		final Iterable<IStrategoTerm> ownURIs = current.getReads(taskID);
-		if(parentTaskVisible(taskID) && parentReadsVisible(taskID))
+		if (parentTaskVisible(taskID) && parentReadsVisible(taskID))
 			return Iterables.concat(parent.getReads(taskID), ownURIs);
 		else
 			return ownURIs;
@@ -421,7 +421,7 @@ public class HierarchicalTaskEngine implements IHierarchicalTaskEngine {
 
 	private TaskRemovalStatus getTaskRemovalStatus(IStrategoTerm taskID) {
 		TaskRemovalStatus status = tasksRemovalStatus.get(taskID);
-		if(status == null) {
+		if (status == null) {
 			status = new TaskRemovalStatus();
 			tasksRemovalStatus.put(taskID, status);
 		}

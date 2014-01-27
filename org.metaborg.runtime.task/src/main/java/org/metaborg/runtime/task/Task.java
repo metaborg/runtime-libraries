@@ -4,9 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.metaborg.runtime.task.definition.ITaskDefinition;
-import org.metaborg.runtime.task.util.Timer;
-import org.spoofax.interpreter.core.IContext;
-import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -14,8 +11,7 @@ import com.google.common.collect.Lists;
 
 public final class Task {
 	public final ITaskDefinition definition;
-	public final Strategy[] strategyParameters;
-	public final IStrategoTerm[] termParameters;
+	public final IStrategoTerm[] arguments;
 	public final IStrategoList initialDependencies;
 
 	private List<IStrategoTerm> results = Lists.newLinkedList();
@@ -24,18 +20,15 @@ public final class Task {
 	private long time = -1;
 	private short evaluations = 0;
 
-	public Task(ITaskDefinition definition, Strategy[] strategyParameters, IStrategoTerm[] termParameters,
-		IStrategoList initialDependencies) {
+	public Task(ITaskDefinition definition, IStrategoTerm[] arguments, IStrategoList initialDependencies) {
 		this.definition = definition;
-		this.strategyParameters = strategyParameters;
-		this.termParameters = termParameters;
+		this.arguments = arguments;
 		this.initialDependencies = initialDependencies;
 	}
 
 	public Task(Task task) {
 		this.definition = task.definition;
-		this.strategyParameters = task.strategyParameters;
-		this.termParameters = task.termParameters;
+		this.arguments = task.arguments;
 		this.initialDependencies = task.initialDependencies;
 
 		this.results = Lists.newLinkedList(task.results);
@@ -43,14 +36,6 @@ public final class Task {
 		this.message = task.message;
 		this.time = task.time;
 		this.evaluations = task.evaluations;
-	}
-
-	public IStrategoTerm evaluate(IContext context, Timer timer, IStrategoTerm taskID) {
-		timer.start();
-		final IStrategoTerm result = definition.evaluate(context, taskID, strategyParameters, termParameters);
-		addTime(timer.stop());
-		addEvaluation();
-		return result;
 	}
 
 	public Iterable<IStrategoTerm> results() {
@@ -163,8 +148,7 @@ public final class Task {
 		int result = 1;
 		result = prime * result + ((definition == null) ? 0 : definition.hashCode());
 		result = prime * result + ((initialDependencies == null) ? 0 : initialDependencies.hashCode());
-		result = prime * result + Arrays.hashCode(strategyParameters);
-		result = prime * result + Arrays.hashCode(termParameters);
+		result = prime * result + Arrays.hashCode(arguments);
 		return result;
 	}
 
@@ -187,9 +171,7 @@ public final class Task {
 				return false;
 		} else if(!initialDependencies.equals(other.initialDependencies))
 			return false;
-		if(!Arrays.equals(strategyParameters, other.strategyParameters))
-			return false;
-		if(!Arrays.equals(termParameters, other.termParameters))
+		if(!Arrays.equals(arguments, other.arguments))
 			return false;
 		return true;
 	}

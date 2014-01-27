@@ -8,11 +8,10 @@ import org.metaborg.runtime.task.ITaskEngine;
 import org.metaborg.runtime.task.Task;
 import org.metaborg.runtime.task.collection.BidirectionalLinkedHashMultimap;
 import org.metaborg.runtime.task.collection.BidirectionalSetMultimap;
+import org.metaborg.runtime.task.definition.ITaskDefinition;
+import org.metaborg.runtime.task.definition.TaskDefinitionIdentifier;
 import org.spoofax.interpreter.core.IContext;
-import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.stratego.Strategy;
-import org.spoofax.interpreter.terms.IStrategoAppl;
-import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.IStrategoTuple;
@@ -43,8 +42,8 @@ public class TaskEvaluationQueue implements ITaskEvaluationQueue, ITaskEvaluatio
 		BidirectionalLinkedHashMultimap.create();
 
 
-	/** Maps the constructor of a task to the evaluator that can evaluate the task. */
-	private final Map<IStrategoConstructor, ITaskEvaluator> taskEvaluators = Maps.newLinkedHashMap();
+	/** Maps identifiers of task definitions to the evaluator that can evaluate the task. */
+	private final Map<TaskDefinitionIdentifier, ITaskEvaluator> taskEvaluators = Maps.newLinkedHashMap();
 
 	/** The default task evaluator that is used to evaluate tasks for which there is no specific evaluator. */
 	private final ITaskEvaluator defaultTaskEvaluator;
@@ -141,15 +140,15 @@ public class TaskEvaluationQueue implements ITaskEvaluationQueue, ITaskEvaluatio
 
 
 	@Override
-	public void addTaskEvaluator(IStrategoConstructor constructor, ITaskEvaluator taskEvaluator) {
-		if(taskEvaluators.put(constructor, taskEvaluator) != null) {
-			throw new RuntimeException("Task evaluator for " + constructor + " already exists.");
+	public void addTaskEvaluator(TaskDefinitionIdentifier identifier, ITaskEvaluator taskEvaluator) {
+		if(taskEvaluators.put(identifier, taskEvaluator) != null) {
+			throw new RuntimeException("Task evaluator for " + identifier + " already exists.");
 		}
 	}
 
 	@Override
-	public IStrategoList adjustDependencies(IStrategoList dependencies, IStrategoTerm instruction) {
-		final ITaskEvaluator taskEvaluator = getTaskEvaluator(instruction);
+	public IStrategoList adjustDependencies(IStrategoList dependencies, ITaskDefinition definition) {
+		final ITaskEvaluator taskEvaluator = getTaskEvaluator(definition.identifier());
 		return taskEvaluator.adjustDependencies(dependencies, factory);
 	}
 
@@ -322,15 +321,11 @@ public class TaskEvaluationQueue implements ITaskEvaluationQueue, ITaskEvaluatio
 	/**
 	 * Returns a task evaluator for given instruction.
 	 */
-	private ITaskEvaluator getTaskEvaluator(IStrategoTerm instruction) {
-		ITaskEvaluator taskEvaluator;
-		if(!Tools.isTermAppl(instruction)) {
+	private ITaskEvaluator getTaskEvaluator(TaskDefinitionIdentifier identifier) {
+		ITaskEvaluator taskEvaluator = taskEvaluators.get(identifier);
+		if(taskEvaluator == null)
 			taskEvaluator = defaultTaskEvaluator;
-		} else {
-			taskEvaluator = taskEvaluators.get(((IStrategoAppl) instruction).getConstructor());
-			if(taskEvaluator == null)
-				taskEvaluator = defaultTaskEvaluator;
-		}
+
 		return taskEvaluator;
 	}
 
@@ -339,7 +334,7 @@ public class TaskEvaluationQueue implements ITaskEvaluationQueue, ITaskEvaluatio
 	 */
 	private void evaluateTask(IStrategoTerm taskID, Task task, IContext context, Strategy collect, Strategy insert,
 		Strategy perform) {
-		final ITaskEvaluator taskEvaluator = getTaskEvaluator(task.instruction);
+		final ITaskEvaluator taskEvaluator = getTaskEvaluator(task.definition.identifier());
 		taskEvaluator.evaluate(taskID, task, taskEngine, this, context, collect, insert, perform);
 	}
 
@@ -348,7 +343,7 @@ public class TaskEvaluationQueue implements ITaskEvaluationQueue, ITaskEvaluatio
 	 */
 	private void evaluateCyclicTask(IStrategoTerm taskID, Task task, IContext context, Strategy collect,
 		Strategy insert, Strategy perform) {
-		final ITaskEvaluator taskEvaluator = getTaskEvaluator(task.instruction);
+		final ITaskEvaluator taskEvaluator = getTaskEvaluator(task.definition.identifier());
 		currentTaskEvaluator = taskEvaluator;
 		taskEvaluator.evaluateCyclic(taskID, task, taskEngine, this, context, collect, insert, perform);
 	}

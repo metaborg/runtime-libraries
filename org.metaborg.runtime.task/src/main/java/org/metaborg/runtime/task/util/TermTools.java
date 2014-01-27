@@ -35,7 +35,7 @@ public final class TermTools {
 
 
 	public static IStrategoInt makeShort(ITermFactory factory, short num) {
-		return factory.makeInt((int) num);
+		return factory.makeInt(num);
 	}
 
 	public static short takeShort(IStrategoTerm term) {

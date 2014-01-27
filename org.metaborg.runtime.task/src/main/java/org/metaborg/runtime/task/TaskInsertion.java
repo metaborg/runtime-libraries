@@ -5,6 +5,7 @@ import static org.metaborg.runtime.task.util.TermTools.makeList;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -14,6 +15,7 @@ import org.spoofax.interpreter.library.ssl.StrategoHashMap;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.interpreter.terms.IStrategoTuple;
 import org.spoofax.interpreter.terms.ITermFactory;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -22,8 +24,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
-import fj.P;
-import fj.P2;
 import fj.data.Either;
 
 public final class TaskInsertion {
@@ -32,26 +32,42 @@ public final class TaskInsertion {
 	 * {@link #insertResultCombinations} is called. For task combinators, {@link #insertResultLists} is called. This
 	 * function assumes that all dependencies of the given task have been solved (have a result or failed).
 	 */
-	public static P2<? extends Iterable<IStrategoTerm>, Boolean> taskCombinations(ITermFactory factory,
-		ITaskEngine taskEngine, IContext context, Strategy collect, Strategy insert, IStrategoTerm taskID, Task task,
-		boolean singleLevel) {
-		final IStrategoTerm instruction = task.instruction;
-		final Iterable<IStrategoTerm> actualDependencies = getResultIDs(context, collect, instruction);
+	public static Either<? extends Iterable<IStrategoTerm[]>, ? extends Iterable<IStrategoTerm>> taskCombinations(
+		ITermFactory factory, ITaskEngine taskEngine, IContext context, Strategy collect, Strategy insert,
+		IStrategoTerm taskID, Task task, boolean singleLevel) {
+		// Construct a fake instruction by composing the term parameters into a tuple, which is later decomposed back
+		// into an array of term parameters again.
+		// TODO: properly support insertion into term parameters.
+		final IStrategoTuple fakeInstruction = factory.makeTuple(task.arguments);
+		final Iterable<IStrategoTerm> actualDependencies = getResultIDs(context, collect, fakeInstruction);
 
-		if(task.isCombinator) {
-			return P.p(
-				new SingletonIterable<IStrategoTerm>(insertResultLists(factory, taskEngine, context, insert,
-					instruction, actualDependencies)), false);
+		if(task.definition.combinator()) {
+			final IStrategoTerm inserted =
+				insertResultLists(factory, taskEngine, context, insert, fakeInstruction, actualDependencies);
+
+			return Either.left(new SingletonIterable<IStrategoTerm[]>(inserted.getAllSubterms()));
 		} else {
 			final Iterable<IStrategoTerm> allDependencies = taskEngine.getDependencies(taskID);
 			if(dependencyFailure(taskEngine, allDependencies))
 				return null;
 
 			if(Iterables.isEmpty(actualDependencies)) {
-				return P.p(new SingletonIterable<IStrategoTerm>(instruction), false);
+				return Either.left(new SingletonIterable<IStrategoTerm[]>(task.arguments));
 			} else {
-				return insertResultCombinations(taskEngine, context, collect, insert, instruction, actualDependencies,
-					new SingletonIterable<IStrategoTerm>(taskID), singleLevel);
+				final Either<? extends Iterable<IStrategoTerm>, ? extends Iterable<IStrategoTerm>> result =
+					insertResultCombinations(taskEngine, context, collect, insert, fakeInstruction, actualDependencies,
+						new SingletonIterable<IStrategoTerm>(taskID), singleLevel);
+
+				if(result.isRight()) {
+					return Either.right(result.right().value());
+				} else {
+					final Iterable<IStrategoTerm> permutations = result.left().value();
+					final Collection<IStrategoTerm[]> parameters = new LinkedList<IStrategoTerm[]>();
+					for(IStrategoTerm insertedFakeInstruction : permutations) {
+						parameters.add(insertedFakeInstruction.getAllSubterms());
+					}
+					return Either.left(parameters);
+				}
 			}
 		}
 	}
@@ -71,12 +87,13 @@ public final class TaskInsertion {
 	 * @param term The term to create permutations for.
 	 * @param dependencies The task IDs of tasks this term depends on.
 	 *
-	 * @return A 2-pair. If the second element is false, the first element contains permutations of the term. Otherwise
-	 *         it contains task IDs of dynamic task dependencies.
+	 * @return Either the permutations of the term on the left side, or task identifiers of dynamic task dependencies on
+	 *         the right side.
 	 */
-	public static P2<? extends Iterable<IStrategoTerm>, Boolean> insertResultCombinations(ITaskEngine taskEngine,
-		IContext context, Strategy collect, Strategy insert, IStrategoTerm term, Iterable<IStrategoTerm> dependencies,
-		Iterable<IStrategoTerm> initialSeen, boolean singleLevel) {
+	public static Either<? extends Iterable<IStrategoTerm>, ? extends Iterable<IStrategoTerm>>
+		insertResultCombinations(ITaskEngine taskEngine, IContext context, Strategy collect, Strategy insert,
+			IStrategoTerm term, Iterable<IStrategoTerm> dependencies, Iterable<IStrategoTerm> initialSeen,
+			boolean singleLevel) {
 		final Set<IStrategoTerm> seen = Sets.newHashSet(initialSeen);
 		final Either<Multimap<IStrategoTerm, IStrategoTerm>, ? extends Iterable<IStrategoTerm>> result =
 			createResultMapping(taskEngine, context, collect, insert, dependencies, seen, singleLevel);
@@ -84,9 +101,9 @@ public final class TaskInsertion {
 		if(result == null) {
 			return null;
 		} else if(result.isRight()) {
-			return P.p(result.right().value(), true);
+			return Either.right(result.right().value());
 		} else {
-			return P.p(insertCarthesianProduct(context, insert, term, result.left().value()), false);
+			return Either.left(insertCarthesianProduct(context, insert, term, result.left().value()));
 		}
 	}
 

@@ -1,7 +1,6 @@
 package org.metaborg.runtime.task.definition;
 
 import org.spoofax.interpreter.core.IContext;
-import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 public final class TaskDefinitionProxy implements ITaskDefinition {
@@ -21,10 +20,24 @@ public final class TaskDefinitionProxy implements ITaskDefinition {
 	}
 
 	@Override
-	public IStrategoTerm evaluate(IContext context, IStrategoTerm taskID, Strategy[] sp, IStrategoTerm[] tp) {
+	public boolean combinator() {
 		if(target == null)
 			resolve();
-		return target.evaluate(context, taskID, sp, tp);
+		return target.combinator();
+	}
+
+	@Override
+	public boolean shortCircuit() {
+		if(target == null)
+			resolve();
+		return target.shortCircuit();
+	}
+
+	@Override
+	public IStrategoTerm evaluate(IContext context, IStrategoTerm taskID, IStrategoTerm[] tp) {
+		if(target == null)
+			resolve();
+		return target.evaluate(context, taskID, tp);
 	}
 
 	private void resolve() {

@@ -2,13 +2,11 @@ package org.metaborg.runtime.task.definition;
 
 public final class TaskDefinitionIdentifier {
 	public final String name;
-	public final byte strategyArity;
-	public final byte termArity;
+	public final byte arity;
 
-	public TaskDefinitionIdentifier(String name, byte strategyArity, byte termArity) {
+	public TaskDefinitionIdentifier(String name, byte arity) {
 		this.name = name;
-		this.strategyArity = strategyArity;
-		this.termArity = termArity;
+		this.arity = arity;
 	}
 
 	@Override
@@ -16,8 +14,7 @@ public final class TaskDefinitionIdentifier {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + strategyArity;
-		result = prime * result + termArity;
+		result = prime * result + arity;
 		return result;
 	}
 
@@ -35,15 +32,13 @@ public final class TaskDefinitionIdentifier {
 				return false;
 		} else if(!name.equals(other.name))
 			return false;
-		if(strategyArity != other.strategyArity)
-			return false;
-		if(termArity != other.termArity)
+		if(arity != other.arity)
 			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return name + "(" + strategyArity + "|" + termArity + ")";
+		return name + "/" + arity;
 	}
 }

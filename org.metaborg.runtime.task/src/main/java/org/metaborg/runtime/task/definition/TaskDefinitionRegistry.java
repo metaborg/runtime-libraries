@@ -10,9 +10,9 @@ public final class TaskDefinitionRegistry implements ITaskDefinitionRegistry {
 	private final Map<TaskDefinitionIdentifier, TaskDefinition> taskDefinitions = Maps.newHashMap();
 
 	@Override
-	public ITaskDefinition register(String name, byte strategyArity, byte termArity, Strategy strategy,
-		boolean isCombinator, boolean shortCircuit) {
-		final TaskDefinitionIdentifier identifier = new TaskDefinitionIdentifier(name, strategyArity, termArity);
+	public ITaskDefinition register(String name, byte arity, Strategy strategy, boolean isCombinator,
+		boolean shortCircuit) {
+		final TaskDefinitionIdentifier identifier = new TaskDefinitionIdentifier(name, arity);
 
 		TaskDefinition definition = taskDefinitions.get(identifier);
 		if(definition == null) {
@@ -23,9 +23,9 @@ public final class TaskDefinitionRegistry implements ITaskDefinitionRegistry {
 	}
 
 	@Override
-	public ITaskDefinition get(String name, byte strategyArity, byte termArity) {
+	public ITaskDefinition get(String name, byte arity) {
 		// TODO: instantiation expensive for task definition retrieval?
-		return get(new TaskDefinitionIdentifier(name, strategyArity, termArity));
+		return get(new TaskDefinitionIdentifier(name, arity));
 	}
 
 	@Override

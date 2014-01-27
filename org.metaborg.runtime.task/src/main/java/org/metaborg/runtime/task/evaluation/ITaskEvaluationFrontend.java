@@ -2,9 +2,10 @@ package org.metaborg.runtime.task.evaluation;
 
 import java.util.Set;
 
+import org.metaborg.runtime.task.definition.ITaskDefinition;
+import org.metaborg.runtime.task.definition.TaskDefinitionIdentifier;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.stratego.Strategy;
-import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.IStrategoTuple;
@@ -14,14 +15,14 @@ import org.spoofax.interpreter.terms.IStrategoTuple;
  */
 public interface ITaskEvaluationFrontend {
 	/**
-	 * Adds a task evaluator for given task constructor.
+	 * Adds a task evaluator for given task identifier.
 	 */
-	public abstract void addTaskEvaluator(IStrategoConstructor constructor, ITaskEvaluator taskEvaluator);
+	public abstract void addTaskEvaluator(TaskDefinitionIdentifier identifier, ITaskEvaluator taskEvaluator);
 
 	/**
 	 * Tries to adjust given dependencies using a task evaluator.
 	 */
-	public abstract IStrategoList adjustDependencies(IStrategoList dependencies, IStrategoTerm instruction);
+	public abstract IStrategoList adjustDependencies(IStrategoList dependencies, ITaskDefinition definition);
 
 	/**
 	 * Evaluates tasks given by a set of task identifiers.

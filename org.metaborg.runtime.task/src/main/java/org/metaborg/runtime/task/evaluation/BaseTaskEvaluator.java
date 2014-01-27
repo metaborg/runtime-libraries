@@ -15,7 +15,7 @@ import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
-import fj.P2;
+import fj.data.Either;
 
 public class BaseTaskEvaluator implements ITaskEvaluator {
 	private final ITermFactory factory;
@@ -70,26 +70,27 @@ public class BaseTaskEvaluator implements ITaskEvaluator {
 		delayed = false;
 		current = taskID;
 
-		final P2<? extends Iterable<IStrategoTerm>, Boolean> combinations =
+		final Either<? extends Iterable<IStrategoTerm[]>, ? extends Iterable<IStrategoTerm>> insertionResult =
 			TaskInsertion.taskCombinations(factory, taskEngine, context, collect, insert, taskID, task, false);
 
-		if(combinations != null && combinations._2()) {
+		if(insertionResult != null && insertionResult.isRight()) {
 			// Inserting results failed because some tasks were not solved yet.
-			evaluationQueue.delay(taskID, combinations._1());
+			evaluationQueue.delay(taskID, insertionResult.right().value());
 			return;
 		}
 
-		final boolean execute = combinations != null;
+		final boolean execute = insertionResult != null;
 
 		// TODO: optimize success/unknown using a bitflag?
 		boolean unknown = false;
 		boolean failure = true;
 		if(execute) {
-			for(IStrategoTerm instruction : combinations._1()) {
-				if(cyclic)
-					instruction = factory.makeTuple(instruction, factory.makeString("cyclic"));
+			for(IStrategoTerm[] termParameters : insertionResult.left().value()) {
+				// TODO: support cyclic
+				// if(cyclic)
+				// termParameters = factory.makeTuple(termParameters, factory.makeString("cyclic"));
 
-				final IStrategoTerm result = task.evaluate(context, timer, taskID);
+				final IStrategoTerm result = evaluateTask(taskID, task, termParameters, context);
 				final TaskResultType resultType = handleResult(taskID, task, result, evaluationQueue);
 
 				boolean done = false;
@@ -98,7 +99,7 @@ public class BaseTaskEvaluator implements ITaskEvaluator {
 						break;
 					case Success:
 						failure = false;
-						if(task.shortCircuit)
+						if(task.definition.shortCircuit())
 							done = true;
 						break;
 					default: // Unknown result or dynamic dependency.
@@ -124,6 +125,15 @@ public class BaseTaskEvaluator implements ITaskEvaluator {
 
 		delayed = false;
 		current = null;
+	}
+
+	private IStrategoTerm
+		evaluateTask(IStrategoTerm taskID, Task task, IStrategoTerm[] termParameters, IContext context) {
+		timer.start();
+		final IStrategoTerm result = task.definition.evaluate(context, taskID, termParameters);
+		task.addTime(timer.stop());
+		task.addEvaluation();
+		return result;
 	}
 
 	@Override

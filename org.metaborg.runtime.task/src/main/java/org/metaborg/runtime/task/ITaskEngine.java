@@ -52,17 +52,16 @@ public interface ITaskEngine {
 
 	/**
 	 * Instantiates a task and returns a unique task identifier for this instruction.
-	 * 
+	 *
 	 * @param partition Partition where the task comes from.
 	 * @param definition Task definition to instantiate a task for.
 	 * @param dependencies A list of task identifiers of the tasks that the new task instance should depends on.
-	 * @param strategyParameters Strategy parameters.
-	 * @param termParameters Term parameters.
-	 * 
+	 * @param arguments Term arguments.
+	 *
 	 * @return A unique task identifier for given instruction.
 	 */
 	public abstract IStrategoTerm addTask(IStrategoString partition, ITaskDefinition definition,
-		IStrategoList dependencies, Strategy[] strategyParameters, IStrategoTerm[] termParameters);
+		IStrategoList dependencies, IStrategoTerm[] arguments);
 
 	/**
 	 * Adds a persisted task back to the task engine.
@@ -155,15 +154,6 @@ public interface ITaskEngine {
 	 * @param task The task.
 	 */
 	public abstract IStrategoTerm getTaskID(Task task);
-
-	/**
-	 * Given an instruction and its initial dependencies, returns its identifier. If it does not have an identifier,
-	 * null is returned.
-	 *
-	 * @param instruction The instruction.
-	 * @param dependencies The initial dependencies of the instruction.
-	 */
-	public abstract IStrategoTerm getTaskID(IStrategoTerm instruction, IStrategoList dependencies);
 
 
 	/**

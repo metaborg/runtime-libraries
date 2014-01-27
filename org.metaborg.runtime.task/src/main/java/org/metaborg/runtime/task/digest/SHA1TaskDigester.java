@@ -5,7 +5,6 @@ import java.security.NoSuchAlgorithmException;
 
 import org.metaborg.runtime.task.Task;
 import org.metaborg.runtime.task.definition.TaskDefinitionIdentifier;
-import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 import org.spoofax.terms.io.binary.SAFWriter;
@@ -43,17 +42,11 @@ public class SHA1TaskDigester implements ITaskDigester {
 	private void digestTask(Task task) {
 		final TaskDefinitionIdentifier identifier = task.definition.identifier();
 		digest.update(identifier.name.getBytes());
-		digest.update(identifier.strategyArity);
-		digest.update(identifier.termArity);
+		digest.update(identifier.arity);
 
 		digestTermSerializer(task.initialDependencies);
 
-		for(Strategy strategy : task.strategyParameters) {
-			// TODO: is the name of the strategy unique enough? does it always have a correct name?
-			digest.update(strategy.toString().getBytes());
-		}
-
-		for(IStrategoTerm term : task.termParameters) {
+		for(IStrategoTerm term : task.arguments) {
 			digestTermSerializer(term);
 		}
 	}

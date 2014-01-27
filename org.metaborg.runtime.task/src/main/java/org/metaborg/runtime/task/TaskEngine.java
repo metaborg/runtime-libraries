@@ -21,12 +21,10 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
 import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.collect.Table;
 
 public class TaskEngine implements ITaskEngine {
 	private ITaskEngine wrapper;
@@ -39,9 +37,6 @@ public class TaskEngine implements ITaskEngine {
 
 	/** Bidirectional mapping between task identifiers and tasks. */
 	private final BiMap<IStrategoTerm, Task> toTask = HashBiMap.create();
-
-	/** Mapping table of instructions and dependencies to task identifiers. */
-	private final Table<IStrategoTerm, IStrategoList, IStrategoTerm> toTaskID = HashBasedTable.create();
 
 
 	/** Origin partitions of tasks. */
@@ -111,36 +106,41 @@ public class TaskEngine implements ITaskEngine {
 
 	@Override
 	public IStrategoTerm createTaskID(Task task) {
-		IStrategoTerm taskID = wrapper.getTaskID(instruction, dependencies);
+		// If task already exists, return task identifier of that task.
+		IStrategoTerm taskID = wrapper.getTaskID(task);
 		if(taskID != null)
 			return taskID;
-		taskID = digester.digest(factory, instruction, dependencies);
-		toTaskID.put(instruction, dependencies, taskID);
-		final Task task = wrapper.getTask(taskID);
-		if(task == null)
-			return taskID;
-		final IStrategoTerm instr = task.instruction;
-		if(!instruction.match(instr)) {
+
+		// If task does not exist, generate an identifier using the task digester.
+		taskID = digester.digest(factory, task);
+
+		// Check for collisions between task identifiers.
+		final Task existingTask = wrapper.getTask(taskID);
+		if(existingTask == null)
+			return taskID; // No task with the same identifier exists, no collision possible.
+		if(!task.equals(existingTask)) {
 			wrapper.reset();
-			throw new IllegalStateException("Identifier collision, task " + instruction + " and " + instr
+			throw new IllegalStateException("Identifier collision, task " + task + " and " + existingTask
 				+ " have the same identifier: " + taskID);
 		}
+
 		return taskID;
 	}
 
 	@Override
 	public IStrategoTerm addTask(IStrategoString partition, ITaskDefinition definition, IStrategoList dependencies,
-		Strategy[] strategyParameters, IStrategoTerm[] termParameters) {
+		IStrategoTerm[] arguments) {
 		if(!taskCollection.inCollection(partition))
 			throw new IllegalStateException(
 				"Collection has not been started yet. Call task-start-collection(|partition) before adding tasks.");
 
 		dependencies = evaluationFrontend.adjustDependencies(dependencies, definition);
 
-		final IStrategoTerm taskID = createTaskID(instruction, dependencies);
+		final Task task = new Task(definition, arguments, dependencies);
+		final IStrategoTerm taskID = createTaskID(task);
 
 		if(wrapper.getTask(taskID) == null) {
-			toTask.put(taskID, new Task(instruction, dependencies, isCombinator, shortCircuit));
+			toTask.put(taskID, task);
 			taskCollection.addTask(taskID);
 			schedule(taskID);
 		}
@@ -165,7 +165,6 @@ public class TaskEngine implements ITaskEngine {
 			throw new RuntimeException("Trying to add a persisted task that already exists.");
 
 		toTask.put(taskID, task);
-		toTaskID.put(task.instruction, initialDependencies, taskID);
 
 		for(final IStrategoTerm partition : partitions)
 			addToPartition(taskID, (IStrategoString) partition);
@@ -192,7 +191,6 @@ public class TaskEngine implements ITaskEngine {
 		final Task task = getTask(taskID); // Don't use wrapper, cannot remove from parent in this task engine.
 		if(task == null)
 			return; // Task is not in this task engine but might be in a parent one.
-		toTaskID.remove(task.instruction, TermTools.makeList(factory, task.initialDependencies));
 		toTask.remove(taskID);
 	}
 
@@ -297,11 +295,6 @@ public class TaskEngine implements ITaskEngine {
 	@Override
 	public IStrategoTerm getTaskID(Task task) {
 		return toTask.inverse().get(task);
-	}
-
-	@Override
-	public IStrategoTerm getTaskID(IStrategoTerm instruction, IStrategoList dependencies) {
-		return toTaskID.get(instruction, dependencies);
 	}
 
 
@@ -479,7 +472,6 @@ public class TaskEngine implements ITaskEngine {
 		taskCollection.reset();
 
 		toTask.clear();
-		toTaskID.clear();
 
 		toPartition.clear();
 		toDependency.clear();
