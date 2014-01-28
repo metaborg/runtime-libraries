@@ -3,7 +3,7 @@ module task/debug
 imports
 	
 	task/core
-	task/create
+	task/legacy-task-creation
 
 signature
 

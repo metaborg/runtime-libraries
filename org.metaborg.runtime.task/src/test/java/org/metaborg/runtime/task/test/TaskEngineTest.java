@@ -21,10 +21,10 @@ public class TaskEngineTest extends TaskTest {
 	private final IStrategoString partition1 = str("String.java");
 	private final IStrategoString partition2 = str("Integer.java");
 
-	private final IStrategoTerm resolveInstruction = resolve("Java", segment("Package", "java"),
-		segment("Package", "util"), segment("Class", "String"));
-	private final IStrategoTerm resolveImportInstruction = resolveImport("Java", segment("Package", "java"),
-		segment("Package", "util"), segment("Class", "String"));
+	private final IStrategoTerm uri1 = uri("Java", segment("Package", "java"), segment("Package", "util"),
+		segment("Class", "String"));
+	private final IStrategoTerm uri2 = uri("Java", segment("Package", "java"), segment("Package", "util"),
+		segment("Class", "String"));
 
 	@Before
 	public void setUp() {
@@ -34,24 +34,24 @@ public class TaskEngineTest extends TaskTest {
 	@Test
 	public void testAddTasks() {
 		taskEngine.startCollection(partition1);
-		IStrategoTerm resolveResult = taskEngine.addTask(partition1, dependencies(), resolveInstruction, false, false);
-		IStrategoTerm resolveID = resultID(resolveResult);
-		IStrategoTerm resolveImportResult =
-			taskEngine.addTask(partition1, dependencies(), resolveImportInstruction, false, false);
-		IStrategoTerm resolveImportID = resultID(resolveImportResult);
+		IStrategoTerm resolveID = resolve(partition1, dependencies(), uri1);
+		IStrategoTerm resolveImportID = resolveImport(partition1, dependencies(), uri2);
 		taskEngine.stopCollection(partition1);
 
-		IStrategoTerm choiceInstruction = choice(resolveResult, resolveImportResult);
 		taskEngine.startCollection(partition2);
-		IStrategoTerm choiceResult =
-			taskEngine.addTask(partition2, dependencies(resolveResult, resolveImportResult), choiceInstruction, true,
-				false);
-		IStrategoTerm choiceID = resultID(choiceResult);
+		IStrategoTerm choiceID =
+			choice(partition2, dependencies(resolveID, resolveImportID), makeResult(resolveID),
+				makeResult(resolveImportID));
 		taskEngine.stopCollection(partition2);
 
-		assertEquals(resolveInstruction, taskEngine.getTask(resolveID).instruction);
-		assertEquals(resolveImportInstruction, taskEngine.getTask(resolveImportID).instruction);
-		assertEquals(choiceInstruction, taskEngine.getTask(choiceID).instruction);
+		assertEquals(resolve, taskEngine.getTask(resolveID).definition);
+		assertEquals(resolveImport, taskEngine.getTask(resolveImportID).definition);
+		assertEquals(choice, taskEngine.getTask(choiceID).definition);
+
+		assertEquals(uri1, taskEngine.getTask(resolveID).arguments[0]);
+		assertEquals(uri2, taskEngine.getTask(resolveImportID).arguments[0]);
+		assertEquals(factory.makeList(makeResult(resolveID), makeResult(resolveImportID)),
+			taskEngine.getTask(choiceID).arguments[0]);
 
 		assertTrue(assertContains(taskEngine.getPartitionsOf(resolveID), partition1));
 		assertFalse(assertContains(taskEngine.getPartitionsOf(resolveID), partition2));

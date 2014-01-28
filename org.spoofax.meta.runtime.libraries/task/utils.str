@@ -1,10 +1,16 @@
 module task/utils
 
-rules
+rules // Version of collect-one that also visits annotations.
 
-	oncetd-annos(s) = s <+ has-annos; get-annos; one(oncetd-annos(s)) <+ one(oncetd-annos(s))
-	
 	collect-one-annos(s) = oncetd-annos(s; ?t); !t
+
+	oncetd-annos(s) = s <+ has-annos; get-annos; one(oncetd-annos(s)) <+ one(oncetd-annos(s))	
+
+rules // Version of collect-all that also visits annotations.
+
+	collect-all-annos(s, un) =
+		![<s> | <crush-annos(![], un, collect-all-annos(s, un))>]
+	<+ crush-annos(![], un, collect-all-annos(s, un))
 	
   crush-annos(nul, sum, s) :
     _#(xs){a*} -> r2
@@ -12,30 +18,24 @@ rules
      r1 := <foldr(nul, sum, s)> xs;
      r2 := <foldr(!r1, sum, s)> a*
 
-	collect-all-annos(s, un) =
-		![<s> | <crush-annos(![], un, collect-all-annos(s, un))>]
-	<+ crush-annos(![], un, collect-all-annos(s, un))
+rules // Selective version of collect-all-annos where a separate strategy is invoked on terms inside annotations.
 
+	collect-all-annos-selective(s, sa, un) =
+		![<s> | <crush-annos-selective(![], un, s, sa)>]
+	<+ crush-annos-selective(![], un, s)
 
+	collect-all-annos-selective(s, un) =
+		![<s> | <crush-annos-selective(![], un, s)>]
+	<+ crush-annos-selective(![], un, s)
 
-
-
-  crush-annos-2(nul, un, s, sa) :
+  crush-annos-selective(nul, un, s, sa) :
     _#(xs){a*} -> r2
     where
-     r1 := <foldr(nul, un, collect-all-annos-2(s, un))> xs;
-     r2 := <foldr(!r1, un, collect-all-annos-2(sa, un))> a*
+     r1 := <foldr(nul, un, collect-all-annos-selective(s, un))> xs;
+     r2 := <foldr(!r1, un, collect-all-annos-selective(sa, un))> a*
      
-  crush-annos-2(nul, un, s) :
+  crush-annos-selective(nul, un, s) :
     _#(xs){a*} -> r2
     where
-     r1 := <foldr(nul, un, collect-all-annos-2(s, un))> xs;
-     r2 := <foldr(!r1, un, collect-all-annos-2(s, un))> a*
-
-	collect-all-annos-2(s, sa, un) =
-		![<s> | <crush-annos-2(![], un, s, sa)>]
-	<+ crush-annos-2(![], un, s)
-
-	collect-all-annos-2(s, un) =
-		![<s> | <crush-annos-2(![], un, s)>]
-	<+ crush-annos-2(![], un, s)
+     r1 := <foldr(nul, un, collect-all-annos-selective(s, un))> xs;
+     r2 := <foldr(!r1, un, collect-all-annos-selective(s, un))> a*

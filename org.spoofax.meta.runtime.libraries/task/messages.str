@@ -3,7 +3,7 @@ module task/messages
 imports
 	
 	task/core
-	task/create
+	task/legacy-task-creation
 	editor/origins
 	
 signature

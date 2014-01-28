@@ -1,0 +1,34 @@
+module task/instantiate
+
+imports
+	
+	task/core
+	task/primitives
+	task/interface
+	task/utils
+
+rules // Task instantiation
+	
+  task-instantiate(|partition, name) = task-instantiate(|partition, name, <task-collect-dependencies>)
+  task-instantiate(|partition, name, dependencies):
+  	arguments -> <task-api-add-task-instance(|partition, name, arguments, dependencies)>
+  	
+  task-collect-dependencies = collect-all-annos(?Result(<id>), union)
+    
+	task-merge-dependencies(|dep*):
+  	term -> <task-collect-dependencies> (dep*, term)
+    
+rules // Immediate task instantiation and execution
+    
+	task-create-execute-ctx = !""
+	task-create-execute(create-task):
+		term -> result
+		with
+		  ctx := <task-create-execute-ctx>
+		; task-push
+		; task-start-collection(|ctx)
+		; Result(taskID) := <create-task> term
+		; task-stop-collection(|ctx)
+		; <task-evaluate-now> taskID
+		; result := <task-get-results> taskID
+		; task-pop

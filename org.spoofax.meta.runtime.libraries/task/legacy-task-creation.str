@@ -1,0 +1,38 @@
+module task/legacy-task-creation
+
+imports
+	
+	task/core
+	task/definition
+	task/instantiate
+	task/interface
+	
+overlays
+	
+	INSTRUCTION()              = "Instruction"
+	INSTRUCTION_COMBINATOR()   = "Instruction-Combinator"
+	INSTRUCTION_SHORTCIRCUIT() = "Instruction-ShortCircuit"
+	
+rules
+	
+	task-register = task-define(perform-task-wrapper|INSTRUCTION(), 1)
+	task-register = task-define-combinator(perform-task-wrapper|INSTRUCTION_COMBINATOR(), 1)
+	task-register = task-define-shortcircuit(perform-task-wrapper|INSTRUCTION_SHORTCIRCUIT(), 1)
+	
+	new-task(|partition) = new-task(|partition, <dependent-tasks>)
+	new-task(|partition, dependencies):
+  	instruction -> result
+  	with
+  		arguments := [instruction]; // TODO: using lists is more expensive than tuples
+  		switch id
+  			case task-is-combinator : <task-instantiate(|partition, INSTRUCTION_COMBINATOR(), dependencies)> arguments
+  			case task-short-circuit : <task-instantiate(|partition, INSTRUCTION_SHORTCIRCUIT(), dependencies)> arguments
+  			otherwise               : <task-instantiate(|partition, INSTRUCTION(), dependencies)> arguments
+  		end => result
+  		
+	dependent-tasks = task-collect-dependencies
+	
+	merge-dependencies(|dep*) = task-merge-dependencies(|dep*)
+	
+	perform-task-wrapper(|instruction):
+		nr -> <perform-task(|nr)> instruction

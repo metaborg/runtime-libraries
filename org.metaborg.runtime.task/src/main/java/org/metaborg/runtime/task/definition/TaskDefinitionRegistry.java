@@ -30,7 +30,10 @@ public final class TaskDefinitionRegistry implements ITaskDefinitionRegistry {
 
 	@Override
 	public ITaskDefinition get(TaskDefinitionIdentifier identifier) {
-		return taskDefinitions.get(identifier);
+		ITaskDefinition definition = taskDefinitions.get(identifier);
+		if(definition == null)
+			throw new RuntimeException("Trying to retrieve task definition for " + identifier + " that does not exist.");
+		return definition;
 	}
 
 	@Override

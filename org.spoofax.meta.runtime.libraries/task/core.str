@@ -2,7 +2,8 @@ module task/core
 
 imports 
   
-  task/create
+  task/instantiate
+  task/legacy-task-creation
   task/insert
   task/utils
   task/primitives
@@ -22,13 +23,12 @@ signature
 rules // API
 	
 	task-add-message(|taskID, message)                         = task-api-add-message(|taskID, message)
-	task-add-task(|partition, dependencies, instruction, is-combinator, short-circuit) = task-api-add-task(|partition, dependencies, instruction, is-combinator, short-circuit)
 	task-add-read(|task-id)                                    = task-api-add-read(|task-id, <id>)
 	task-clear-partition                                       = task-api-clear-partition(|<id>)
 	task-delay                                                 = task-api-delay(|<id>)
 	task-debug-info(|partition)                                = task-api-debug-info(|partition)
-	task-evaluate-now                                          = task-api-evaluate-now(task-collect-result-ids-2, insert-results-hashmap, perform-task|<id>)
-	task-evaluate-scheduled                                    = task-api-evaluate-scheduled(task-collect-result-ids-2, insert-results-hashmap, perform-task)
+	task-evaluate-now                                          = task-api-evaluate-now(task-collect-result-ids-no-properties, insert-results-hashmap, perform-task|<id>)
+	task-evaluate-scheduled                                    = task-api-evaluate-scheduled(task-collect-result-ids-no-properties, insert-results-hashmap, perform-task)
 	task-get-dependencies                                      = task-api-get-dependencies(|<id>)
 	task-get-messages(|partition)                              = task-api-get-messages(|partition)
 	task-get-readers                                           = task-api-get-readers(|<id>)
@@ -40,8 +40,8 @@ rules // API
 	task-push                                                  = task-api-push
 	task-recover                                               = task-api-recover
 	task-reset                                                 = task-api-reset
-	task-result-combinations                                   = task-api-result-combinations(task-collect-result-ids-2, insert-results-hashmap|<id>, 0)
-	task-result-combinations-single                            = task-api-result-combinations(task-collect-result-ids-2, insert-results-hashmap|<id>, 1)
+	task-result-combinations                                   = task-api-result-combinations(task-collect-result-ids-no-properties, insert-results-hashmap|<id>, 0)
+	task-result-combinations-single                            = task-api-result-combinations(task-collect-result-ids-no-properties, insert-results-hashmap|<id>, 1)
 	task-setup(|project-path)                                  = task-api-setup(|project-path)
 	task-setup                                                 = task-api-setup(|<id>)
 	task-start-collection(|partition)                          = task-api-start-collection(|partition)
@@ -81,6 +81,6 @@ rules // Projections
 	task-use-result-id:
     Use(Result(taskID)) -> taskID
 		
-	task-collect-result-ids-2 =
-		collect-all-annos-2(task-result-id, task-use-result-id, union)
+	task-collect-result-ids-no-properties =
+		collect-all-annos-selective(task-result-id, task-use-result-id, union)
 		

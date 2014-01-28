@@ -7,7 +7,7 @@ imports
 	properties/query
 	properties/eq
   task/core
-  task/create
+  task/legacy-task-creation
   editor/annotations
   
 signature

@@ -1,0 +1,15 @@
+module task/definition
+
+imports
+	
+	task/primitives
+	task/interface
+	
+rules
+	
+	task-register-all = try(task-register; with(fail|"Any call to task-register must fail!"))
+	
+	task-define(strategy|name, arity) = task-api-add-task-definition(strategy|name, arity, 0, 0); fail
+	task-define-combinator(strategy|name, arity) = task-api-add-task-definition(strategy|name, arity, 1, 0); fail
+	task-define-shortcircuit(strategy|name, arity) = task-api-add-task-definition(strategy|name, arity, 0, 1); fail
+	

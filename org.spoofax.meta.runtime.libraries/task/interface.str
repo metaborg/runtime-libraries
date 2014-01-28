@@ -2,9 +2,14 @@ module task/interface
 
 strategies
   
+  task-match              = fail
+  avoid-task(|dep*)       = fail
+  
+  task-register = fail
+  
+strategies /** @deprecated Legacy */
+
   perform-task(|nr)  = fail
   task-rewrite       = fail
-  task-match         = fail
-  avoid-task(|dep*)  = fail
   task-is-combinator = fail
   task-short-circuit = fail

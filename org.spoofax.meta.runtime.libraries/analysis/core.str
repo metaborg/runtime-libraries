@@ -10,6 +10,7 @@ imports
   nabl/uri
   nabl/utils
   task/core
+  task/definition
   task/messages
   editor/origins
   
@@ -42,6 +43,7 @@ rules // Analysis
 			    index-start-collection(|partition);
 	    		task-setup(|project-path);
 	    		try(try-recover; task-recover);
+	    		task-register-all;
 	    		task-start-collection(|partition)
 	      	, analysis-core-debug-time(!"Time - setup: ") | "analyze-collect-setup"
 	      ); measure-time(
