@@ -12,10 +12,10 @@ import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.IStrategoTuple;
 
-public class task_api_add_task_0_4 extends AbstractPrimitive {
-	public static task_api_add_task_0_4 instance = new task_api_add_task_0_4();
+public class task_api_add_task_instance_0_4 extends AbstractPrimitive {
+	public static task_api_add_task_instance_0_4 instance = new task_api_add_task_instance_0_4();
 
-	public task_api_add_task_0_4() {
+	public task_api_add_task_instance_0_4() {
 		super("task_api_add_task", 0, 4);
 	}
 

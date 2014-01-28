@@ -123,7 +123,7 @@ public class TaskEngineFactory {
 			factory.makeInt(task.evaluations()),
 			makeList(factory, dependencies),
 			makeList(factory, partitions),
-			makeNullable(factory, results)
+			makeList(factory, reads)
 		);
 		// @formatter:on
 	}
