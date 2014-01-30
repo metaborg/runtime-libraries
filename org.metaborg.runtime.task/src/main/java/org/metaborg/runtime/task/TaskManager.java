@@ -9,8 +9,8 @@ import java.util.Map;
 
 import org.metaborg.runtime.task.definition.ITaskDefinitionRegistry;
 import org.metaborg.runtime.task.definition.TaskDefinitionRegistry;
-import org.metaborg.runtime.task.digest.ITaskDigester;
 import org.metaborg.runtime.task.digest.CountingTaskDigester;
+import org.metaborg.runtime.task.digest.ITaskDigester;
 import org.metaborg.runtime.task.evaluation.BaseTaskEvaluator;
 import org.metaborg.runtime.task.evaluation.ITaskEvaluationFrontend;
 import org.metaborg.runtime.task.evaluation.TaskEvaluationQueue;

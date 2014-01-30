@@ -58,7 +58,9 @@ public final class TaskInsertion {
 					insertResultCombinations(taskEngine, context, collect, insert, fakeInstruction, actualDependencies,
 						new SingletonIterable<IStrategoTerm>(taskID), singleLevel);
 
-				if(result.isRight()) {
+				if(result == null) {
+					return null;
+				} else if(result.isRight()) {
 					return Either.right(result.right().value());
 				} else {
 					final Iterable<IStrategoTerm> permutations = result.left().value();
