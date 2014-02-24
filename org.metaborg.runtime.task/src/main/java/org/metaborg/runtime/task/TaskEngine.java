@@ -9,6 +9,7 @@ import org.metaborg.runtime.task.collection.BidirectionalSetMultimap;
 import org.metaborg.runtime.task.digest.ITermDigester;
 import org.metaborg.runtime.task.evaluation.ITaskEvaluationFrontend;
 import org.metaborg.runtime.task.util.TermTools;
+import org.metaborg.runtime.task.util.UniqueQueue;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -40,14 +41,13 @@ public class TaskEngine implements ITaskEngine {
 	private final Table<IStrategoTerm, IStrategoList, IStrategoTerm> toTaskID = HashBasedTable.create();
 
 
-	/** Origis of tasks. */
+	/** Origins of tasks. */
 	private final BidirectionalSetMultimap<IStrategoTerm, IStrategoTerm> toSource = BidirectionalLinkedHashMultimap
 		.create();
 
 	/** Bidirectional mapping of dependencies between tasks identifiers. */
 	private final BidirectionalSetMultimap<IStrategoTerm, IStrategoTerm> toDependency = BidirectionalLinkedHashMultimap
 		.create();
-	// TODO: may not be updated during evaluation any more!
 
 	/** Bidirectional mapping of dynamic dependencies between tasks identifiers. Can be updated during evaluation. */
 	private final BidirectionalSetMultimap<IStrategoTerm, IStrategoTerm> toDynamicDependency =
@@ -59,7 +59,7 @@ public class TaskEngine implements ITaskEngine {
 
 
 	/** Tasks that do not have a source are garbage. **/
-	private final Set<IStrategoTerm> garbage = Sets.newHashSet();
+	private final Queue<IStrategoTerm> garbage = new UniqueQueue<IStrategoTerm>();
 
 	/** Set of task that are scheduled for evaluation the next time evaluate is called. */
 	private final Set<IStrategoTerm> scheduled = Sets.newHashSet();
@@ -148,33 +148,20 @@ public class TaskEngine implements ITaskEngine {
 	}
 
 	@Override
-	public void addPersistedTask(IStrategoTerm taskID, Task task, Iterable<IStrategoTerm> sources,
-		IStrategoList initialDependencies, Iterable<IStrategoTerm> dependencies, Iterable<IStrategoTerm> reads,
-		IStrategoTerm results, TaskStatus status, IStrategoTerm message, long time, short evaluations) {
+	public void addPersistedTask(IStrategoTerm taskID, Task task, IStrategoList initialDependencies) {
 		if(wrapper.getTask(taskID) != null)
 			throw new RuntimeException("Trying to add a persisted task that already exists.");
 
 		toTask.put(taskID, task);
 		toTaskID.put(task.instruction, initialDependencies, taskID);
-
-		for(final IStrategoTerm source : sources)
-			addToSource(taskID, source);
-		for(final IStrategoTerm dependency : dependencies)
-			addDependency(taskID, dependency);
-		for(final IStrategoTerm read : reads)
-			addRead(taskID, read);
-		if(results != null)
-			task.setResults(results);
-		if(message != null)
-			task.setMessage(message);
-
-		task.setStatus(status);
-		task.setTime(time);
-		task.setEvaluations(evaluations);
 	}
 
 	@Override
 	public void removeTask(IStrategoTerm taskID) {
+		// Thrash higher-order tasks that were created by this task. Make a copy of the result of getFromSource because
+		// that collection will be changed by trashUnreferencedTasks, which would result in a concurrent modification.
+		trashUnreferencedTasks(Lists.newArrayList(getFromSource(taskID)), taskID);
+
 		removeSourcesOf(taskID);
 		removeDependencies(taskID);
 		removeReads(taskID);
@@ -191,22 +178,30 @@ public class TaskEngine implements ITaskEngine {
 		final Iterable<IStrategoTerm> removedTasks = taskCollection.stopCollection(source);
 		final Iterable<IStrategoTerm> addedTasks = taskCollection.addedTasks();
 
-		for(final IStrategoTerm removed : removedTasks) {
-			wrapper.removeFromSource(removed, source);
-			if(wrapper.getSourcesOf(removed).isEmpty())
-				garbage.add(removed);
-		}
-
+		trashUnreferencedTasks(removedTasks, source);
 		collectGarbage();
 
 		return factory.makeTuple(TermTools.makeList(factory, removedTasks), TermTools.makeList(factory, addedTasks));
 	}
 
-	private void collectGarbage() {
-		for(final IStrategoTerm taskID : garbage)
-			wrapper.removeTask(taskID);
+	/**
+	 * Removes given tasks from given source, and marks the task as garbage if it is not referenced by any source.
+	 */
+	private void trashUnreferencedTasks(Iterable<IStrategoTerm> taskIDs, IStrategoTerm source) {
+		for(final IStrategoTerm removed : taskIDs) {
+			wrapper.removeFromSource(removed, source);
+			if(wrapper.getSourcesOf(removed).isEmpty()) {
+				garbage.add(removed);
+			}
+		}
+	}
 
-		garbage.clear();
+	/**
+	 * Removes all tasks that are marked as garbage, and clears garbage.
+	 */
+	private void collectGarbage() {
+		for(IStrategoTerm taskID; (taskID = garbage.poll()) != null;)
+			wrapper.removeTask(taskID);
 	}
 
 	/**
@@ -219,7 +214,7 @@ public class TaskEngine implements ITaskEngine {
 	}
 
 	@Override
-	public void invalidate(IStrategoTerm taskID) {
+	public Task invalidate(IStrategoTerm taskID) {
 		Task task = getTask(taskID);
 		if(task == null) {
 			task = wrapper.getTask(taskID);
@@ -231,6 +226,8 @@ public class TaskEngine implements ITaskEngine {
 		task.unsolve();
 		task.clearMessage();
 		wrapper.removeReads(taskID);
+
+		return task;
 	}
 
 	@Override
@@ -260,8 +257,10 @@ public class TaskEngine implements ITaskEngine {
 
 	@Override
 	public IStrategoTerm evaluateScheduled(IContext context, Strategy collect, Strategy insert, Strategy perform) {
-		for(IStrategoTerm taskID : scheduled)
-			invalidate(taskID);
+		for(IStrategoTerm taskID : scheduled) {
+			final Task task = invalidate(taskID);
+			task.clearInstructionOverride();
+		}
 		wrapper.clearTimes();
 		wrapper.clearEvaluations();
 

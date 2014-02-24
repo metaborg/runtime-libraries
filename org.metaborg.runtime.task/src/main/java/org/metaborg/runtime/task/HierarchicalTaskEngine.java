@@ -109,11 +109,8 @@ public class HierarchicalTaskEngine implements IHierarchicalTaskEngine {
 	}
 
 	@Override
-	public void addPersistedTask(IStrategoTerm taskID, Task task, Iterable<IStrategoTerm> partitions,
-		IStrategoList initialDependencies, Iterable<IStrategoTerm> dependencies, Iterable<IStrategoTerm> reads,
-		IStrategoTerm results, TaskStatus status, IStrategoTerm message, long time, short evaluations) {
-		current.addPersistedTask(taskID, task, partitions, initialDependencies, dependencies, reads, results, status,
-			message, time, evaluations);
+	public void addPersistedTask(IStrategoTerm taskID, Task task, IStrategoList initialDependencies) {
+		current.addPersistedTask(taskID, task, initialDependencies);
 	}
 
 	@Override
@@ -129,8 +126,8 @@ public class HierarchicalTaskEngine implements IHierarchicalTaskEngine {
 
 
 	@Override
-	public void invalidate(IStrategoTerm taskID) {
-		current.invalidate(taskID);
+	public Task invalidate(IStrategoTerm taskID) {
+		return current.invalidate(taskID);
 	}
 
 	@Override

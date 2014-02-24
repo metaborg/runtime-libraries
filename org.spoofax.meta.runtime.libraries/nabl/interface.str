@@ -15,6 +15,10 @@ strategies // Collect
 	
 	nabl-use-site(|lang, partition, unique*, uri*, state*) = fail
 	
+	nabl-filtering-site(|lang, partition, unique*, uri*, state*) = fail
+	
+	nabl-disambiguation-site(|lang, partition, unique*, uri*, state*) = fail
+	
 	nabl-import-site(|lang, partition, unique*, uri*, state*) = fail
 	
 	nabl-prop-site(|lang, partition, uri*, state*, implicit*) = fail
@@ -27,7 +31,9 @@ strategies // Projections
 	
 strategies // Lookup hooks
 		
-	nabl-disambiguate(|prop*, namespace, name) = fail
+	nabl-filter-def(|ctx, ctx-terms, ctx-string) = fail
+	
+	nabl-disambiguate-def(|ctx, ctx-terms, ctx-string) = fail
 
 strategies // Name generation
 	
