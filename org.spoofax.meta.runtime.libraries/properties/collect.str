@@ -47,7 +47,7 @@ rules // generic analysis of properties
   nabl-store-prop(|partition, uri, name):
     Prop(kind, prop, dep*) -> <new-prop(|partition, uri, kind, task)> name
     where
-    	task := <task-create-id(|partition, <dependent-tasks> dep*)> prop
+    	task := <task-create-make-set(|partition, <dependent-tasks> dep*)> prop
       
 rules
         
