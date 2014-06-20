@@ -348,6 +348,15 @@ rules
 	task-create-make-set(|ctx):
 		term -> <new-task(|ctx)> MakeSet(term)
 		
+  /**
+   * Creates a task that converts the results of its subtask into set, removing all duplicates.
+   *
+   * @type Result -> Result
+   */	
+	task-create-make-set(|ctx, dep*):
+		term -> <new-task(|ctx, all-dep*)> MakeSet(term)
+		with
+			all-dep* := <merge-dependencies(|dep*)> term
 		
 	/** @internal */
 	task-get-storage-type: MakeSet(_) -> <task-set-storage>
