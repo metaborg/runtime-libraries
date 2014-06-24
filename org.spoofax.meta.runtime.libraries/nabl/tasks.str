@@ -15,6 +15,7 @@ imports
   nabl/uri
   nabl/utils
   nabl/entries
+  properties/collect
   properties/entries
   properties/eq
   properties/query
