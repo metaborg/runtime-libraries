@@ -94,6 +94,7 @@ rules // Core multi-file analysis that takes File/3 appls, analyzes those files,
     ; (result*, collect-debug-result*) := <unzip> collect-result*
     ; measure-time(
         task-evaluate-scheduled => (evaluated-task*, skipped-task*, unevaluated-task*)
+      ; <map(analysis-collect-legacy-messages)> result*
       , ?evaluate-time
       )
     ; analysis-inc-progress(|total-progress)
@@ -149,8 +150,6 @@ rules // Common
       task-start-collection(|partition);
 
       analyzed-ast := <collector(id|Language(language), partition, <new-hashtable>, [])> transformed-ast;
-      
-      <analysis-collect-legacy-messages(|partition)> analyzed-ast;
 
       index-stop-collection(|partition) => (removed-entry*, added-entry*);
       task-stop-collection(|partition)  => (removed-task*, added-task*);

@@ -8,6 +8,8 @@ imports
 	analysis/resolve
 	editor/eclipse
 	editor/queue
+	index/core
+	task/core
 	nabl/collect
 	task/messages
 	
@@ -50,10 +52,21 @@ rules // Other services
 
 rules // Messages
 	
-	analysis-collect-legacy-messages(|source) =
-	  where(collect-all(constraint-error; analysis-legacy-convert-error(|source)))
-	; where(collect-all(constraint-warning; analysis-legacy-convert-warning(|source)))
-	; where(collect-all(constraint-note; analysis-legacy-convert-note(|source)))
+	analysis-collect-legacy-messages:
+		result@FileResult(_, _, source, _, ast, _, _, _) -> result
+		with
+		  error-tuple*   := <collect-all(constraint-error)> ast
+		; warning-tuple* := <collect-all(constraint-warning)> ast
+		; note-tuple*    := <collect-all(constraint-note)> ast
+		; if <Tl> error-tuple* <+ <Tl> warning-tuple* <+ <Tl> note-tuple* then
+			  legacy-source  := $[[source]_legacy]
+			; task-start-collection(|legacy-source)
+			; error*   := <map(analysis-legacy-convert-error(|legacy-source))> error-tuple*
+			; warning* := <map(analysis-legacy-convert-warning(|legacy-source))> warning-tuple*
+		  ; note*    := <map(analysis-legacy-convert-note(|legacy-source))> note-tuple*
+			; task-stop-collection(|legacy-source)
+			; <task-evaluate-now> [error*, warning*, note*]
+		end
 
 	analysis-legacy-convert-error(|source):
 		(term, message) -> <task-create-error(|source, message)> term
