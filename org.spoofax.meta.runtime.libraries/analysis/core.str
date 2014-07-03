@@ -3,6 +3,7 @@ module analysis/core
 imports
   
   analysis/builtins
+  analysis/legacy
   analysis/interface
   nabl/collect
   nabl/uri
@@ -148,6 +149,8 @@ rules // Common
       task-start-collection(|partition);
 
       analyzed-ast := <collector(id|Language(language), partition, <new-hashtable>, [])> transformed-ast;
+      
+      <analysis-collect-legacy-messages(|partition)> analyzed-ast;
 
       index-stop-collection(|partition) => (removed-entry*, added-entry*);
       task-stop-collection(|partition)  => (removed-task*, added-task*);

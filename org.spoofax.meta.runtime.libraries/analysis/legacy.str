@@ -9,11 +9,16 @@ imports
 	editor/eclipse
 	editor/queue
 	nabl/collect
+	task/messages
 	
 rules // Interface
 	
 	analysis-single-default-interface = fail
 	analysis-multiple-default-interface = fail
+	
+	constraint-error = fail
+	constraint-warning = fail
+	constraint-note = fail
 	
 rules // Analysis
 	
@@ -42,3 +47,19 @@ rules // Other services
 	analysis-save-default(|language) = analysis-spoofax-save(|language)
 	analysis-propose-completions(|language, project-path, path) = analysis-propose-completions(|language, project-path)
 	analysis-resolve(|language, project-path, path) = analysis-resolve(|language, project-path)
+
+rules // Messages
+	
+	analysis-collect-legacy-messages(|source) =
+	  where(collect-all(constraint-error; analysis-legacy-convert-error(|source)))
+	; where(collect-all(constraint-warning; analysis-legacy-convert-warning(|source)))
+	; where(collect-all(constraint-note; analysis-legacy-convert-note(|source)))
+
+	analysis-legacy-convert-error(|source):
+		(term, message) -> <task-create-error(|source, message)> term
+		
+	analysis-legacy-convert-warning(|source):
+		(term, message) -> <task-create-warning(|source, message)> term
+		
+	analysis-legacy-convert-note(|source):
+		(term, message) -> <task-create-note(|source, message)> term
