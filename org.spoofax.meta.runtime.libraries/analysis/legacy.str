@@ -12,6 +12,7 @@ imports
 	task/core
 	nabl/collect
 	task/messages
+	task/core
 	
 rules // Interface
 	
@@ -52,27 +53,29 @@ rules // Other services
 
 rules // Messages
 	
+	analysis-get-legacy-messages(|source) = task-get-messages(|$[[source]_legacy])
+	
 	analysis-collect-legacy-messages:
 		result@FileResult(_, _, source, _, ast, _, _, _) -> result
 		with
-		  error-tuple*   := <collect-all(constraint-error)> ast
-		; warning-tuple* := <collect-all(constraint-warning)> ast
-		; note-tuple*    := <collect-all(constraint-note)> ast
+		  error-tuple*   := <collect-all(constraint-error); flatten-list> ast
+		; warning-tuple* := <collect-all(constraint-warning); flatten-list> ast
+		; note-tuple*    := <collect-all(constraint-note); flatten-list> ast
 		; if <Tl> error-tuple* <+ <Tl> warning-tuple* <+ <Tl> note-tuple* then
 			  legacy-source  := $[[source]_legacy]
 			; task-start-collection(|legacy-source)
-			; error*   := <map(analysis-legacy-convert-error(|legacy-source))> error-tuple*
-			; warning* := <map(analysis-legacy-convert-warning(|legacy-source))> warning-tuple*
-		  ; note*    := <map(analysis-legacy-convert-note(|legacy-source))> note-tuple*
+			; error*   := <filter(analysis-legacy-convert-error(|legacy-source))> error-tuple*
+			; warning* := <filter(analysis-legacy-convert-warning(|legacy-source))> warning-tuple*
+		  ; note*    := <filter(analysis-legacy-convert-note(|legacy-source))> note-tuple*
 			; task-stop-collection(|legacy-source)
 			; <task-evaluate-now> [error*, warning*, note*]
 		end
 
 	analysis-legacy-convert-error(|source):
-		(term, message) -> <task-create-error(|source, message)> term
+		(term, message) -> <task-create-error(|source, message); task-result-id> term
 		
 	analysis-legacy-convert-warning(|source):
-		(term, message) -> <task-create-warning(|source, message)> term
+		(term, message) -> <task-create-warning(|source, message); task-result-id> term
 		
 	analysis-legacy-convert-note(|source):
-		(term, message) -> <task-create-note(|source, message)> term
+		(term, message) -> <task-create-note(|source, message); task-result-id> term

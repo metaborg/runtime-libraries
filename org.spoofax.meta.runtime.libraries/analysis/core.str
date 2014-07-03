@@ -171,7 +171,9 @@ rules // Common
   analysis-get-messages(pp-message):
     partition -> (error*, warning*, note*)
     with
-      message* := <task-get-messages(|partition)>;
+      task-message*   := <task-get-messages(|partition)>;
+      legacy-message* := <analysis-get-legacy-messages(|partition)>;
+      message* := [task-message*, legacy-message*];
       error*   := <filter(?Error(_, _, _); analysis-message-to-tuple; pp-message)> message*;
       warning* := <filter(?Warning(_, _, _); analysis-message-to-tuple; pp-message)> message*;
       note*    := <filter(?Note(_, _, _); analysis-message-to-tuple; pp-message)> message*
