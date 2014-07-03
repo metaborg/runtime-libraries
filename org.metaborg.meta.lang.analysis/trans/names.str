@@ -5,6 +5,7 @@ imports
   lib/runtime/task/-
   lib/runtime/properties/-
   lib/runtime/types/-
+  lib/runtime/relations/-
   lib/runtime/editor/-
 
 
@@ -17,11 +18,18 @@ signature
     NablNsTask : Namespace
 
 
+signature
+  constructors
+    
+
+
 rules
 
-  nabl-scoping-site =
-    ?Sections(_)
-    ; nabl-scope(|[NablNsTask()])
+  nabl-custom-properties(add-properties) =
+    ![] ; add-properties
+
+
+rules
 
   nabl-get-scope =
     ?Sections(_) ; ![NablNsTask()]
@@ -32,7 +40,7 @@ rules
   nabl-name-apply(s) =
     TaskDef(s, id, id, id, id)
 
-  nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, partition__, uniques__, uri__, states__) =
+  nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, ctx__, uniques__, uri__, states__) =
     ?TaskDef(t, _, _, _, _)
     ; origin-track-forced(
         TaskDef(
@@ -40,7 +48,7 @@ rules
             ?c-uri1__
           , ?s-uri1__
           | lang__
-          , partition__
+          , ctx__
           , uniques__
           , uri__
           , uri__
@@ -67,22 +75,25 @@ rules
   nabl-name-apply(s) =
     TaskRef(s)
 
-  nabl-use-site(|lang__, partition__, uniques__, uris__, states__) =
+  nabl-use-site(|lang__, ctx__, uniques__, uris__, states__) =
     ?TaskRef(t)
     ; origin-track-forced(
         TaskRef(
           nabl-use(
           | lang__
-          , partition__
+          , ctx__
           , uniques__
           , uris__
-          , [ UseCandidate(
-                NablNsTask()
-              , []
-              , Current()
-              , True()
-              , []
-              )
+          , [ <{:
+                 id
+                 ; !UseCandidate(
+                      NablNsTask()
+                    , []
+                    , Current()
+                    , True()
+                    , []
+                    )
+               }>
             ]
           )
         )

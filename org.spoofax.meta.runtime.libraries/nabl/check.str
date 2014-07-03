@@ -33,24 +33,17 @@ rules // Error checking tasks
 			if Unique() := unique then
 				uri'		:= <nabl-uri-parent> uri;
 				resolve := <nabl-create-resolvedefs(|ctx, ns, name, [])> uri';
-				<task-create-error-on-multiple(|ctx, resolve, "Duplicate definition")> name
+				if(
+					parent:= <nabl-uri-name> uri';
+					parent-ns := <nabl-uri-namespace> uri'
+				)then
+					<task-create-error-on-multiple(|ctx, resolve, ["Duplicate ", <pp-ns>ns ," ", name , " in ", <pp-ns>parent-ns, " ", parent ])> name
+				else
+					<task-create-error-on-multiple(|ctx, resolve, ["Duplicate ", <pp-ns>ns ," ", name])> name
+				end
 			end
-			
-	// TODO: check needs to be converted into a task.
-	nabl-hiding-task(|ctx):
-		name -> name
-		where
-			uri := <nabl-uri> name;
-			ns	:= <nabl-uri-namespace> uri;
-			not(<nabl-check-disable-hiding(|uri, ns)> name)
-		where
-			nabl-uri-all-lexical-parent-scopes;
-			nabl-insert-import-tasks(|ctx, ns);
-      nabl-resolve-task(|ctx, ns, <nabl-fix-name> name, []) => task;
-      <task-create-error-on-success(|ctx, task, "Declaration hides previous definition")> name
-  
-	nabl-constraint(|partition) = 
-		nabl-hiding-task(|partition)
+
+	pp-ns = write-to-string;string-replace(|"NablNs","")
 
 rules // Legacy
  

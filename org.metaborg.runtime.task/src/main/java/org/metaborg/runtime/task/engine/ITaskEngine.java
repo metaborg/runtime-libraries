@@ -1,12 +1,18 @@
-package org.metaborg.runtime.task;
+package org.metaborg.runtime.task.engine;
 
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.metaborg.runtime.task.ITask;
+import org.metaborg.runtime.task.ITaskFactory;
+import org.metaborg.runtime.task.TaskStorageType;
+import org.metaborg.runtime.task.TaskType;
 import org.metaborg.runtime.task.digest.ITermDigester;
 import org.metaborg.runtime.task.evaluation.ITaskEvaluationFrontend;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.stratego.Strategy;
+import org.spoofax.interpreter.terms.IStrategoAppl;
+import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
@@ -15,6 +21,7 @@ public interface ITaskEngine {
 	 * Returns the term digester.
 	 */
 	public abstract ITermDigester getDigester();
+
 
 	/**
 	 * Returns the task evaluation frontend.
@@ -25,6 +32,22 @@ public interface ITaskEngine {
 	 * Sets the task evaluation frontend.
 	 */
 	public abstract void setEvaluationFrontend(ITaskEvaluationFrontend evaluator);
+
+
+	/**
+	 * Gets the task factory for given instruction.
+	 *
+	 * @param instruction The instruction
+	 */
+	public abstract ITaskFactory getTaskFactory(IStrategoAppl instruction);
+
+	/**
+	 * Registers a task factory for given instruction constructor.
+	 *
+	 * @param constructor The constructor of the instruction to activate given factory for.
+	 * @param factory The task factory
+	 */
+	public abstract void registerTaskFactory(IStrategoConstructor constructor, ITaskFactory factory);
 
 
 	/**
@@ -41,21 +64,21 @@ public interface ITaskEngine {
 	 * @param instruction The instruction.
 	 * @param dependencies The initial dependencies of the instruction.
 	 */
-	public abstract IStrategoTerm createTaskID(IStrategoTerm instruction, IStrategoList dependencies);
+	public abstract IStrategoTerm createTaskID(IStrategoAppl instruction, IStrategoList dependencies);
 
 	/**
 	 * Adds an instruction with dependencies from a partition and returns a unique task identifier for this instruction.
-	 *
+	 * 
 	 * @param source The origin of the task.
 	 * @param dependencies A list of task identifiers of the tasks that given instruction depends on,
 	 * @param instruction The instruction.
-	 * @param isCombinator Whether this task is a task combinator.
+	 * @param type Type of task.
+	 * @param storageType Result storage type of task.
 	 * @param shortCircuit Whether evaluating this task stops after the first successful instruction has been executed.
-	 *
 	 * @return A unique task identifier for given instruction.
 	 */
-	public abstract IStrategoTerm addTask(IStrategoTerm source, IStrategoList dependencies, IStrategoTerm instruction,
-		boolean isCombinator, boolean shortCircuit);
+	public abstract IStrategoTerm addTask(IStrategoTerm source, IStrategoList dependencies, IStrategoAppl instruction,
+		TaskType type, TaskStorageType storageType, boolean shortCircuit);
 
 	/**
 	 * Adds a persisted task back to the task engine.
@@ -64,7 +87,7 @@ public interface ITaskEngine {
 	 * @param task The task object.
 	 * @param initialDependencies The initial dependencies of the task.
 	 */
-	public abstract void addPersistedTask(IStrategoTerm taskID, Task task, IStrategoList initialDependencies);
+	public abstract void addPersistedTask(IStrategoTerm taskID, ITask task, IStrategoList initialDependencies);
 
 	/**
 	 * Removes task with given identifier from the task engine.
@@ -90,7 +113,7 @@ public interface ITaskEngine {
 	 *
 	 * @return The task that was invalidated.
 	 */
-	public abstract Task invalidate(IStrategoTerm taskID);
+	public abstract ITask invalidate(IStrategoTerm taskID);
 
 	/**
 	 * Invalidates and schedules tasks that have changed because something they read has changed.
@@ -135,14 +158,14 @@ public interface ITaskEngine {
 	 *
 	 * @param taskID The task identifier.
 	 */
-	public abstract Task getTask(IStrategoTerm taskID);
+	public abstract ITask getTask(IStrategoTerm taskID);
 
 	/**
 	 * Gets task identifier of given task.
 	 *
 	 * @param task The task.
 	 */
-	public abstract IStrategoTerm getTaskID(Task task);
+	public abstract IStrategoTerm getTaskID(ITask task);
 
 	/**
 	 * Given an instruction and its initial dependencies, returns its identifier. If it does not have an identifier,
@@ -151,7 +174,7 @@ public interface ITaskEngine {
 	 * @param instruction The instruction.
 	 * @param dependencies The initial dependencies of the instruction.
 	 */
-	public abstract IStrategoTerm getTaskID(IStrategoTerm instruction, IStrategoList dependencies);
+	public abstract IStrategoTerm getTaskID(IStrategoAppl instruction, IStrategoList dependencies);
 
 
 	/**
@@ -162,12 +185,12 @@ public interface ITaskEngine {
 	/**
 	 * Gets all tasks.
 	 */
-	public abstract Iterable<Task> getTasks();
+	public abstract Iterable<ITask> getTasks();
 
 	/**
 	 * Gets all task identifier to task mappings.
 	 */
-	public abstract Iterable<Entry<IStrategoTerm, Task>> getTaskEntries();
+	public abstract Iterable<Entry<IStrategoTerm, ITask>> getTaskEntries();
 
 
 	/**
@@ -217,8 +240,9 @@ public interface ITaskEngine {
 	 * Gets all other task identifiers that task with given identifier statically depends on.
 	 *
 	 * @param taskID The task identifier to get static dependencies for.
+	 * @param withDynamic If dynamic dependencies should be included.
 	 */
-	public abstract Iterable<IStrategoTerm> getDependencies(IStrategoTerm taskID);
+	public abstract Iterable<IStrategoTerm> getDependencies(IStrategoTerm taskID, boolean withDynamic);
 
 	/**
 	 * Gets all other task identifiers that task with given identifier dynamically depends on.
@@ -228,19 +252,26 @@ public interface ITaskEngine {
 	public abstract Iterable<IStrategoTerm> getDynamicDependencies(IStrategoTerm taskID);
 
 	/**
-	 * Gets all other task identifier that task with given identifier statically transitively depends on.
+	 * Gets all other task identifiers that task with given identifier statically transitively depends on.
 	 *
 	 * @param taskID The task identifier to get static dependencies for.
 	 */
 	public abstract Set<IStrategoTerm> getTransitiveDependencies(IStrategoTerm taskID);
 
 	/**
-	 * Gets all other task identifier that depend on the task with given identifier.
+	 * Gets all other task identifiers that depend on the task with given identifier.
 	 *
 	 * @param taskID The task identifier to get dependent tasks for.
 	 * @param withDynamic If dynamic dependents should be included.
 	 */
-	public abstract Iterable<IStrategoTerm> getDependent(IStrategoTerm taskID, boolean withDynamic);
+	public abstract Iterable<IStrategoTerm> getDependents(IStrategoTerm taskID, boolean withDynamic);
+
+	/**
+	 * Gets all other task identifiers that dynamically depend on the task with given identifier.
+	 *
+	 * @param taskID The task identifier to get dynamically dependent tasks for.
+	 */
+	public abstract Iterable<IStrategoTerm> getDynamicDependents(IStrategoTerm taskID);
 
 	/**
 	 * Queries if adding a dependency between two tasks would cause a cyclic dependency. Does not change the actual

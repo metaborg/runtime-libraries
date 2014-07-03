@@ -2,7 +2,7 @@ package org.metaborg.runtime.task.primitives;
 
 import java.io.IOException;
 
-import org.metaborg.runtime.task.TaskManager;
+import org.metaborg.runtime.task.engine.TaskManager;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.library.AbstractPrimitive;
@@ -19,7 +19,7 @@ public class task_api_persist_0_0 extends AbstractPrimitive {
 	@Override
 	public boolean call(IContext env, Strategy[] svars, IStrategoTerm[] tvars) throws InterpreterException {
 		try {
-			TaskManager.getInstance().storeCurrent(env.getFactory());
+			TaskManager.getInstance().writeCurrent(env.getFactory());
 		} catch(IOException e) {
 			throw new RuntimeException("Failed to persist task engine.", e);
 		}

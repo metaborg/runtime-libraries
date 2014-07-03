@@ -17,16 +17,6 @@ rules
 
 	is-completion-name = ?"completion123"
   fix-completion-name = is-completion-name; !""
-  
-  measure-time(s, log) =
-    where(before := <times>);
-    s;
-    where(after := <times>; !(after, before); diff-times; times-to-seconds; Fst; log)
-  
-  measure-time(s, log | name) = 
-    measure-time(s, record-time(|name); log)
-  
-  record-time(|name) = id
   	
  	try-make-list = is-list <+ ![<id>]
 		

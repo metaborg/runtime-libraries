@@ -2,8 +2,12 @@ module nabl/interface
 
 strategies // Collect
   
+  nabl-collect-rewrite(|lang, partition, old-uri*, new-uri*) = fail
+  
 	nabl-scoping-site = fail
-	
+  
+  nabl-new-scoping-site = fail
+  
 	nabl-def-site(
 	  child-uris, sibiling-uris, implicits
 	| lang, partition, unique*, uri*, state*
@@ -31,9 +35,9 @@ strategies // Projections
 	
 strategies // Lookup hooks
 		
-	nabl-filter-def(|ctx, ctx-terms, ctx-string) = fail
+	nabl-filter-def(|ctx, uri*, ctx-terms, ctx-string) = fail
 	
-	nabl-disambiguate-def(|ctx, ctx-terms, ctx-string) = fail
+	nabl-disambiguate-def(|ctx, uri*, ctx-terms, ctx-string) = fail
 
 strategies // Name generation
 	

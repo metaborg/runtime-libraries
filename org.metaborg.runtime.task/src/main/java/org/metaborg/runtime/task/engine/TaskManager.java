@@ -1,4 +1,4 @@
-package org.metaborg.runtime.task;
+package org.metaborg.runtime.task.engine;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -9,9 +9,9 @@ import java.util.Map;
 
 import org.metaborg.runtime.task.digest.ITermDigester;
 import org.metaborg.runtime.task.digest.NonDeterministicCountingTermDigester;
-import org.metaborg.runtime.task.evaluation.BaseTaskEvaluator;
 import org.metaborg.runtime.task.evaluation.ITaskEvaluationFrontend;
 import org.metaborg.runtime.task.evaluation.TaskEvaluationQueue;
+import org.metaborg.runtime.task.specific.RelationMatchTask;
 import org.spoofax.interpreter.library.IOAgent;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
@@ -36,6 +36,17 @@ public class TaskManager {
 		return INSTANCE;
 	}
 
+
+	public boolean isInitialized() {
+		return current.get() != null;
+	}
+
+	private void ensureInitialized() {
+		if(!isInitialized())
+			throw new IllegalStateException(
+				"Task engine has not been set-up, use task-setup(|project-path) to set up the task system before use.");
+	}
+
 	public ITaskEngine getCurrent() {
 		ensureInitialized();
 		return current.get();
@@ -55,14 +66,9 @@ public class TaskManager {
 		setCurrent(getCurrentProject(), taskEngine);
 	}
 
-	public boolean isInitialized() {
-		return current.get() != null;
-	}
 
-	private void ensureInitialized() {
-		if(!isInitialized())
-			throw new IllegalStateException(
-				"Task engine has not been set-up, use task-setup(|project-path) to set up the task system before use.");
+	private boolean isHierarchicalTaskEngine(ITaskEngine taskEngine) {
+		return taskEngine instanceof IHierarchicalTaskEngine;
 	}
 
 	public ITaskEngine pushTaskEngine(ITermFactory factory) {
@@ -70,10 +76,6 @@ public class TaskManager {
 		final ITaskEngine newTaskEngine = createTaskEngine(currentTaskEngine, factory, currentTaskEngine.getDigester());
 		setCurrent(newTaskEngine);
 		return newTaskEngine;
-	}
-
-	private boolean isHierarchicalTaskEngine(ITaskEngine taskEngine) {
-		return taskEngine instanceof IHierarchicalTaskEngine;
 	}
 
 	public ITaskEngine popTaskEngine() {
@@ -115,6 +117,7 @@ public class TaskManager {
 		return parentTaskEngine;
 	}
 
+
 	public ITaskEngine createTaskEngine(ITermFactory factory) {
 		return createTaskEngine(factory, createTermDigester());
 	}
@@ -139,19 +142,11 @@ public class TaskManager {
 	}
 
 	public ITaskEvaluationFrontend createTaskEvaluationFrontend(ITaskEngine taskEngine, ITermFactory factory) {
-		final ITaskEvaluationFrontend taskEvaluationFrontend =
-			new TaskEvaluationQueue(taskEngine, factory, new BaseTaskEvaluator(factory));
-		// taskEvaluationFrontend.addTaskEvaluator(factory.makeConstructor("Choice", 1), new ChoiceTaskEvaluator());
-		// taskEvaluationFrontend.addTaskEvaluator(factory.makeConstructor("Sequence", 1), new SequenceTaskEvaluator());
+		final ITaskEvaluationFrontend taskEvaluationFrontend = new TaskEvaluationQueue(taskEngine, factory);
+		RelationMatchTask.register(taskEvaluationFrontend, factory);
 		return taskEvaluationFrontend;
 	}
 
-	public ITaskEngine getTaskEngine(String absoluteProjectPath) {
-		URI project = getProjectURIFromAbsolute(absoluteProjectPath);
-		WeakReference<ITaskEngine> taskEngineRef = taskEngineCache.get(project);
-		ITaskEngine taskEngine = taskEngineRef == null ? null : taskEngineRef.get();
-		return taskEngine;
-	}
 
 	public ITaskEngine loadTaskEngine(String projectPath, ITermFactory factory, IOAgent agent) {
 		URI project = getProjectURI(projectPath, agent);
@@ -159,9 +154,9 @@ public class TaskManager {
 			WeakReference<ITaskEngine> taskEngineRef = taskEngineCache.get(project);
 			ITaskEngine taskEngine = taskEngineRef == null ? null : taskEngineRef.get();
 			if(taskEngine == null) {
-				File taskEngineFile = getFile(project);
+				File taskEngineFile = getTaskEngineFile(project);
 				if(taskEngineFile.exists())
-					taskEngine = tryReadFromFile(taskEngineFile, factory);
+					taskEngine = read(taskEngineFile, factory);
 			}
 			if(taskEngine == null) {
 				taskEngine = createTaskEngine(factory);
@@ -172,8 +167,8 @@ public class TaskManager {
 		}
 	}
 
-	public void unloadTaskEngine(String removedProjectPath, IOAgent agent) {
-		URI removedProject = getProjectURI(removedProjectPath, agent);
+	public void unloadTaskEngine(String projectPath, IOAgent agent) {
+		URI removedProject = getProjectURI(projectPath, agent);
 		synchronized(TaskManager.class) {
 			WeakReference<ITaskEngine> removedTaskEngine = taskEngineCache.remove(removedProject);
 
@@ -189,21 +184,7 @@ public class TaskManager {
 		}
 	}
 
-	private URI getProjectURI(String projectPath, IOAgent agent) {
-		File file = new File(projectPath);
-		if(!file.isAbsolute())
-			file = new File(agent.getWorkingDir(), projectPath);
-		return file.toURI();
-	}
-
-	private URI getProjectURIFromAbsolute(String projectPath) {
-		File file = new File(projectPath);
-		if(!file.isAbsolute())
-			throw new RuntimeException("Project path is not absolute.");
-		return file.toURI();
-	}
-
-	public ITaskEngine tryReadFromFile(File file, ITermFactory factory) {
+	public ITaskEngine read(File file, ITermFactory factory) {
 		try {
 			ITaskEngine taskEngine = createTaskEngine(factory);
 			IStrategoTerm tasks = new TermReader(factory).parseFromFile(file.toString());
@@ -218,21 +199,40 @@ public class TaskManager {
 		}
 	}
 
-	public void storeCurrent(ITermFactory factory) throws IOException {
-		File file = getFile(getCurrentProject());
-		IStrategoTerm tasks = taskEngineFactory.toTerm(getCurrent(), factory);
+	public void write(ITaskEngine taskEngine, File file, ITermFactory factory) throws IOException {
+		final IStrategoTerm serialized = taskEngineFactory.toTerm(taskEngine, factory);
 		file.createNewFile();
-		FileOutputStream fos = new FileOutputStream(file);
+		final FileOutputStream fos = new FileOutputStream(file);
 		try {
-			SAFWriter.writeTermToSAFStream(tasks, fos);
+			SAFWriter.writeTermToSAFStream(serialized, fos);
 			fos.flush();
 		} finally {
 			fos.close();
 		}
 	}
 
-	private File getFile(URI project) {
-		File container = new File(new File(project), ".cache");
+	public void writeCurrent(ITermFactory factory) throws IOException {
+		write(getCurrent(), getTaskEngineFile(getCurrentProject()), factory);
+	}
+
+
+	public URI getProjectURI(String projectPath, IOAgent agent) {
+		File file = new File(projectPath);
+		if(!file.isAbsolute())
+			file = new File(agent.getWorkingDir(), projectPath);
+		return file.toURI();
+	}
+
+	public URI getProjectURIFromAbsolute(String projectPath) {
+		File file = new File(projectPath);
+		if(!file.isAbsolute())
+			throw new RuntimeException("Project path is not absolute.");
+		return file.toURI();
+	}
+
+
+	public File getTaskEngineFile(URI projectPath) {
+		File container = new File(new File(projectPath), ".cache");
 		container.mkdirs();
 		return new File(container, "taskengine.idx");
 	}

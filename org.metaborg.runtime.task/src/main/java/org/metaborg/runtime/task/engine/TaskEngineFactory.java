@@ -1,17 +1,14 @@
-package org.metaborg.runtime.task;
+package org.metaborg.runtime.task.engine;
 
-import static org.metaborg.runtime.task.util.TermTools.isNull;
-import static org.metaborg.runtime.task.util.TermTools.makeBool;
-import static org.metaborg.runtime.task.util.TermTools.makeList;
-import static org.metaborg.runtime.task.util.TermTools.makeLong;
-import static org.metaborg.runtime.task.util.TermTools.makeNullable;
-import static org.metaborg.runtime.task.util.TermTools.makeShort;
-import static org.metaborg.runtime.task.util.TermTools.takeBool;
-import static org.metaborg.runtime.task.util.TermTools.takeLong;
-import static org.metaborg.runtime.task.util.TermTools.takeShort;
+import static org.metaborg.runtime.task.util.TermTools.*;
 
 import java.util.Map.Entry;
 
+import org.metaborg.runtime.task.ITask;
+import org.metaborg.runtime.task.TaskStatus;
+import org.metaborg.runtime.task.TaskStorageType;
+import org.metaborg.runtime.task.TaskType;
+import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoInt;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
@@ -25,9 +22,9 @@ public class TaskEngineFactory {
 		final IStrategoTerm digestState = taskEngine.getDigester().state(factory);
 
 		IStrategoList tasks = factory.makeList();
-		for(final Entry<IStrategoTerm, Task> entry : taskEngine.getTaskEntries()) {
+		for(final Entry<IStrategoTerm, ITask> entry : taskEngine.getTaskEntries()) {
 			final IStrategoTerm taskID = entry.getKey();
-			final Task task = entry.getValue();
+			final ITask task = entry.getValue();
 
 			IStrategoTerm results = serializer.toAnnotations(makeList(factory, task.results()));
 			IStrategoTerm message = task.message();
@@ -35,17 +32,18 @@ public class TaskEngineFactory {
 				message = serializer.toAnnotations(message);
 
 			final Iterable<IStrategoTerm> sources = taskEngine.getSourcesOf(taskID);
-			final Iterable<IStrategoTerm> dependencies = taskEngine.getDependencies(taskID);
+			final Iterable<IStrategoTerm> dependencies = taskEngine.getDependencies(taskID, false);
 			final Iterable<IStrategoTerm> dynamicDependencies = taskEngine.getDynamicDependencies(taskID);
 			final Iterable<IStrategoTerm> reads = taskEngine.getReads(taskID);
 
 			// @formatter:off
 			final IStrategoTerm taskTuple = factory.makeTuple(
 				taskID,
-				task.instruction,
-				task.initialDependencies,
-				makeBool(factory, task.isCombinator),
-				makeBool(factory, task.shortCircuit),
+				task.initialInstruction(),
+				task.initialDependencies(),
+				factory.makeInt(task.type().id),
+				factory.makeInt(task.storageType().id),
+				makeBool(factory, task.shortCircuit()),
 				makeNullable(factory, task.instructionOverride()),
 				results,
 				factory.makeInt(task.status().id),
@@ -77,9 +75,10 @@ public class TaskEngineFactory {
 			int i = -1;
 
 			final IStrategoTerm taskID = taskTerm.getSubterm(++i);
-			final IStrategoTerm instruction = taskTerm.getSubterm(++i);
+			final IStrategoAppl instruction = (IStrategoAppl) taskTerm.getSubterm(++i);
 			final IStrategoList initialDependencies = (IStrategoList) taskTerm.getSubterm(++i);
-			final IStrategoInt isCombinator = (IStrategoInt) taskTerm.getSubterm(++i);
+			final IStrategoInt type = (IStrategoInt) taskTerm.getSubterm(++i);
+			final IStrategoInt storageType = (IStrategoInt) taskTerm.getSubterm(++i);
 			final IStrategoInt shortCircuit = (IStrategoInt) taskTerm.getSubterm(++i);
 			final IStrategoTerm instructionOverride = taskTerm.getSubterm(++i);
 			final IStrategoTerm results = serializer.fromAnnotations(taskTerm.getSubterm(++i), false);
@@ -93,11 +92,13 @@ public class TaskEngineFactory {
 			final IStrategoList dynamicDependencies = (IStrategoList) taskTerm.getSubterm(++i);
 			final IStrategoList reads = (IStrategoList) taskTerm.getSubterm(++i);
 
-			final Task task =
-				new Task(instruction, initialDependencies, takeBool(isCombinator), takeBool(shortCircuit));
-			task.overrideInstruction(instructionOverride);
+			final ITask task =
+				taskEngine.getTaskFactory(instruction).create(instruction, initialDependencies,
+					TaskType.get(type.intValue()), TaskStorageType.get(storageType.intValue()), takeBool(shortCircuit));
+			if(!isNull(instructionOverride))
+				task.overrideInstruction((IStrategoAppl) instructionOverride);
 			if(!isNull(results))
-				task.setResults(results);
+				task.results().set(results);
 			task.setStatus(TaskStatus.get(status.intValue()));
 			if(!isNull(message))
 				task.setMessage(message);
