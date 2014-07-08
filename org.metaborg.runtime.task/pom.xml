@@ -3,36 +3,42 @@
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>org.metaborg.runtime.task</artifactId>
-	<version>1.2.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>org.metaborg</groupId>
+		<artifactId>org.metaborg.maven.parent.java</artifactId>
+		<version>1.2.0-SNAPSHOT</version>
+		<relativePath>../../spoofax-deploy/org.metaborg.maven.parent.java</relativePath>
+	</parent>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.metaborg</groupId>
 			<artifactId>org.spoofax.terms</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
+			<version>${metaborg-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.metaborg</groupId>
 			<artifactId>org.spoofax.interpreter.core</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
+			<version>${metaborg-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.metaborg</groupId>
 			<artifactId>org.spoofax.jsglr</artifactId>
-			<version>1.2.0-SNAPSHOT</version>
+			<version>${metaborg-version}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>17.0</version>
+			<version>${guava-version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.functionaljava</groupId>
 			<artifactId>functionaljava</artifactId>
-			<version>4.1</version>
+			<version>${fj-version}</version>
 		</dependency>
 
 		<dependency>
@@ -42,11 +48,4 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-
-	<parent>
-		<groupId>org.metaborg</groupId>
-		<artifactId>org.metaborg.maven.java.parent</artifactId>
-		<version>1.2.0-SNAPSHOT</version>
-		<relativePath>../../spoofax-deploy/org.metaborg.maven.java.parent</relativePath>
-	</parent>
 </project>
