@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.net.URI;
 import java.util.Map;
+import java.util.Stack;
 
 import org.metaborg.runtime.task.digest.ITermDigester;
 import org.metaborg.runtime.task.digest.NonDeterministicCountingTermDigester;
@@ -25,7 +26,7 @@ public class TaskManager {
 	private static final Map<URI, WeakReference<ITaskEngine>> taskEngineCache = Maps.newHashMap();
 	private final static TaskEngineFactory taskEngineFactory = new TaskEngineFactory();
 
-	private final ThreadLocal<ITaskEngine> current = new ThreadLocal<ITaskEngine>();
+	private final ThreadLocal<Stack<ITaskEngine>> current = new ThreadLocal<Stack<ITaskEngine>>();
 	private final ThreadLocal<URI> currentProject = new ThreadLocal<URI>();
 
 	private TaskManager() {
@@ -49,6 +50,11 @@ public class TaskManager {
 
 	public ITaskEngine getCurrent() {
 		ensureInitialized();
+		return current.get().peek();
+	}
+
+	public Stack<ITaskEngine> getCurrentStack() {
+		ensureInitialized();
 		return current.get();
 	}
 
@@ -58,7 +64,9 @@ public class TaskManager {
 	}
 
 	private void setCurrent(URI project, ITaskEngine taskEngine) {
-		current.set(taskEngine);
+		final Stack<ITaskEngine> stack = new Stack<ITaskEngine>();
+		stack.push(taskEngine);
+		current.set(stack);
 		taskEngineCache.put(project, new WeakReference<ITaskEngine>(taskEngine));
 	}
 
@@ -67,56 +75,28 @@ public class TaskManager {
 	}
 
 
-	private boolean isHierarchicalTaskEngine(ITaskEngine taskEngine) {
-		return taskEngine instanceof IHierarchicalTaskEngine;
-	}
-
 	public ITaskEngine pushTaskEngine(ITermFactory factory) {
-		final ITaskEngine currentTaskEngine = getCurrent();
-		final ITaskEngine newTaskEngine = createTaskEngine(currentTaskEngine, factory, currentTaskEngine.getDigester());
-		setCurrent(newTaskEngine);
+		final Stack<ITaskEngine> stack = getCurrentStack();
+		final ITaskEngine currentTaskEngine = stack.peek();
+		final ITaskEngine newTaskEngine = createTaskEngine(currentTaskEngine, factory);
+		stack.push(newTaskEngine);
 		return newTaskEngine;
 	}
 
 	public ITaskEngine popTaskEngine() {
-		final ITaskEngine currentTaskEngine = getCurrent();
-		if(!isHierarchicalTaskEngine(currentTaskEngine))
+		final Stack<ITaskEngine> stack = getCurrentStack();
+		if(stack.size() == 1)
 			throw new RuntimeException("Cannot pop the root task engine.");
 
-		final ITaskEngine parentTaskEngine = ((IHierarchicalTaskEngine) currentTaskEngine).getParent();
-		setCurrent(parentTaskEngine);
+		final ITaskEngine parentTaskEngine = stack.pop();
 		return parentTaskEngine;
 	}
 
 	public ITaskEngine popToRootTaskEngine() {
-		final ITaskEngine currentTaskEngine = getCurrent();
-		if(!isHierarchicalTaskEngine(currentTaskEngine))
-			return currentTaskEngine;
-		final ITaskEngine parentTaskEngine = ((IHierarchicalTaskEngine) currentTaskEngine).getParent();
-		setCurrent(parentTaskEngine);
-		return popToRootTaskEngine();
+		final ITaskEngine rootTaskEngine = getCurrentStack().get(0);
+		setCurrent(rootTaskEngine);
+		return rootTaskEngine;
 	}
-
-	public ITaskEngine mergeTaskEngine(ITermFactory factory) {
-		final ITaskEngine currentTaskEngine = getCurrent();
-		if(!isHierarchicalTaskEngine(currentTaskEngine))
-			throw new RuntimeException("Cannot merge from the root task engine.");
-		final IHierarchicalTaskEngine currentHierarchicalTaskEngine = (IHierarchicalTaskEngine) currentTaskEngine;
-		final ITaskEngine parentTaskEngine = currentHierarchicalTaskEngine.getParent();
-
-		for(IStrategoTerm taskID : currentHierarchicalTaskEngine.getRemovedTasks())
-			parentTaskEngine.removeTask(taskID);
-
-		// Serialize current task engine into parent task engine.
-		final IStrategoTerm currentSerialized = taskEngineFactory.toTerm(currentTaskEngine, factory);
-		taskEngineFactory.fromTerms(parentTaskEngine, currentSerialized, factory);
-
-		// TODO: what about tasks that have changes, like more reads or dependencies?
-
-		setCurrent(parentTaskEngine);
-		return parentTaskEngine;
-	}
-
 
 	public ITaskEngine createTaskEngine(ITermFactory factory) {
 		return createTaskEngine(factory, createTermDigester());
@@ -125,16 +105,14 @@ public class TaskManager {
 	public ITaskEngine createTaskEngine(ITermFactory factory, ITermDigester digester) {
 		final TaskEngine taskEngine = new TaskEngine(factory, digester);
 		taskEngine.setEvaluationFrontend(createTaskEvaluationFrontend(taskEngine, factory));
-		taskEngine.setWrapper(taskEngine);
 		return taskEngine;
 	}
 
-	public ITaskEngine createTaskEngine(ITaskEngine parent, ITermFactory factory, ITermDigester digester) {
-		final TaskEngine taskEngine = new TaskEngine(factory, digester);
-		final ITaskEngine hierarchicalTaskEngine = new HierarchicalTaskEngine(taskEngine, parent);
-		taskEngine.setEvaluationFrontend(createTaskEvaluationFrontend(hierarchicalTaskEngine, factory));
-		taskEngine.setWrapper(hierarchicalTaskEngine);
-		return hierarchicalTaskEngine;
+	public ITaskEngine createTaskEngine(ITaskEngine taskEngine, ITermFactory factory) {
+		final IStrategoTerm serializedTaskEngine = taskEngineFactory.toTerm(taskEngine, factory);
+		final ITaskEngine taskEngineCopy = createTaskEngine(factory);
+		taskEngineFactory.fromTerms(taskEngineCopy, serializedTaskEngine, factory);
+		return taskEngineCopy;
 	}
 
 	public ITermDigester createTermDigester() {
@@ -168,16 +146,21 @@ public class TaskManager {
 	}
 
 	public void unloadTaskEngine(String projectPath, IOAgent agent) {
-		URI removedProject = getProjectURI(projectPath, agent);
+		final URI removedProject = getProjectURI(projectPath, agent);
 		synchronized(TaskManager.class) {
-			WeakReference<ITaskEngine> removedTaskEngine = taskEngineCache.remove(removedProject);
+			final WeakReference<ITaskEngine> removedTaskEngine = taskEngineCache.remove(removedProject);
 
-			ITaskEngine taskEngine = current.get();
-			if(taskEngine != null && taskEngine == removedTaskEngine.get()) {
-				current.set(null);
+			final Stack<ITaskEngine> stack = getCurrentStack();
+			if(stack != null) {
+				for(ITaskEngine taskEngine : stack) {
+					if(taskEngine == removedTaskEngine.get()) {
+						current.set(null);
+						break;
+					}
+				}
 			}
 
-			URI project = currentProject.get();
+			final URI project = currentProject.get();
 			if(project != null && project.equals(removedProject)) {
 				currentProject.set(null);
 			}
