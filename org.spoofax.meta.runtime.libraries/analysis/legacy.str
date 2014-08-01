@@ -8,12 +8,20 @@ imports
 	analysis/resolve
 	editor/eclipse
 	editor/queue
+	index/core
+	task/core
 	nabl/collect
+	task/messages
+	task/core
 	
 rules // Interface
 	
 	analysis-single-default-interface = fail
 	analysis-multiple-default-interface = fail
+	
+	constraint-error = fail
+	constraint-warning = fail
+	constraint-note = fail
 	
 rules // Analysis
 	
@@ -42,3 +50,32 @@ rules // Other services
 	analysis-save-default(|language) = analysis-spoofax-save(|language)
 	analysis-propose-completions(|language, project-path, path) = analysis-propose-completions(|language, project-path)
 	analysis-resolve(|language, project-path, path) = analysis-resolve(|language, project-path)
+
+rules // Messages
+	
+	analysis-get-legacy-messages(|source) = task-get-messages(|$[[source]_legacy])
+	
+	analysis-collect-legacy-messages:
+		result@FileResult(_, _, source, _, ast, _, _, _) -> result
+		with
+		  error-tuple*   := <collect-all(constraint-error); flatten-list> ast
+		; warning-tuple* := <collect-all(constraint-warning); flatten-list> ast
+		; note-tuple*    := <collect-all(constraint-note); flatten-list> ast
+		; if <Tl> error-tuple* <+ <Tl> warning-tuple* <+ <Tl> note-tuple* then
+			  legacy-source  := $[[source]_legacy]
+			; task-start-collection(|legacy-source)
+			; error*   := <filter(analysis-legacy-convert-error(|legacy-source))> error-tuple*
+			; warning* := <filter(analysis-legacy-convert-warning(|legacy-source))> warning-tuple*
+		  ; note*    := <filter(analysis-legacy-convert-note(|legacy-source))> note-tuple*
+			; task-stop-collection(|legacy-source)
+			; <task-evaluate-now> [error*, warning*, note*]
+		end
+
+	analysis-legacy-convert-error(|source):
+		(term, message) -> <task-create-error(|source, message); task-result-id> term
+		
+	analysis-legacy-convert-warning(|source):
+		(term, message) -> <task-create-warning(|source, message); task-result-id> term
+		
+	analysis-legacy-convert-note(|source):
+		(term, message) -> <task-create-note(|source, message); task-result-id> term
