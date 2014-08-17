@@ -4,6 +4,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>org.metaborg.runtime.task</artifactId>
 	<packaging>jar</packaging>
+	<description>Task engine for incremental execution of program analysis tasks</description>
+	<url>https://github.com/metaborg/runtime-libraries</url>
 
 	<parent>
 		<groupId>org.metaborg</groupId>
@@ -45,4 +47,19 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+
+	<developers>
+		<developer>
+			<name>Gabriël Konat</name>
+			<email>g.d.p.konat@tudelft.nl</email>
+			<organization>Delft University of Technology</organization>
+			<organizationUrl>http://www.ewi.tudelft.nl/en</organizationUrl>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:git@github.com:metaborg/runtime-libraries.git</connection>
+		<developerConnection>scm:git:git@github.com:metaborg/runtime-libraries.git</developerConnection>
+		<url>https://github.com/metaborg/runtime-libraries</url>
+	</scm>
 </project>
