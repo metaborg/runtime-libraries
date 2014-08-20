@@ -3,11 +3,15 @@ module refactoring/construct-text
 imports
 	libstratego-lib 
 	libstratego-gpp
+  editor/origins
 	refactoring/layout-adaption
-	refactoring/origin-tracking
 
 signature constructors
   Parenthetical : Unknown -> Unknown
+
+rules
+	
+	DEFAULT-INDENT = !"\t" //HACK: this is used in case multiline subterm texts are pretty-printed
 
 rules //Parenthetical
 

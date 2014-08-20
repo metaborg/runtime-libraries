@@ -1,10 +1,14 @@
 module refactoring/layout-adaption
 
 imports
+  editor/origins
 	refactoring/construct-text
-	refactoring/origin-tracking
   refactoring/construct-initial-list-structure
-		
+
+rules
+  
+  TABSIZE = !4  
+  
 rules //rules that translate AST-changes to Textual changes
 
 ast-change-to-text-change(pp, override-reconstruction, resugar):
