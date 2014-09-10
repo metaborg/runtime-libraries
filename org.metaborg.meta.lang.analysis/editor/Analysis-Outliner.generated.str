@@ -2,7 +2,7 @@ module editor/Analysis-Outliner.generated
 
 imports
   
-  include/Analysis
+  include/Analysis-sig
   lib/runtime/editor/outline-library
 
 rules
