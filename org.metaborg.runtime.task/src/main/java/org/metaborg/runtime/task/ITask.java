@@ -24,6 +24,8 @@ public interface ITask {
 
 	public abstract TaskStorageType storageType();
 
+    public abstract TaskStorageType actualStorageType();
+
 
 	public abstract boolean shortCircuit();
 

@@ -13,7 +13,7 @@ public interface ITaskFactory {
 	 * Creates a task.
 	 */
 	public abstract ITask create(IStrategoAppl instruction, IStrategoList dependencies, TaskType type,
-		TaskStorageType storageType, boolean shortCircuit);
+        TaskStorageType storageType, TaskStorageType actualStorageType, boolean shortCircuit);
 
 	/**
 	 * Clones a task.

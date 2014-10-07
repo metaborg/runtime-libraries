@@ -57,7 +57,8 @@ public class ChoiceTask implements ITaskFactory, ITaskQueuer, ITaskEvaluator {
 
 	@Override
 	public ITask create(IStrategoAppl instruction, IStrategoList dependencies, TaskType type,
-		TaskStorageType storageType, boolean shortCircuit) {
+        TaskStorageType storageType, TaskStorageType actualStorageType, boolean shortCircuit) {
+        // TODO: this must respect the given storageType
 		return new Task(instruction, dependencies, type, TaskStorageType.List, shortCircuit, new ListTaskResults());
 	}
 

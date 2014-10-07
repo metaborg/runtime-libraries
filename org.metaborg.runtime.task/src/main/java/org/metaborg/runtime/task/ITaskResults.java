@@ -14,4 +14,6 @@ public interface ITaskResults extends Iterable<IStrategoTerm> {
 	public abstract void add(IStrategoTerm result);
 
 	public abstract void clear();
+
+    public abstract TaskStorageType type();
 }
