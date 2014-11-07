@@ -15,6 +15,7 @@ import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.IStrategoTuple;
 import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.jsglr.client.imploder.ImploderOriginTermFactory;
 
 public class TaskTest {
 	protected static Interpreter interpreter;
@@ -27,7 +28,7 @@ public class TaskTest {
 	@BeforeClass
 	public static void setUpOnce() throws NoSuchAlgorithmException {
 		interpreter = new Interpreter();
-		factory = interpreter.getFactory();
+		factory = new ImploderOriginTermFactory(interpreter.getFactory());
 		agent = interpreter.getIOAgent();
 
 		taskManager = TaskManager.getInstance();

@@ -1,4 +1,5 @@
 bin
+target
 .cache
 include/Analysis.def
 include/Analysis-parenthesize.str
@@ -24,3 +25,4 @@ lib/runtime
 lib/*.generated.str
 lib-refactoring/*.generated.str
 /include
+src-gen
