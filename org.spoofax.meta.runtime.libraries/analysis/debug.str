@@ -242,7 +242,23 @@ rules // Helper rules for Index Resolved
 			else
 				<string-lt>(<get-constructor>a-namespace, <get-constructor>b-namespace)
 			end
-			
+
+	uri-compare: ([a@Anonymous(_)|as], [b@ID(_, _, _)|bs]) -> <fail> //where debug(!"1")
+	uri-compare: ([a@ID(_, _, _)|as], [b@Anonymous(_)|bs]) -> ([a|as], [b|bs]) //where debug(!"2")
+	uri-compare: ([Anonymous(a)|as], [Anonymous(b)|bs]) -> ([a|as], [b|bs]) //where debug(!"3")
+		where
+			if <eq>(a, b) then
+				<uri-compare> (as, bs)
+			else
+				a-len := <strlen>a;
+				b-len := <strlen>b;
+				if <eq>(a-len, b-len) then
+					<string-lt>(a, b)
+				else
+					<lt>(a-len, b-len)
+				end
+			end
+
 	// reverse URIs (for having urls in the right order, and for ordering as tree)
 	reverse-uris = bottomup(try(reverse-uri))
 	reverse-uri: URI(language, uri) -> URI(language, <reverse>uri)

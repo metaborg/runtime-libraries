@@ -135,4 +135,5 @@ rules // helper rules: format to HTML for hover
 	escape-for-html =
 		string-replace(|"&", "&amp;") ;
 		string-replace(|"<", "&lt;") ;
-		string-replace(|">", "&gt;")
+		string-replace(|">", "&gt;") ;
+		string-replace(|"\n", "<br/>")
