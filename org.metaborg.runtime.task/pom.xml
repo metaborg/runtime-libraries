@@ -25,18 +25,17 @@
 			<artifactId>org.spoofax.interpreter.core</artifactId>
 			<version>${metaborg-version}</version>
 		</dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>org.metaborg.util</artifactId>
+      <version>${metaborg-version}</version>
+    </dependency>
 		<dependency>
 			<groupId>org.metaborg</groupId>
 			<artifactId>org.spoofax.jsglr</artifactId>
 			<version>${metaborg-version}</version>
 			<scope>test</scope>
 		</dependency>
-    <dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>org.metaborg.util</artifactId>
-      <version>${metaborg-version}</version>
-      <scope>test</scope>
-    </dependency>
 
 		<dependency>
 			<groupId>com.google.guava</groupId>
