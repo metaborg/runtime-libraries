@@ -6,8 +6,8 @@ import java.util.Set;
 
 import org.metaborg.runtime.task.ITask;
 import org.metaborg.runtime.task.engine.ITaskEngine;
-import org.metaborg.runtime.task.util.collections.BidirectionalLinkedHashMultimap;
-import org.metaborg.runtime.task.util.collections.BidirectionalSetMultimap;
+import org.metaborg.util.collection.BiLinkedHashMultimap;
+import org.metaborg.util.collection.BiSetMultimap;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -37,8 +37,8 @@ public class TaskEvaluationQueue implements ITaskEvaluationQueue, ITaskEvaluatio
 	private final Set<IStrategoTerm> queued = Sets.newHashSet();
 
 	/** Dependencies of tasks which are updated during evaluation. */
-	private BidirectionalSetMultimap<IStrategoTerm, IStrategoTerm> runtimeDependencies =
-		BidirectionalLinkedHashMultimap.create();
+	private BiSetMultimap<IStrategoTerm, IStrategoTerm> runtimeDependencies =
+		BiLinkedHashMultimap.create();
 
 
 	/** Maps the constructor of an instruction to the queuer that can queue the task. */
@@ -198,8 +198,8 @@ public class TaskEvaluationQueue implements ITaskEvaluationQueue, ITaskEvaluatio
 		TaskEvaluationDebugging.debugUnevaluated(taskEngine, this.scheduled, runtimeDependencies);
 
 		// Make a copy of the dynamic dependency graph for later use.
-		final BidirectionalSetMultimap<IStrategoTerm, IStrategoTerm> copiedRuntimeDependencies =
-			BidirectionalLinkedHashMultimap.create(runtimeDependencies);
+		final BiSetMultimap<IStrategoTerm, IStrategoTerm> copiedRuntimeDependencies =
+			BiLinkedHashMultimap.create(runtimeDependencies);
 		final Set<IStrategoTerm> taskIDs = Sets.newHashSet(copiedRuntimeDependencies.keySet());
 
 		// Evaluate all tasks left in the dependency graph using a special strategy to break cycles.
@@ -220,7 +220,7 @@ public class TaskEvaluationQueue implements ITaskEvaluationQueue, ITaskEvaluatio
 		for(int i = 0; i < 25; ++i) {
 			System.out.println("Fixpoint cycle " + i);
 
-			runtimeDependencies = BidirectionalLinkedHashMultimap.create(copiedRuntimeDependencies);
+			runtimeDependencies = BiLinkedHashMultimap.create(copiedRuntimeDependencies);
 			for(final IStrategoTerm taskID : taskIDs) {
 				queue(taskID);
 			}

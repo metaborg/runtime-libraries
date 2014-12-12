@@ -13,9 +13,9 @@ import org.metaborg.runtime.task.TaskType;
 import org.metaborg.runtime.task.digest.ITermDigester;
 import org.metaborg.runtime.task.evaluation.ITaskEvaluationFrontend;
 import org.metaborg.runtime.task.util.TermTools;
-import org.metaborg.runtime.task.util.UniqueQueue;
-import org.metaborg.runtime.task.util.collections.BidirectionalLinkedHashMultimap;
-import org.metaborg.runtime.task.util.collections.BidirectionalSetMultimap;
+import org.metaborg.util.collection.BiLinkedHashMultimap;
+import org.metaborg.util.collection.BiSetMultimap;
+import org.metaborg.util.collection.UniqueQueue;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -52,19 +52,19 @@ public class TaskEngine implements ITaskEngine {
 
 
     /** Origins of tasks. */
-    private final BidirectionalSetMultimap<IStrategoTerm, IStrategoTerm> toSource = BidirectionalLinkedHashMultimap
+    private final BiSetMultimap<IStrategoTerm, IStrategoTerm> toSource = BiLinkedHashMultimap
         .create();
 
     /** Bidirectional mapping of dependencies between tasks identifiers. */
-    private final BidirectionalSetMultimap<IStrategoTerm, IStrategoTerm> toDependency = BidirectionalLinkedHashMultimap
+    private final BiSetMultimap<IStrategoTerm, IStrategoTerm> toDependency = BiLinkedHashMultimap
         .create();
 
     /** Bidirectional mapping of dynamic dependencies between tasks identifiers. Can be updated during evaluation. */
-    private final BidirectionalSetMultimap<IStrategoTerm, IStrategoTerm> toDynamicDependency =
-        BidirectionalLinkedHashMultimap.create();
+    private final BiSetMultimap<IStrategoTerm, IStrategoTerm> toDynamicDependency =
+        BiLinkedHashMultimap.create();
 
     /** Bidirectional mapping from task identifiers to URI's that they read during evaluation. */
-    private final BidirectionalSetMultimap<IStrategoTerm, IStrategoTerm> toRead = BidirectionalLinkedHashMultimap
+    private final BiSetMultimap<IStrategoTerm, IStrategoTerm> toRead = BiLinkedHashMultimap
         .create();
 
 

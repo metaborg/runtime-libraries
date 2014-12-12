@@ -6,7 +6,7 @@ import org.metaborg.runtime.task.ITask;
 import org.metaborg.runtime.task.TaskInsertion;
 import org.metaborg.runtime.task.TaskStatus;
 import org.metaborg.runtime.task.engine.ITaskEngine;
-import org.metaborg.runtime.task.util.Timer;
+import org.metaborg.util.time.Timer;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.stratego.Strategy;
