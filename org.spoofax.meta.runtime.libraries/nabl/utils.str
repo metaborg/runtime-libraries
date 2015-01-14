@@ -94,7 +94,6 @@ rules // Debugging
 	debugz = debug(|"z ")
 
 	
-	pp-aterm = pp-aterm-box; box2text-string(|80)
 	ppdebug(|t) = where(pp-aterm; debug(!t))
 
 	ppdebug0 = ppdebug(|"0 ")
