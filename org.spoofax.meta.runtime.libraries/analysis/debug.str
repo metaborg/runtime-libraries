@@ -221,7 +221,13 @@ rules // Helper rules for Index Resolved
 					[URI(_, a-url)|_] := <get-arguments>a;
 					[URI(_, b-url)|_] := <get-arguments>b
 				end;
-				<uri-compare> (a-url, b-url)
+				if <eq>(a-url, b-url) then
+					[_,a-ty] := <get-arguments>a;
+					[_,b-ty] := <get-arguments>b;
+					<string-lt>(<write-to-string>a-ty, <write-to-string>b-ty)
+				else
+					<uri-compare> (a-url, b-url)
+				end
 			else
 				cmp-o := <lt>(a-order, b-order)
 			end
@@ -242,7 +248,23 @@ rules // Helper rules for Index Resolved
 			else
 				<string-lt>(<get-constructor>a-namespace, <get-constructor>b-namespace)
 			end
-			
+
+	uri-compare: ([a@Anonymous(_)|as], [b@ID(_, _, _)|bs]) -> <fail>
+	uri-compare: ([a@ID(_, _, _)|as], [b@Anonymous(_)|bs]) -> ([a|as], [b|bs])
+	uri-compare: ([Anonymous(a)|as], [Anonymous(b)|bs]) -> ([a|as], [b|bs])
+		where
+			if <eq>(a, b) then
+				<uri-compare> (as, bs)
+			else
+				a-len := <strlen>a;
+				b-len := <strlen>b;
+				if <eq>(a-len, b-len) then
+					<string-lt>(a, b)
+				else
+					<lt>(a-len, b-len)
+				end
+			end
+
 	// reverse URIs (for having urls in the right order, and for ordering as tree)
 	reverse-uris = bottomup(try(reverse-uri))
 	reverse-uri: URI(language, uri) -> URI(language, <reverse>uri)

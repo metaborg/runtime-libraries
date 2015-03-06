@@ -6,7 +6,7 @@ import java.util.Set;
 import org.metaborg.runtime.task.ITask;
 import org.metaborg.runtime.task.engine.ITaskEngine;
 import org.metaborg.runtime.task.util.Debug;
-import org.metaborg.runtime.task.util.collections.BidirectionalSetMultimap;
+import org.metaborg.util.collection.BiSetMultimap;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.google.common.collect.Iterables;
@@ -16,7 +16,7 @@ public final class TaskEvaluationDebugging {
 	 * Produces debug information to debug unevaluated task problems.
 	 */
 	public static void debugUnevaluated(ITaskEngine taskEngine, Iterable<IStrategoTerm> unevaluated,
-		BidirectionalSetMultimap<IStrategoTerm, IStrategoTerm> toRuntimeDependency) {
+		BiSetMultimap<IStrategoTerm, IStrategoTerm> toRuntimeDependency) {
 		if(Debug.DEBUGGING) {
 			// Find cycles.
 			final Set<IStrategoTerm> cycle = findCycle(toRuntimeDependency, unevaluated);
@@ -49,13 +49,13 @@ public final class TaskEvaluationDebugging {
 	}
 
 	private static Set<IStrategoTerm> findCycle(
-		BidirectionalSetMultimap<IStrategoTerm, IStrategoTerm> toRuntimeDependency, Iterable<IStrategoTerm> tasks) {
+		BiSetMultimap<IStrategoTerm, IStrategoTerm> toRuntimeDependency, Iterable<IStrategoTerm> tasks) {
 		// Use LinkedHashSet because it preserves order.
 		return findCycle(toRuntimeDependency, tasks, new LinkedHashSet<IStrategoTerm>());
 	}
 
 	private static Set<IStrategoTerm> findCycle(
-		BidirectionalSetMultimap<IStrategoTerm, IStrategoTerm> toRuntimeDependency, Iterable<IStrategoTerm> tasks,
+		BiSetMultimap<IStrategoTerm, IStrategoTerm> toRuntimeDependency, Iterable<IStrategoTerm> tasks,
 		Set<IStrategoTerm> seen) {
 		for(IStrategoTerm taskID : tasks) {
 			final Set<IStrategoTerm> newSeen = new LinkedHashSet<IStrategoTerm>(seen);
