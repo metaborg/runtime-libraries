@@ -148,6 +148,10 @@ public class TaskManager {
     }
 
 
+    public ITaskEngine getTaskEngine(URI project) {
+        return taskEngineCache.get(project).get();
+    }
+
     public ITaskEngine loadTaskEngine(String projectPath, ITermFactory factory, IOAgent agent) {
         final URI project = getProjectURI(projectPath, agent);
         synchronized(TaskManager.class) {
@@ -169,6 +173,10 @@ public class TaskManager {
 
     public void unloadTaskEngine(String projectPath, IOAgent agent) {
         final URI removedProject = getProjectURI(projectPath, agent);
+        unloadTaskEngine(removedProject);
+    }
+
+    public void unloadTaskEngine(URI removedProject) {
         synchronized(TaskManager.class) {
             WeakReference<ITaskEngine> removedTaskEngine = taskEngineCache.remove(removedProject);
 
@@ -186,6 +194,10 @@ public class TaskManager {
 
     public void resetTaskEngine(String projectPath, IOAgent agent) {
         final URI project = getProjectURI(projectPath, agent);
+        resetTaskEngine(project);
+    }
+
+    public void resetTaskEngine(URI project) {
         synchronized(TaskManager.class) {
             final WeakReference<ITaskEngine> taskEngineRef = taskEngineCache.get(project);
             ITaskEngine taskEngine = taskEngineRef == null ? null : taskEngineRef.get();
