@@ -1,0 +1,62 @@
+module ScopeGraph
+
+imports 
+
+  Common
+  Term
+  
+context-free syntax
+
+  Section.ScopeGraph =
+    <scope graph
+    
+      <Scopes>
+      <Declarations>
+      <References>
+    >
+  
+context-free syntax
+  
+  Scopes =
+    <scopes
+      
+      <{Scope "\n\n"}*>
+    >
+    
+  Scope.Scope     = <<SID> <Parent>>
+  Scope.Scope     = <<SID>:<ScopeRef> <Parent>>
+  Scope.ScopeVar  = <var <SVar>>
+  
+  Parent.Global =
+  Parent.Parent = [ -> [ScopeRef]]
+  
+  ScopeRef.SRef     = SID
+  ScopeRef.SVarRef  = SVar
+  
+context-free syntax
+
+  Declarations =
+  	<declarations
+  	 
+  	 <{Declaration "\n\n"}*>
+    >
+  
+  Declaration.Decl = <<Term> in <ScopeRef>>
+  Declaration.Decl = <<Term>:<ScopeRef> in <ScopeRef>>
+
+context-free syntax
+
+  References =
+  	<references
+      
+      <{Reference "\n\n"}*>
+    >
+    
+  Reference.Ref    = <<Term> in <ScopeRef>>
+  Reference.Import = <<Term>:<ScopeRef> in <ScopeRef>> 
+
+lexical syntax
+
+  SID   = "s" INT
+  SVar  = "sigma" INT
+  
