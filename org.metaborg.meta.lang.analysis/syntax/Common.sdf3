@@ -2,45 +2,43 @@ module Common
 
 lexical syntax
 
-  [a-zA-Z0-9\_\-\*\']+  -> ID
-  "-"? [0-9]+       -> INT
-  [0-9]+ "." [0-9]+ -> FLOAT
-  [0-9]+            -> TASKID
+  ID      = [a-zA-Z0-9\_\-\*\']+ 
+  INT     = "-"? [0-9]+ 
+  FLOAT   = [0-9]+ "." [0-9]+ 
+  TASKID  = [0-9]+ 
   
-  "\"" StringChar* "\"" -> STRING
-  ~[\"\n]               -> StringChar
-  "\\\""                -> StringChar
-  BackSlashChar         -> StringChar
-  "\\"                  -> BackSlashChar
+  STRING      = "\"" StringChar* "\"" 
+  StringChar  = ~[\"\n] 
+  StringChar  = "\\\"" 
+  StringChar  = BackSlashChar 
+  BackSlashChar = "\\" 
+
+  LAYOUT      = [\ \t\n\r] 
+  LAYOUT      = "//" ~[\n\r]* [\n\r] | EOF 
   
-  [\ \t\n\r] -> LAYOUT
+  EOF =  
+
+  LAYOUT      = "/*" ~[\*] | CommentChar* "*/" 
+  CommentChar = [\*] 
   
-  [\*]                             -> CommentChar
-  "/*" (~[\*] | CommentChar)* "*/" -> LAYOUT
-  "//" ~[\n\r]* ([\n\r] | EOF)     -> LAYOUT
-  
-  -> EOF
 
 lexical restrictions
 
-  %% Ensure greedy matching for lexicals
-
   CommentChar   -/- [\/]
   INT           -/- [0-9]
+  TASKID        -/- [0-9]
   FLOAT         -/- [0-9]
   ID            -/- [a-zA-Z0-9\_]
-  
-  %% EOF may not be followed by any char
-  
+
   EOF           -/- ~[]
 
-  %% Backslash chars in strings may not be followed by " 
-  
   BackSlashChar -/- [\"]
 
 context-free restrictions
 
-  %% Ensure greedy matching for comments
+  LAYOUT? -/- [\ \t\n\r]
+  LAYOUT? -/- [\/].[\/]
+  LAYOUT? -/- [\/].[\*]
 
   LAYOUT? -/- [\ \t\n\r]
   LAYOUT? -/- [\/].[\/]

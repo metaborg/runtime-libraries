@@ -6,7 +6,7 @@ imports
 	Term
 	Task
 	
-templates
+context-free syntax
 
 	MsgType.Note = <note>
 	MsgType.Warn = <warning>
@@ -18,9 +18,9 @@ templates
 	
 	Instruction.Msg = <show <MsgType> <Term> on <Term> when <Term> <MsgTrigger>>
 	
-	Instruction.Choice = <choose <Term*; separator=" <+ ">>
-	Instruction.Sequence = <sequence <Term*; separator=" ; ">>
-	Instruction.Combine = <concat <Term*; separator=" + ">>
+	Instruction.Choice = <choose <{Term " <+ "}*>>
+	Instruction.Sequence = <sequence <{Term " ; "}*>>
+	Instruction.Combine = <concat <{Term " + "}*>>
 	
 	Instruction.Id = <produce <Term>>
 	Instruction.PropLookup = <lookup <Term> prop on <Term>>

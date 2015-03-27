@@ -7,28 +7,28 @@ imports
 	URI
 	Instruction
 
-templates
+context-free syntax
 
 	Section.Tasks = 
-<tasks
-
-	<TaskDef*; separator="\n\n">
->
+		<tasks
+		
+			<{TaskDef "\n\n"}*>
+		>
 	
 	TaskDef.TaskDef = 
-<task <TASKID> <Deps>= 
-	<Instruction> 
-	-\> 
-	<Result><Reads>
->
-	TaskRef.TaskRef = <<TASKID>>
+		<task <TASKID> <Deps>= 
+			<Instruction> 
+			-\> 
+			<Result><Reads>
+		>
+	
+	TaskRef.TaskRef = TASKID
 	
 	Deps.None   = <>
-	Deps.SDeps  = <s[<DepList>] >
-	Deps.DDeps  = <d[<DepList>] >
-	Deps.SDDeps = <s[<DepList>] d[<DepList>] >
-	DepList     = <<TaskRef*; separator=", ">>
-
+	Deps.SDeps  = <s[<{TaskRef ", "}*>] >
+	Deps.DDeps  = <d[<{TaskRef ", "}*>] >
+	Deps.SDDeps = <s[<{TaskRef ", "}*>] d[<{TaskRef ", "}*>] >
+	
 	Instruction = <<Term>> {avoid}
 	
 	Result         = <<Term>>
@@ -38,11 +38,11 @@ templates
 	
 	Reads.None     = <>
 	Reads.Reads    = 
-<
-
-reads
-<Term>
->
+		<
+		
+		reads
+		  <Term>
+		>
 	
 	Term.TaskRef = <&<TASKID>>
 	Term.URI     = </ <URI> />
