@@ -1,0 +1,19 @@
+module scope-graph/names
+
+imports src-gen/signatures/-
+
+namespaces
+
+  Scope
+  
+binding rules
+
+  ScopeGraph(_, _, _): scopes Scope
+  
+  Scope(s, _)   : defines Scope s
+  Scope(s, _, _): defines Scope s
+  ScopeVar(s)   : defines Scope s
+  
+  SRef(s)   : refers to Scope s
+  SVarRef(s): refers to Scope s
+   

@@ -1,0 +1,195 @@
+module scope-graph/names
+
+imports
+  lib/runtime/nabl/-
+  lib/runtime/task/-
+  lib/runtime/properties/-
+  lib/runtime/types/-
+  lib/runtime/relations/-
+  lib/runtime/editor/-
+  src-gen/signatures/-
+
+
+signature
+  constructors
+    NablNsScope : Namespace
+
+
+signature
+  constructors
+    
+
+
+rules
+
+  nabl-custom-properties(add-properties) =
+    ![] ; add-properties
+
+
+rules
+
+  nabl-scoping-site =
+    ?ScopeGraph(_, _, _)
+    ; nabl-scope(|[NablNsScope()])
+
+  nabl-get-scope =
+    ?ScopeGraph(_, _, _)
+    ; ![NablNsScope()]
+
+  nabl-get-name :
+    Scope(s, _) -> s
+
+  nabl-name-apply(s) =
+    Scope(s, id)
+
+  nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, ctx__, uniques__, uri__, states__) =
+    ?Scope(s, _)
+    ; origin-track-forced(
+        Scope(
+          nabl-def(
+            ?c-uri1__
+          , ?s-uri1__
+          | lang__
+          , ctx__
+          , uniques__
+          , uri__
+          , uri__
+          , NablNsScope()
+          , Unique()
+          , Current()
+          , []
+          , []
+          )
+        , id
+        )
+      |
+      )
+    ; match(child-uris__|c-uri1__)
+    ; match(sibl-uris__|s-uri1__)
+    ; match(implicits__|[])
+
+  nabl-get-name :
+    Scope(s, _, _) -> s
+
+  nabl-name-apply(s) =
+    Scope(s, id, id)
+
+  nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, ctx__, uniques__, uri__, states__) =
+    ?Scope(s, _, _)
+    ; origin-track-forced(
+        Scope(
+          nabl-def(
+            ?c-uri1__
+          , ?s-uri1__
+          | lang__
+          , ctx__
+          , uniques__
+          , uri__
+          , uri__
+          , NablNsScope()
+          , Unique()
+          , Current()
+          , []
+          , []
+          )
+        , id
+        , id
+        )
+      |
+      )
+    ; match(child-uris__|c-uri1__)
+    ; match(sibl-uris__|s-uri1__)
+    ; match(implicits__|[])
+
+  nabl-get-name :
+    ScopeVar(s) -> s
+
+  nabl-name-apply(s) =
+    ScopeVar(s)
+
+  nabl-def-site(child-uris__, sibl-uris__, implicits__|lang__, ctx__, uniques__, uri__, states__) =
+    ?ScopeVar(s)
+    ; origin-track-forced(
+        ScopeVar(
+          nabl-def(
+            ?c-uri1__
+          , ?s-uri1__
+          | lang__
+          , ctx__
+          , uniques__
+          , uri__
+          , uri__
+          , NablNsScope()
+          , Unique()
+          , Current()
+          , []
+          , []
+          )
+        )
+      |
+      )
+    ; match(child-uris__|c-uri1__)
+    ; match(sibl-uris__|s-uri1__)
+    ; match(implicits__|[])
+
+  nabl-get-name :
+    SRef(s) -> s
+
+  nabl-name-apply(s) =
+    SRef(s)
+
+  nabl-use-site(|lang__, ctx__, uniques__, uris__, states__) =
+    ?SRef(s)
+    ; origin-track-forced(
+        SRef(
+          nabl-use(
+          | lang__
+          , ctx__
+          , uniques__
+          , uris__
+          , [ <{:
+                 id
+                 ; !UseCandidate(
+                      NablNsScope()
+                    , []
+                    , Current()
+                    , True()
+                    , []
+                    )
+               }>
+            ]
+          )
+        )
+      |
+      )
+
+  nabl-get-name :
+    SVarRef(s) -> s
+
+  nabl-name-apply(s) =
+    SVarRef(s)
+
+  nabl-use-site(|lang__, ctx__, uniques__, uris__, states__) =
+    ?SVarRef(s)
+    ; origin-track-forced(
+        SVarRef(
+          nabl-use(
+          | lang__
+          , ctx__
+          , uniques__
+          , uris__
+          , [ <{:
+                 id
+                 ; !UseCandidate(
+                      NablNsScope()
+                    , []
+                    , Current()
+                    , True()
+                    , []
+                    )
+               }>
+            ]
+          )
+        )
+      |
+      )
