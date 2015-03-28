@@ -1,0 +1,25 @@
+module HierarchicalScopeGraph
+
+imports 
+  Common
+  URI
+  
+context-free syntax
+
+  Section.ScopeGraph = <
+    scope graph {
+	    <{ScopeElem "\n"}*>
+    }
+    >
+  
+  HScope.Scope = <
+    scope <Segment> {
+      <{ScopeElem "\n"}*>
+    }
+    >
+  
+  ScopeElem        = HScope  
+  ScopeElem.Decl   = [declaration [Segment]]
+  ScopeElem.Decl   = [declaration [Segment] ~~> [URI]]
+  ScopeElem.Ref    = [reference [Segment]]
+  ScopeElem.Import = [import [URI]]

@@ -6,6 +6,7 @@ imports
 	Instruction
 	Index
 	ScopeGraph
+	HierarchicalScopeGraph
 	
 	Term
 	URI
