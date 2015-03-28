@@ -7,7 +7,7 @@ imports
 
 context-free syntax
 
-	URI = {Segment " / "}*
+	URI.URI = </ <{Segment " / "}*>>
 	
 	Segment.Id   = <<ID>:<Term>>
 	Segment.Id   = <<ID>:<Term>#<ID>>
