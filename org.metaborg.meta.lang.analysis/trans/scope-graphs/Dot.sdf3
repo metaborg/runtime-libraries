@@ -1,0 +1,40 @@
+module Dot
+
+imports Common
+
+context-free syntax
+
+  Graph.Graph =
+    <digraph {
+      rankdir=BT
+      
+      <{GraphElem "\n"}*>
+    }>
+    
+context-free syntax
+
+  GraphElem.None = {avoid}
+  
+  GraphElem.Node =
+    <<STRING> <NodeProps>;>
+
+  GraphElem.Edge =
+    [[STRING] -> [STRING] [EdgeProps];]
+
+context-free syntax
+    
+  ElemProp.Label  = [label = <[ID]>]
+  ElemProp.Label  = [label = <[ID]<sub>[INT]</sub>>]
+  
+  NodeProps       = <[<{NodeProp ", "}*>]>
+  
+  NodeProp        = ElemProp
+  NodeProp.Circle = <shape = "circle">
+  NodeProp.Box    = <shape = "box">
+ 
+  EdgeProps       = <[<{EdgeProp ", "}*>]>
+  
+  EdgeProp        = ElemProp
+  EdgeProp.Normal = <arrowhead = "normal">
+  EdgeProp.Empty  = <arrowhead = "empty">
+ 

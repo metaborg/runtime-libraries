@@ -1,0 +1,126 @@
+module scope-graphs/to-dot
+
+imports
+
+  libstratego-gpp
+  
+  src-gen/signatures/-
+  src-gen/pp/Dot-pp
+
+  scope-graphs/query
+    
+rules
+
+  editor-show-dot:
+    (selected, position, ast, path, project-path) -> (filename, result)
+    with
+      filename := <guarantee-extension(|"gv")> path
+    ; result   := <analysis-to-dot; prettyprint-dot> ast
+      
+  prettyprint-dot =
+    prettyprint-Graph
+  ; !V([], <id>)
+  ; box2text-string(|120)
+     
+  analysis-to-dot:
+  	Sections(s*) -> g
+  	with
+  	  <one(graph-to-dot)> s* => [g]
+  	
+  graph-to-dot: 
+  	ScopeGraph(s*, d*, r*) -> Graph([se*, de*, re*])
+	  with
+	  	<mapconcat(scope-to-dot)> s* => se*
+	  ; <mapconcat(decl-to-dot)> d*  => de*
+	  ; <mapconcat(ref-to-dot)> r*   => re*  
+    
+rules
+	 
+  scope-to-dot:
+    s -> [n, pe, se]
+    with 
+      <scope-to-node> s => n
+    ; <parent-to-edge <+ none> s => pe
+    ; <import-scope-to-edge <+ none> s => se
+  
+  scope-to-node: 
+  	s -> Node(name, [Circle(), Label("s", index)])   
+    with
+    	<scope-name; double-quote> s => name
+    ; <scope-index> s => index
+    	
+  parent-to-edge: 
+    s -> Edge(name, parent, [Normal()])
+    where
+    	<scope-name; double-quote> s => name
+    ; <parent-scope; double-quote> s => parent
+  
+  import-scope-to-edge:
+  	s -> Edge(name, scope, [Empty()])
+  	where
+  		<scope-name; double-quote> s => name
+  	; <import-scope; double-quote> s => scope
+
+  none = !None()
+  
+rules
+	
+	decl-to-dot:
+		d -> [n, se, ae]
+		with
+			<decl-to-node> d => n
+		; <decl-scope-to-edge <+ none> d => se
+    ; <assoc-scope-to-edge <+ none> d => ae
+
+  decl-to-node: 
+    d -> Node(node, [Box(), Label(label, index)])   
+    with
+      <decl-name> d => Name(name, index)
+    ; name-to-id => node 
+    ; <un-double-quote> name => label
+
+  decl-scope-to-edge: 
+    d -> Edge(scope, decl, [Normal()])
+    with
+      <decl-name; name-to-id> d => decl
+    ; <decl-scope; double-quote> d => scope
+  
+  assoc-scope-to-edge:
+    d -> Edge(decl, scope, [Empty()])
+    where
+      <decl-name; name-to-id> d => decl
+    ; <assoc-scope; double-quote> d => scope
+
+  name-to-id:
+    Name(name, index) -> identifier
+    with
+      <concat-strings; double-quote> [<un-double-quote> name, "_", index] => identifier
+rules
+	
+  ref-to-dot:
+    r -> [n, se, ie]
+    with
+      <ref-to-node> r => n
+    ; <ref-scope-to-edge <+ none> r => se
+    ; <import-scope-to-edge <+ none> r => ie
+	
+	ref-to-node:
+		r -> Node(node, [Box(), Label(label, index)])
+		with
+			<ref-name> r => Name(name, index)
+		; name-to-id => node
+    ; <un-double-quote> name => label
+      
+  ref-scope-to-edge: 
+    r -> Edge(ref, scope, [Normal()])
+    with
+      <ref-name; name-to-id> r => ref
+    ; <ref-scope; double-quote> r => scope
+  
+  import-scope-to-edge:
+    r -> Edge(ref, scope, [Empty()])
+    where
+      <ref-name; name-to-id> r => ref
+    ; <import-scope; double-quote> r => scope
+			
+  

@@ -15,7 +15,8 @@ imports
 	pp
 	outline
 	convert
-
+  scope-graphs/-
+  
 rules // Analysis
 	
 	editor-analyze = analysis-default-editor

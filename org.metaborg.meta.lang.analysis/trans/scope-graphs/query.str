@@ -1,0 +1,38 @@
+module scope-graphs/query
+
+imports
+  src-gen/signatures/-
+  
+rules
+        
+  scope-name = ?Scope(<id>, _)
+  scope-name = ?Scope(<id>, _, _)
+  scope-name = ?ScopeVar(<id>)
+  
+  scope-index = scope-name; string-as-chars(Tl)
+  
+  scoperef-name = ?SRef(<id>)
+  scoperef-name = ?SVarRef(<id>)
+    
+  parent-scope =?Scope(_, <parent-name>)
+  parent-scope =?Scope(_, _, <parent-name>)
+  
+  import-scope = ?Scope(_, <scoperef-name>, _)
+  
+  parent-name = ?Parent(<scoperef-name>)
+   
+  decl-name = ?Decl(<id>, _)
+  decl-name = ?Decl(<id>, _, _)
+  
+  decl-scope = ?Decl(_, <scoperef-name>)
+  decl-scope = ?Decl(_, _, <scoperef-name>)
+  
+  assoc-scope = ?Decl(_, <scoperef-name>, _)
+
+  ref-name = ?Ref(<id>, _)
+  ref-name = ?Import(<id>, _, _)
+
+  ref-scope = ?Ref(_, <scoperef-name>)
+  ref-scope = ?Import(_, _, <scoperef-name>)
+  
+  import-scope = ?Import(_, <scoperef-name>, _)
