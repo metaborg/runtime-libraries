@@ -3,8 +3,7 @@ module ScopeGraph
 imports 
 
   Common
-  Term
-  
+
 context-free syntax
 
   Section.ScopeGraph =
@@ -41,9 +40,11 @@ context-free syntax
   	 <{Declaration "\n\n"}*>
     >
   
-  Declaration.Decl = <<Term> in <ScopeRef>>
-  Declaration.Decl = <<Term>:<ScopeRef> in <ScopeRef>>
+  Declaration.Decl = <<Name> in <ScopeRef>>
+  Declaration.Decl = <<Name>:<ScopeRef> in <ScopeRef>>
 
+  Name.Name = <<STRING>_<INT>>
+  
 context-free syntax
 
   References =
@@ -52,8 +53,8 @@ context-free syntax
       <{Reference "\n\n"}*>
     >
     
-  Reference.Ref    = <<Term> in <ScopeRef>>
-  Reference.Import = <<Term>:<ScopeRef> in <ScopeRef>> 
+  Reference.Ref    = <<Name> in <ScopeRef>>
+  Reference.Import = <<Name>:<ScopeRef> in <ScopeRef>> 
 
 lexical syntax
 
