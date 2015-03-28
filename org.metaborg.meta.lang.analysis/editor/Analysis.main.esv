@@ -11,7 +11,7 @@ language General properties
   description   : "Spoofax/IMP-generated editor for the Analysis language"
   url           : http://strategoxt.org
                   
-  extensions    : task, index, analysis
+  extensions    : task, index, analysis, sgraph
   table         : include/Analysis.tbl
   start symbols : Start
   

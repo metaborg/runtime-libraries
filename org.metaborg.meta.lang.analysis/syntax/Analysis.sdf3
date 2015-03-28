@@ -5,6 +5,7 @@ imports
 	Task
 	Instruction
 	Index
+	ScopeGraph
 	
 	Term
 	URI
