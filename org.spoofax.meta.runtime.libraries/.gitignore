@@ -1,2 +1,7 @@
-.cache
-build
+/.cache
+/build
+/target
+/include
+/src-gen
+/lib/runtime
+/lib/*.generated.*
