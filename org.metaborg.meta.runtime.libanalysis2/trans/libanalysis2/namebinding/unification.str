@@ -1,0 +1,29 @@
+module libanalysis2/namebinding/unification
+
+imports
+  src-gen/signatures/libanalysis2/-
+  libanalysis2/prelude/-
+  libanalysis2/pp
+
+rules
+  
+  is-var: ScopeVar(_) -> <id>
+  is-var: DeclVar(_) -> <id>
+
+rules
+
+  unifyd(|pos): (d1,d2) -> <unifyd;pureWM>
+  unifyd(|pos): (d1,d2) -> <pureWM;add-error(|(pos,msg))> []
+  with msg := $[Could not unify declarations [<pp-Analysis-string> d1] and [<pp-Analysis-string> d2]]
+
+  unifyd: (d,d) -> []
+  unifyd: (v@DeclVar(_),d) -> [(v,d)]
+  unifyd: (d,v@DeclVar(_)) -> [(v,d)]
+
+  unifys(|pos): (s1,s2) -> <unifys;pureWM>
+  unifys(|pos): (s1,s2) -> <pureWM;add-error(|(pos,msg))> []
+  with msg := $[Could not unify scopes [<pp-Analysis-string> s1] and [<pp-Analysis-string> s2]]
+
+  unifys: (s,s) -> []
+  unifys: (v@ScopeVar(_),s) -> [(v,s)]
+  unifys: (s,v@ScopeVar(_)) -> [(v,s)]

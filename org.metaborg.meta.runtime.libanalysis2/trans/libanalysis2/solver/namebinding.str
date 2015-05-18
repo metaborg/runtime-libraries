@@ -1,0 +1,73 @@
+module libanalysis2/solver/namebinding
+
+imports
+  
+  src-gen/signatures/libanalysis2/-
+  libanalysis2/substitution/-
+  libanalysis2/namebinding/-
+  libanalysis2/typechecking/-
+  libanalysis2/solver/-
+  libanalysis2/prelude/-
+  libanalysis2/pp
+
+rules
+ 
+  solve-namebinding-fact: (FDecl(d,s),sol-wm)     -> [(sol-wm',[])]
+  with <fromWM;sol-g> sol-wm => g
+     ; <G-with-decl> (g,s,d) => g'
+     ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
+
+  solve-namebinding-fact: (FRef(r,s),sol-wm)      -> [(sol-wm',[])]
+  with <fromWM;sol-g> sol-wm => g
+     ; <G-with-ref> (g,s,r) => g'
+     ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
+
+  solve-namebinding-fact: (FImportR(r,s),sol-wm)  -> [(sol-wm',[])]
+  with <fromWM;sol-g> sol-wm => g
+     ; <G-with-r-import> (g,s,r) => g'
+     ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
+
+  solve-namebinding-fact: (FImportS(s',s),sol-wm) -> [(sol-wm',[])]
+  with <fromWM;sol-g> sol-wm => g
+     ; <G-with-s-import> (g,s,s') => g'
+     ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
+
+  solve-namebinding-fact: (FParent(s,p),sol-wm)   -> [(sol-wm',[])]
+  with <fromWM;sol-g> sol-wm => g
+     ; <G-with-parent> (g,s,p) => g'
+     ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
+
+  solve-namebinding-fact: (FAssoc(d,s),sol-wm)    -> [(sol-wm',[])]
+  with <fromWM;sol-g> sol-wm => g
+     ; <G-with-assoc> (g,d,s) => g'
+     ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
+
+rules
+
+  solve-namebinding-constraint: (CResolves(r,d,pos),sol-wm) -> res*
+  where <resolve> (r, <fromWM;sol-g> sol-wm) => Total(d*@[_|_])
+      ; <fromWM;sol-r> sol-wm => r*
+  with ( <lookup> (r,r*)
+       < <unifyd(|pos)> (d,<id>) => s-wm
+       ; !( <S-apply> (<fromWM> s-wm, d)
+          , <sol-wm-apply-s(|pos)> (s-wm,sol-wm)
+          )
+       + !(d, <fmap(sol-set-r(|r,d))> sol-wm)
+       ) => (d', sol-wm')
+       ; <map( <unifyd(|pos)> (d',<id>)
+             ; !(<sol-wm-apply-s(|pos)> (<id>,sol-wm'),[])
+             )> d* => res*
+
+  solve-namebinding-constraint: (CAssoc(d,s,pos),sol-wm) -> [(sol-wm',[])]
+  where <is-ground> d
+      ; <fromWM;sol-g> sol-wm => g
+      ; <G-assoc> (g,d) => s'
+  with <unifys(|pos)> (s,s') => s-wm
+     ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm) => sol-wm'
+ 
+rules
+
+  is-var: t -> t
+  where <is-decl-var> t
+
+  is-decl-var: DeclVar(_) -> <id>

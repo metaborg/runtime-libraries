@@ -1,0 +1,99 @@
+module libanalysis2/Analysis
+
+lexical syntax
+
+  Int            = "-"? [0-9]+ 
+  String         = [a-zA-Z0-9]+
+
+lexical restrictions
+
+  Int           -/- [0-9]
+  String        -/- [a-zA-Z0-9]
+
+sorts
+
+  NotImplemented
+
+context-free start-symbols
+
+  NotImplemented
+
+context-free syntax
+
+  NotImplemented.NotImplemented = <>
+
+sorts
+
+  Scope
+  OptionScope
+  DeclId
+  RefId
+  Pos
+  Namespace
+
+context-free syntax
+
+  Scope.Scope               = <scope(<Int>)>
+  Scope.ScopeVar            = <s<Int>>
+
+  OptionScope.NoneScope     = <none>
+  OptionScope.SomeScope     = <<Scope>>
+
+  DeclId.DeclId             = <decl(<Namespace>,<String>,<Int>)>
+  DeclId.DeclVar            = <d<Int>>
+
+  RefId.RefId               = <ref(<Namespace>,<String>,<Int>)>
+
+  Pos.POfDecl               = <posOf(<DeclId>)>
+  Pos.DPos                  = <@(<Int>,<Int>)[<DeclId>]>
+  Pos.POfRef                = <posOf(<RefId>)>
+  Pos.RPos                  = <@(<Int>,<Int>)[<RefId>]>
+
+  Namespace                 = NotImplemented
+
+sorts
+
+  Type
+  TypeDef
+  TypeArg
+  Variance
+  TypeCon
+
+context-free syntax
+
+  Type.TApp                 = <<TypeCon>[<{Type ","}*>]>
+  Type.TVar                 = <t<Int>>
+
+  TypeDef.TDef              = <<TypeCon>[<{TypeArg ","}*>]>
+  TypeArg.TArg              = <<Variance><Type>>
+
+  Variance.Invariant        = <=>
+  Variance.Covariant        = <+>
+  Variance.Contravariant    = <->
+
+  TypeCon                   = NotImplemented
+
+sorts
+
+  Constraint
+
+context-free syntax
+
+  Constraint.CTrue          = <T>
+  Constraint.CAndStar       = <<{Constraint "/\\"}*>> {longest-match}
+
+  Constraint.FDecl          = <<DeclId> in <Scope>>
+  Constraint.FRef           = <<RefId> in <Scope>>
+  Constraint.FImportR       = <import <RefId> in <Scope>>
+  Constraint.FImportS       = <import <Scope> in <Scope>>
+  Constraint.FParent        = <parent(<Scope>) is <OptionScope>>
+  Constraint.FAssoc         = <<DeclId> with <Scope>>
+  Constraint.FSubType       = [[TypeDef] <: [Type] [Pos]]
+
+  Constraint.CResolves      = [[RefId] |--> [DeclId] [Pos]]
+  Constraint.CEqType        = [[Type] == [Type] [Pos]]
+  Constraint.CLubType       = [[Type] == lub([Type],[Type]) [Pos]]
+  Constraint.CSubType       = [[Type] <= [Type] [Pos]]
+  Constraint.CAssoc         = [[DeclId] ~~> [Scope] [Pos]]
+  Constraint.CTypeOf        = <<Pos> : <Type> <Pos>>
+

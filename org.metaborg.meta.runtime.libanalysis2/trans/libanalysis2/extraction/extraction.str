@@ -1,0 +1,23 @@
+module libanalysis2/extraction/extraction
+
+imports
+  src-gen/signatures/libanalysis2/-
+  libanalysis2/namebinding/-
+  
+signature
+  constructors
+    Cs : List(Cs) -> C
+
+rules
+ 
+  do-extract-constraint = fail
+
+  extract-constraints =
+    do-extract-constraint
+  ; constraint-to-list
+  ; constraints-nontrivial
+
+  constraint-to-list: CAndStar(c*) -> <map(constraint-to-list);concat> c*
+  constraint-to-list = ![<id>]
+
+  constraints-nontrivial = filter(not(?CTrue()))

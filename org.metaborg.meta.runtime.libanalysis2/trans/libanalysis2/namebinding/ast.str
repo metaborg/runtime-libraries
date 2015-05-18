@@ -1,0 +1,22 @@
+module libanalysis2/namebinding/ast
+
+imports
+  runtime/editor/annotations
+  runtime/editor/origins
+  libanalysis2/abstract-syntax/-
+  libanalysis2/prelude/-
+
+signature
+  constructors
+    Ref : DeclId -> Annotation
+
+rules
+
+  apply-resolution(|r*) = apply-positional(add-ref|r*)
+
+  add-ref(|d): t -> t'
+  with <origin-location-offset> d => o
+     ; <origin-location-offset-set(|o)> Ref(d) => a
+     ; <add-annotation(|a)> t => t'
+
+  get-decl = get-annotation(?Ref(<id>))

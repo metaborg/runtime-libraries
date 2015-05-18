@@ -1,0 +1,21 @@
+module libanalysis2/typechecking/ast
+
+imports
+  runtime/editor/annotations
+  runtime/editor/origins
+  libanalysis2/abstract-syntax/-
+  libanalysis2/prelude/-
+
+signature
+  constructors
+    Type    : Type -> Annotation
+
+rules
+
+  apply-types(|t*): ast -> ast'
+  with <apply-positional(add-type|t*)> ast => ast'
+
+  add-type(|ty): t -> t'
+  with t' := <add-annotation(|Type(ty))> t
+
+  get-type = get-annotation(?Type(<id>))

@@ -1,0 +1,10 @@
+/.cache
+/bin
+/editor/java/trans
+/include
+/src-gen
+/target
+/lib/runtime
+*.generated.*
+*~
+*.swp

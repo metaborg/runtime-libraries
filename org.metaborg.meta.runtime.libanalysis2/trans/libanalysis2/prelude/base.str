@@ -1,0 +1,14 @@
+module libanalysis2/prelude/base
+
+rules
+
+  if(s) = ?x ; s ; !x
+
+  noop(s) = id
+
+  xmlencode =
+    try(string-replace(|"&","&amp;"))
+  ; try(string-replace(|"<","&lt;"))
+  ; try(string-replace(|">","&gt;"))
+
+  debugwrap(s) = ?t ; <s> t ; debug(!$[[<write-to-string> t] -> ])
