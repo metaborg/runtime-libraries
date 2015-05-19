@@ -1,7 +1,7 @@
 module libanalysis2/typechecking/subtypes
 
 imports
-  signatures/libanalysis2/-
+  src-gen/signatures/libanalysis2/-
   libanalysis2/substitution/-
   libanalysis2/typechecking/-
   libanalysis2/prelude/-

@@ -1,7 +1,7 @@
 module libanalysis2/analysis
 
 imports
-  signatures/libanalysis2/-
+  src-gen/signatures/libanalysis2/-
   libanalysis2/abstract-syntax/-
   libanalysis2/extraction/-
   libanalysis2/namebinding/-

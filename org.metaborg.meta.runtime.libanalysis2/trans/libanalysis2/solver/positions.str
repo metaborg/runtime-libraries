@@ -2,7 +2,7 @@ module libanalysis2/solver/positions
 
 imports
   runtime/editor/origins
-  signatures/libanalysis2/-
+  src-gen/signatures/libanalysis2/-
   libanalysis2/abstract-syntax/-
   libanalysis2/substitution/-
   libanalysis2/namebinding/-

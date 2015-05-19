@@ -4,7 +4,7 @@ imports
 
   libstratego-gpp
   include/libanalysis2-parenthesize
-  pp/libanalysis2/-
+  src-gen/pp/libanalysis2/-
 
 rules
   prettyprint-Int = ![S(<int-to-string>)]

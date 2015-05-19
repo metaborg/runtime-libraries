@@ -1,8 +1,8 @@
 module libanalysis2/abstract-syntax/abstract-syntax
 
 imports
-  runtime/editor/annotations
-  runtime/editor/origins
+  lib/runtime/editor/annotations
+  lib/runtime/editor/origins
   libanalysis2/prelude/-
 
 rules
