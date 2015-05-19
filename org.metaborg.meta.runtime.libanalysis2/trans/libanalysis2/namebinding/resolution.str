@@ -1,7 +1,7 @@
 module libanalysis2/namebinding/resolution
 
 imports
-  src-gen/signatures/libanalysis2/-
+  signatures/libanalysis2/-
   libanalysis2/namebinding/-
   libanalysis2/pp
   libanalysis2/prelude/-
