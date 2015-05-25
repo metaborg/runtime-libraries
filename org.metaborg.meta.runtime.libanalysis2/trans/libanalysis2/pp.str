@@ -3,13 +3,35 @@ module libanalysis2/pp
 imports
 
   libstratego-gpp
+  runtime/tmpl/pp
+  libstratego-sglr
   include/libanalysis2-parenthesize
+  signatures/libanalysis2/-
   pp/libanalysis2/-
 
 rules
-  prettyprint-Int = ![S(<int-to-string>)]
-  prettyprint-Int = ![S(<is-string>)]
- 
+
+  // allow printing of actual Ints as well
+  prettyprint-Int: _ -> [S(<int-to-string>)]
+  prettyprint-Int: _ -> [S(<is-string>)]
+
+  // print origins more compactly
+  prettyprint-Pos :
+    Origin(file, line, column, begin, end) -> [ H(
+                                                   [SOpt(HS(), "0")]
+                                                 , [ S("@(")
+                                                   , line'
+                                                   , S(",")
+                                                   , column'
+                                                   , S(")")
+                                                   ]
+                                                 )
+                                              ]
+    with line'   := <pp-one-Z(prettyprint-Int)> line
+    with column' := <pp-one-Z(prettyprint-Int)> column
+
+rules
+
   pp-Analysis-string =
     parenthesize-libanalysis2
     ; prettyprint-example

@@ -13,9 +13,8 @@ signature
 rules
 
   apply-types(|t*): ast -> ast'
-  with <apply-positional(add-type|t*)> ast => ast'
+  with <apply-annotations(make-type|t*)> ast => ast'
 
-  add-type(|ty): t -> t'
-  with t' := <add-annotation(|Type(ty))> t
+  make-type: ty -> Type(ty)
 
   get-type = get-annotation(?Type(<id>))

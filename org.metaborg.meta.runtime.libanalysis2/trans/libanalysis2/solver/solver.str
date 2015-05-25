@@ -82,27 +82,28 @@ rules
 
   initial-solution = sol-new;pureWM
 
-  solve-constraints-phase1 = 
-    csolve( solve-specialise
-          , ( solve-namebinding-fact
-           <+ solve-trivial-constraints
-           <+ solve-ignore
-            )
-          )
+  solve-constraints-phase1: c* -> s
+  with
+    s := <csolve( solve-specialise
+                , ( solve-namebinding-fact
+                 <+ solve-trivial-constraints
+                 <+ solve-ignore
+                  )
+                )> c*
 
-  solve-constraints-phase2 =
-    csolve-repeat( solve-specialise
-                 , ( solve-namebinding-constraint
-                  <+ solve-subtype-fact
-                  <+ solve-position-constraint
-                  <+ solve-eqtype-constraint
-                  <+ check-subtype-constraint
-                  // <+ solve-subtype-constraint // comment out to disable inference based on bounds
-                  <+ solve-trivial-constraints
-                  <+ solve-ignore
-                   )
-                 , postprocess-bounds
-                 )
+  solve-constraints-phase2: c* -> s
+  with
+    s := <csolve-repeat( solve-specialise
+                       , ( solve-namebinding-constraint
+                        <+ solve-subtype-fact
+                        <+ solve-position-constraint
+                        <+ solve-eqtype-constraint
+                        <+ check-subtype-constraint
+                        <+ solve-trivial-constraints
+                        <+ solve-ignore
+                         )
+                       , postprocess-bounds
+                       )> c*
 
   solve-specialise: (sol-wm,c) -> c'
   with <fromWM;sol-s> sol-wm => s*

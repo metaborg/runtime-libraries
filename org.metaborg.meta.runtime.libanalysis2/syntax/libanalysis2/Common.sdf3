@@ -1,0 +1,23 @@
+module libanalysis2/Common
+
+lexical syntax
+
+  Int            = "-"? [0-9]+
+  String         = [a-zA-Z0-9]+
+
+lexical restrictions
+
+  Int           -/- [0-9]
+  String        -/- [a-zA-Z0-9]
+
+sorts
+
+  NotImplemented
+
+context-free start-symbols
+
+  NotImplemented
+
+context-free syntax
+
+  NotImplemented.NotImplemented = <>

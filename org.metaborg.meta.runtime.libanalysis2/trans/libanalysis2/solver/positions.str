@@ -32,5 +32,5 @@ rules
   reduce-op(|x*): t -> t'
   where <reduce-pos-op(|x*)> t => t'
 
-  reduce-pos-op(|x*): POfDecl(d@DeclId(_,_,_)) -> DPos(<term-line> d, <term-column> d, d)
-  reduce-pos-op(|x*): POfRef(r@RefId(_,_,_)) -> RPos(<term-line> r, <term-column> r, r)
+  reduce-pos-op(|x*): POfDecl(d@DeclId(_,_,pos)) -> pos
+  reduce-pos-op(|x*): POfRef(r@RefId(_,_,pos)) -> pos

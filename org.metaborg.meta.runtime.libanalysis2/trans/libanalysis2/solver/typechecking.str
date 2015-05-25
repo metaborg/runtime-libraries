@@ -42,13 +42,13 @@ rules
   where <not(is-type-var)> ty1
       ; <not(is-type-var)> ty2
   with <fromWM;sol-x> sol-wm => x*
-  	 ; ( <is-subtype-traverse(!CEqType(<Fst>,<Snd>,pos)
-  	                         ,!CSubType(<Fst>,<Snd>,pos)
-  	                         ,!CSubType(<Snd>,<Fst>,pos)
-  	                         ,id|x*);Snd> (ty1,ty2) => c*
+     ; ( <is-subtype-traverse(!CEqType(<Fst>,<Snd>,pos)
+                             ,!CSubType(<Fst>,<Snd>,pos)
+                             ,!CSubType(<Snd>,<Fst>,pos)
+                             ,id|x*);Snd> (ty1,ty2) => c*
        < !(sol-wm,c*)
        + !(<add-error(|(pos,$[[<pp-Analysis-string> ty1] is not a subtype of [<pp-Analysis-string> ty2]]))> sol-wm, [])
-  	   ) => res
+       ) => res
 
 rules
 

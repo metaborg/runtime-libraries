@@ -8,11 +8,11 @@ imports
 rules
 
   sg-dot: G(s*,a*) -> $[
-  	digraph { 
+    digraph { 
       rankdir=BT
-  	  [s-stmts] 
-  	  [a-stmts] 
-  	}
+      [s-stmts] 
+      [a-stmts] 
+    }
   ]
   with <stmts(sg-dot-scope)> s* => s-stmts
      ; <stmts(sg-dot-arrow(|"empty"))> a* => a-stmts

@@ -12,27 +12,27 @@ signature
     WithMessages : X * List(String) * List(String) * List(String) -> WithMessages(X)
 
 rules // functor
-	
-  fmap(s): WithMessages(x, e*, w*, n*) -> WithMessages(<s> x, e*, w*, n*)	
-	
+  
+  fmap(s): WithMessages(x, e*, w*, n*) -> WithMessages(<s> x, e*, w*, n*)  
+  
 rules
-	
+  
   pureWM: x -> WithMessages(x,[],[],[])
 
 rules
-	
+  
   bind(s): WithMessages(x,_,_,_) -> <s> x
 
   join: WithMessages(WithMessages(x,ie*,iw*,in*),oe*,ow*,on*)
         -> WithMessages(x,[ie*,oe*],[iw*,ow*],[in*,on*])
 
 rules
-	
-	mplus(s): (WithMessages(x1,e1*,w1*,n1*),WithMessages(x2,e2*,w2*,n2*))
-	          -> WithMessages(<s> (x1,x2),[e1*,e2*],[w1*,w2*],[n1*,n2*])
+  
+  mplus(s): (WithMessages(x1,e1*,w1*,n1*),WithMessages(x2,e2*,w2*,n2*))
+            -> WithMessages(<s> (x1,x2),[e1*,e2*],[w1*,w2*],[n1*,n2*])
 
 rules
-	
+  
   sequenceWM = sequenceWM(id)
  
   sequenceWM(s): wm* -> WithMessages(x*,e*,w*,n*)
@@ -43,8 +43,8 @@ rules
      ; <map(wm-notes);concat> wm* => n*
 
 rules
-	
-	twrapWM: t -> wm
+  
+  twrapWM: t -> wm
   where is-tuple
   with TupleToList ; sequenceWM ; fmap(ListToTuple) => wm
 

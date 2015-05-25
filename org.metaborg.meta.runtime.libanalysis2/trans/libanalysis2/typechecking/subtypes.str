@@ -26,8 +26,8 @@ rules
   example-subtype-relation =
     ![ (TInt(), ( [] , [ (TInt(),[]) ]))
      , (TBool(), ( [] , [ (TBool(),[]) ]))
-     , (TArrow(), ( [Contravariant(),Covariant()]
-                  , [ (TArrow(),[TVar("T"),TVar("R")]) ]))
+     , (TFun(), ( [Contravariant(),Covariant()]
+                  , [ (TFun(),[TVar("T"),TVar("R")]) ]))
      ]
   */
 
@@ -67,7 +67,7 @@ rules
       ; <elem> (tc2,tc1*)
 
 rules
-	
+  
   lub(|x*): (ty1,ty2) -> lub
   where lub-traverse(eq;Fst,lub(|x*),glb(|x*),!TApp(<Fst>,<Snd>)|x*) => lub
 
@@ -88,13 +88,13 @@ rules
       ; <common-prefix;last> (tc1*,tc2*) => tc
 
 rules
-	
+  
   glb(|x*): (ty1,ty2) -> glb
   where glb-traverse(eq;Fst,glb(|x*),lub(|x*),!TApp(<Fst>,<Snd>)|x*) => glb
 
   glb-traverse(inv,cov,contrav,plus|x*): (ty1@TApp(tc1,a1*),ty2@TApp(tc2,a2*)) -> <plus> (tc,a''*)
   where id
-  	  ; ( <is-subtype(|x*)> (tc1,tc2)
+      ; ( <is-subtype(|x*)> (tc1,tc2)
         ; !(tc1,a1*,tc2,a2*)
         + <is-subtype(|x*)> (tc2,tc1)
         ; !(tc2,a2*,tc1,a1*)
@@ -104,17 +104,17 @@ rules
       ; <zip;S-foldr(![],unifyt)> (fa'*,a'*) => s
       ; <zip> (v*, <zip> (a*,fa'*)) => a'*
   where <map( ?(Invariant(),<id>) ; ( !(<Fst>,<lookup> (<Snd>, s)) < inv + Fst )
-        	 <+ ?(Covariant(),<id>) ; ( !(<Fst>,<lookup> (<Snd>, s)) < cov + Fst )
+           <+ ?(Covariant(),<id>) ; ( !(<Fst>,<lookup> (<Snd>, s)) < cov + Fst )
            <+ ?(Contravariant(),<id>) ; ( !(<Fst>,<lookup> (<Snd>, s)) < contrav + Fst )
             )> a'* => a''*
 
   glb(|x*): (tc1,tc2) -> tc
-  where (  <is-subtype(|x*)> (tc1,tc2) ; !tc1
-        <+ <is-subtype(|x*)> (tc2,tc1) ; !tc2
+  where ( <is-subtype(|x*)> (tc1,tc2) ; !tc1
+       <+ <is-subtype(|x*)> (tc2,tc1) ; !tc2
         ) => tc
 
 rules
-	
+  
   upcast(|x*): (TApp(tc1,a1*),tc2) -> TApp(tc2,a2*)
   where <lookup> (tc1,x*) => (_,sr1*@[(tc1,fa1*)|_])
       ; <lookup> (tc2,sr1*) => fa2*

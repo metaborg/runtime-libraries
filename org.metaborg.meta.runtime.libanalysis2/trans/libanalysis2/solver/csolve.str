@@ -22,7 +22,7 @@ rules
   csolve(preprocess,solve): (e,c*) -> res*
   with <csolve-step(preprocess,solve)> (c*,e,[])
      ; map( if(<eq> (<Snd>,[]) <+ <set-eq> (<Snd>,c*)) ; ![<id>]
-       	 <+ csolve(preprocess,solve)
+          <+ csolve(preprocess,solve)
           );concat => res*
 
   csolve-step(preprocess,solve): ([c|c*],e,c'*) -> res*
@@ -30,7 +30,7 @@ rules
     <preprocess> (e,c) => c'
   ; <solve> (c',e)
   ; map( !(c*, <Fst>, <conc> (<Snd>,c'*))
-    	 ; csolve-step(preprocess,solve)
+       ; csolve-step(preprocess,solve)
        );concat => res*
 
   csolve-step(preprocess,solve): ([],e,c') -> [(e, <reverse> c')]

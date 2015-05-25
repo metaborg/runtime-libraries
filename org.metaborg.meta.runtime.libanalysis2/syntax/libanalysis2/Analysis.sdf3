@@ -1,26 +1,8 @@
 module libanalysis2/Analysis
 
-lexical syntax
+imports
 
-  Int            = "-"? [0-9]+ 
-  String         = [a-zA-Z0-9]+
-
-lexical restrictions
-
-  Int           -/- [0-9]
-  String        -/- [a-zA-Z0-9]
-
-sorts
-
-  NotImplemented
-
-context-free start-symbols
-
-  NotImplemented
-
-context-free syntax
-
-  NotImplemented.NotImplemented = <>
+  libanalysis2/Common
 
 sorts
 
@@ -39,15 +21,14 @@ context-free syntax
   OptionScope.NoneScope     = <none>
   OptionScope.SomeScope     = <<Scope>>
 
-  DeclId.DeclId             = <decl(<Namespace>,<String>,<Int>)>
+  DeclId.DeclId             = <decl(<Namespace>,<String>,<Pos>)>
   DeclId.DeclVar            = <d<Int>>
 
-  RefId.RefId               = <ref(<Namespace>,<String>,<Int>)>
+  RefId.RefId               = <ref(<Namespace>,<String>,<Pos>)>
 
+  Pos.Origin                = <@(<String>,<Int>,<Int>,<Int>,<Int>)>
   Pos.POfDecl               = <posOf(<DeclId>)>
-  Pos.DPos                  = <@(<Int>,<Int>)[<DeclId>]>
   Pos.POfRef                = <posOf(<RefId>)>
-  Pos.RPos                  = <@(<Int>,<Int>)[<RefId>]>
 
   Namespace                 = NotImplemented
 

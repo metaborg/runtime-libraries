@@ -3,8 +3,10 @@ module libanalysis2/namebinding/ast
 imports
   runtime/editor/annotations
   runtime/editor/origins
+
   libanalysis2/abstract-syntax/-
   libanalysis2/prelude/-
+  signatures/libanalysis2/-
 
 signature
   constructors
@@ -12,11 +14,14 @@ signature
 
 rules
 
-  apply-resolution(|r*) = apply-positional(add-ref|r*)
+  apply-resolution(|r*) =
+    apply-annotations(make-ref|r*)
 
-  add-ref(|d): t -> t'
-  with <origin-location-offset> d => o
-     ; <origin-location-offset-set(|o)> Ref(d) => a
-     ; <add-annotation(|a)> t => t'
+  make-ref: d@DeclId(_,_,pos) -> r
+  with o := <position-to-origin> pos
+     ; r := <origin-location-offset-set(|o)> Ref(d)
+
+  get-declid(|ns) = get-annotation(?DeclId(ns,_,_))
+  get-refid(|ns) = get-annotation(?RefId(ns,_,_))
 
   get-decl = get-annotation(?Ref(<id>))

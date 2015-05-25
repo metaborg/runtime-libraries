@@ -3,18 +3,22 @@ module libanalysis2/abstract-syntax/abstract-syntax
 imports
   runtime/editor/annotations
   runtime/editor/origins
+  editor-common.generated
+
   libanalysis2/prelude/-
+  signatures/libanalysis2/-
 
 rules
 
-  apply-positional(s|pv*): ast -> ast'
-  with <mapk(origin-location-offset)> pv* => pv'*
-     ; <topdown(try(apply-positional-term(s|pv'*)))> ast => ast'
+  get-position: t -> Origin(f,l,c,s,e)
+  with (f,l,c,s,e) := <origin-location-offset> t
 
-  apply-positional-term(s|pv*): t -> t'
-  where <origin-location-offset> t => o
-      ; <lookup> (o,pv*) => x
-  with <s(|x)> t => t'
+  position-to-origin:
+    Origin(f,l,c,s,e) -> (f,l,c,s,e)
 
-  term-line = origin-line;inc;int-to-string
-  term-column = origin-column;inc;int-to-string
+  apply-annotations(s|aa*): ast -> ast'
+  with <topdown(try(apply-annotations-to-term(s|aa*)))> ast => ast'
+
+  apply-annotations-to-term(s|aa*): t{a*} -> t{a''*}
+  where a'* := <filter(<lookup> (<id>,aa*) ; s)> a*;
+        a''* := [a*,a'*]
