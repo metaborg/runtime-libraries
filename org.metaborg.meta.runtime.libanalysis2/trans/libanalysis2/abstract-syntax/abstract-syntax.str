@@ -6,7 +6,7 @@ imports
   editor-common.generated
 
   libanalysis2/prelude/-
-  signatures/libanalysis2/-
+  src-gen/signatures/libanalysis2/-
 
 rules
 

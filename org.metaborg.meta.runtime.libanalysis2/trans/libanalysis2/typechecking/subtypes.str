@@ -1,7 +1,7 @@
 module libanalysis2/typechecking/subtypes
 
 imports
-  signatures/libanalysis2/-
+  src-gen/signatures/libanalysis2/-
   libanalysis2/substitution/-
   libanalysis2/typechecking/-
   libanalysis2/prelude/-
@@ -109,7 +109,7 @@ rules
             )> a'* => a''*
 
   glb(|x*): (tc1,tc2) -> tc
-  where ( <is-subtype(|x*)> (tc1,tc2) ; !tc1
+  where (  <is-subtype(|x*)> (tc1,tc2) ; !tc1
        <+ <is-subtype(|x*)> (tc2,tc1) ; !tc2
         ) => tc
 
