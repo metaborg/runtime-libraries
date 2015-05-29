@@ -6,8 +6,8 @@ imports
   runtime/tmpl/pp
   libstratego-sglr
   include/libanalysis2-parenthesize
-  signatures/libanalysis2/-
-  pp/libanalysis2/-
+  src-gen/signatures/libanalysis2/-
+  src-gen/pp/libanalysis2/-
 
 rules
 

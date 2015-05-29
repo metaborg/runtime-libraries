@@ -1,7 +1,7 @@
 module libanalysis2/solver/errors
 
 imports
-  signatures/libanalysis2/-
+  src-gen/signatures/libanalysis2/-
   libanalysis2/substitution/-
   libanalysis2/solver/-
   libanalysis2/prelude/-

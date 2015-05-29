@@ -1,7 +1,7 @@
 module libanalysis2/namebinding/scopegraph
 
 imports
-  signatures/libanalysis2/-
+  src-gen/signatures/libanalysis2/-
   libanalysis2/pp
   libanalysis2/prelude/-
 

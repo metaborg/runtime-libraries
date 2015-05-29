@@ -6,8 +6,9 @@ Link the following (CWD is project root):
 
  * syntax/libanalysis/
  * trans/libanalysis/
- * include/LibAnalysis-parenthesize.str -> lib/include/.
- * src-gen/ds-signatures -> .
+ * build.libanalsysi2.xml
+ * Add `all-libanalsysi2` as a dependency to `all` target in
+   `build.main.xml`.
 
 ## Issues
 

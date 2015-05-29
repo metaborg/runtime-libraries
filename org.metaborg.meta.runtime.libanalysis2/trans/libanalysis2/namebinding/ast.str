@@ -6,7 +6,7 @@ imports
 
   libanalysis2/abstract-syntax/-
   libanalysis2/prelude/-
-  signatures/libanalysis2/-
+  src-gen/signatures/libanalysis2/-
 
 signature
   constructors

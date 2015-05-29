@@ -4,7 +4,7 @@ imports
   
   runtime/editor/origins
   runtime/editor/annotations
-  signatures/libanalysis2/-
+  src-gen/signatures/libanalysis2/-
   libanalysis2/pp
 
 rules
