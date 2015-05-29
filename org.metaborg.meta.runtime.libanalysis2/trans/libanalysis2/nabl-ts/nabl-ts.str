@@ -1,0 +1,41 @@
+module libanalysis2/nabl-ts/nabl-ts
+
+imports
+  
+  runtime/editor/origins
+  runtime/editor/annotations
+  src-gen/signatures/libanalysis2/-
+  libanalysis2/pp
+
+rules
+  
+  nabl-ts-constraint(|scope) = fail
+  
+rules
+
+  do-extract-constraint =
+    ?ast;
+    // Ensure all dynamic rules are properly scoped
+    try(dr-scope-all-end);
+    dr-scope-all-start;
+    scope-counter := <new-counter>;
+    decl-var-counter := <new-counter>;
+    rules( NewScope: _ -> <next-counter> scope-counter
+           NewDeclVar: _ -> <next-counter> decl-var-counter
+         );
+    s := Scope(<NewScope>);
+    <nabl-ts-traverse(|s)> ast => (ast',c*);
+    c'* := [FParent(s,NoneScope())|c*];
+    !(ast',c'*)
+
+  nabl-ts-traverse(|scope) =
+       nabl-ts-constraint(|scope)
+    <+ nabl-ts-traverse-children(|scope)
+
+  nabl-ts-traverse-children(|scope) =
+    ?t@c#(p*){a*};
+    (p'*, c*) := <map(nabl-ts-traverse(|scope));unzip> p*;
+    t'' := <try( ?t'
+               ; o := <origin-location-offset> t
+               ; <origin-location-offset-set(|o)> t' )> c#(p'*){a*};
+    !(t'', <concat> c*)

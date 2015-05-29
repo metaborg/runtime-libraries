@@ -1,0 +1,24 @@
+module libanalysis2/abstract-syntax/abstract-syntax
+
+imports
+  runtime/editor/annotations
+  runtime/editor/origins
+  editor-common.generated
+
+  libanalysis2/prelude/-
+  src-gen/signatures/libanalysis2/-
+
+rules
+
+  get-position: t -> Origin(f,l,c,s,e)
+  with (f,l,c,s,e) := <origin-location-offset> t
+
+  position-to-origin:
+    Origin(f,l,c,s,e) -> (f,l,c,s,e)
+
+  apply-annotations(s|aa*): ast -> ast'
+  with <topdown(try(apply-annotations-to-term(s|aa*)))> ast => ast'
+
+  apply-annotations-to-term(s|aa*): t{a*} -> t{a''*}
+  where a'* := <filter(<lookup> (<id>,aa*) ; s)> a*;
+        a''* := [a*,a'*]

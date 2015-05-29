@@ -1,0 +1,40 @@
+module libanalysis2/solver/csolve
+
+imports
+  libanalysis2/prelude/-
+  libanalysis2/pp
+
+rules
+
+  // solve : (c,e) -> [(e,[c])]
+  // preprocess : (e,c) -> c
+  // postprocess : (e,[c]) -> e
+
+  // csolve-repeat(preprocess,solve,postprocess) :: (e,[c]) -> [(e,[c])]
+  csolve-repeat(preprocess,solve,postprocess): (e,c*) -> res*
+  with csolve(preprocess,solve)
+     ; map( !(<postprocess>, <Snd>)
+          ; if(<eq> (e,<Fst>)) ; ![<id>]
+         <+ csolve-repeat(preprocess,solve,postprocess)
+          );concat => res*
+
+  // csolve :: (e,[c]) -> [(e,[c]])]
+  csolve(preprocess,solve): (e,c*) -> res*
+  with <csolve-step(preprocess,solve)> (c*,e,[])
+     ; map( if(<eq> (<Snd>,[]) <+ <set-eq> (<Snd>,c*)) ; ![<id>]
+          <+ csolve(preprocess,solve)
+          );concat => res*
+
+  csolve-step(preprocess,solve): ([c|c*],e,c'*) -> res*
+  with
+    <preprocess> (e,c) => c'
+  ; <solve> (c',e)
+  ; map( !(c*, <Fst>, <conc> (<Snd>,c'*))
+       ; csolve-step(preprocess,solve)
+       );concat => res*
+
+  csolve-step(preprocess,solve): ([],e,c') -> [(e, <reverse> c')]
+
+  preprocess-default: (_,c) -> c
+
+  solve-ignore: (c,e) -> [(e,[c])]

@@ -1,0 +1,36 @@
+module libanalysis2/solver/positions
+
+imports
+  runtime/editor/origins
+  src-gen/signatures/libanalysis2/-
+  libanalysis2/abstract-syntax/-
+  libanalysis2/substitution/-
+  libanalysis2/namebinding/-
+  libanalysis2/typechecking/-
+  libanalysis2/solver/-
+  libanalysis2/prelude/-
+  libanalysis2/pp
+ 
+rules
+  
+  solve-position-constraint: (f@CTypeOf(p,ty,pos),sol-wm) -> [res]
+  where <is-ground> p
+  with <fromWM;sol-p> sol-wm => p*
+     ; ( <lookup> (p, p*) => ty'
+       < !(sol-wm, [CEqType(ty, ty', pos)])
+       + !(<fmap(<sol-set-p(!ty)> (p,<id>))> sol-wm, [])
+       ) => res
+
+rules
+
+  is-op: t -> t
+  where <is-pos-op> t
+
+  is-pos-op: POfDecl(_) -> <id>
+  is-pos-op: POfRef(_) -> <id>
+
+  reduce-op(|x*): t -> t'
+  where <reduce-pos-op(|x*)> t => t'
+
+  reduce-pos-op(|x*): POfDecl(d@DeclId(_,_,pos)) -> pos
+  reduce-pos-op(|x*): POfRef(r@RefId(_,_,pos)) -> pos

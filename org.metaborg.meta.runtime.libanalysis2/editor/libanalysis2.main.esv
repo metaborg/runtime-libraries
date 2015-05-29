@@ -1,0 +1,20 @@
+module Analysis.main
+
+language General properties
+  
+  name              : libanalysis2
+  id                : org.metaborg.meta.runtime.libanalysis2
+  extends           : Root
+  
+  description       : "Constraint based Analysis"
+  url               : http://metaborg.org/spoofax
+
+  extensions        : analysis2
+  table             : include/libanalysis2.tbl
+  start symbols     : NotImplemented
+
+  SDF includes          : include/libanalysis2.def
+  TemplateLang includes : include/sdf3
+  ds includes           : include/ds
+
+  provider          : include/libanalysis2.ctree
