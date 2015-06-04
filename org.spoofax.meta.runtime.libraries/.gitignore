@@ -4,4 +4,4 @@
 /include
 /src-gen
 /lib/runtime
-/lib/*.generated.*
+*.generated.*
