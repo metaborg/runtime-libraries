@@ -1,9 +1,12 @@
 module Analysis.main
 
+imports
+
+  runtime-libraries.generated
+
 language General properties
   
   name              : runtime-libraries
-  id                : org.spoofax.meta.runtime.libraries
   extends           : Root
   
   description       : "Constraint based Analysis"

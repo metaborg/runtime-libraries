@@ -1,9 +1,12 @@
-module Analysis.main
+module libanalysis2.main
+
+imports
+
+  libanalysis2.generated
 
 language General properties
   
   name              : libanalysis2
-  id                : org.metaborg.meta.runtime.libanalysis2
   extends           : Root
   
   description       : "Constraint based Analysis"
@@ -16,5 +19,6 @@ language General properties
   SDF includes          : include/libanalysis2.def
   TemplateLang includes : include/sdf3
   ds includes           : include/ds
+  Stratego includes     : include/lib
 
   provider          : include/libanalysis2.ctree
