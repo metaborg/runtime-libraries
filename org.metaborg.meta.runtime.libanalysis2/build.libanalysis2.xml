@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="build.libanalysis2">
 
-    <target name="libanalysis2-all" depends="libanalysis2-sdf2parenthesize"/>
+    <target name="libanalysis2-all" depends="call-onsave,libanalysis2-sdf2parenthesize"/>
 
     <target name="libanalysis2-pack-sdf" depends="copy-sdf2">
         <condition else="" property="utils-include" value="-I ${utils}">
