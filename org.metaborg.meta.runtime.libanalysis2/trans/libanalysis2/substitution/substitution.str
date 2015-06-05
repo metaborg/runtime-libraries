@@ -44,4 +44,4 @@ rules
 
 rules
   
-  pp-S = map(tapp(pp-Analysis-string,pp-Analysis-string))
+  pp-S = map((pp-Analysis-string,pp-Analysis-string))

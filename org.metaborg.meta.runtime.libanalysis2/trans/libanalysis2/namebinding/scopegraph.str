@@ -37,5 +37,5 @@ rules
 
 rules
   
-  pp-Graph = tapp(map(tapp(pp-Analysis-string,pp-ScopeImpl)),map(tapp(pp-Analysis-string,pp-Analysis-string))|"G")
-  pp-ScopeImpl = tapp(pp-Analysis-string,map(pp-Analysis-string),map(pp-Analysis-string),map(pp-Analysis-string),map(pp-Analysis-string)|"S")
+  pp-Graph = G(map((pp-Analysis-string,pp-ScopeImpl)),map((pp-Analysis-string,pp-Analysis-string)))
+  pp-ScopeImpl = S(pp-Analysis-string,map(pp-Analysis-string),map(pp-Analysis-string),map(pp-Analysis-string),map(pp-Analysis-string))

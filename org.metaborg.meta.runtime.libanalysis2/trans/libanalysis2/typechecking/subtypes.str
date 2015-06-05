@@ -130,5 +130,5 @@ rules
 
 rules
   
-  pp-Supertype = tapp(pp-Analysis-string,map(pp-Analysis-string))
-  pp-SubtypeRelation = map(tapp(pp-Analysis-string,tapp(map(pp-Analysis-string),map(pp-Supertype))))
+  pp-Supertype = (pp-Analysis-string,map(pp-Analysis-string))
+  pp-SubtypeRelation = map((pp-Analysis-string,(map(pp-Analysis-string),map(pp-Supertype))))

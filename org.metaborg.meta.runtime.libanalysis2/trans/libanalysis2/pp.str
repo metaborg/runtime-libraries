@@ -12,8 +12,8 @@ imports
 rules
 
   // allow printing of actual Ints as well
-  prettyprint-Int: _ -> [S(<int-to-string>)]
-  prettyprint-Int: _ -> [S(<is-string>)]
+  prettyprint-Int = ![S(<int-to-string>)]
+  prettyprint-Int = ![S(<is-string>)]
 
   // print origins more compactly
   prettyprint-Pos :

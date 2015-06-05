@@ -85,3 +85,7 @@ rules // resolution internal
 
   // match :: (Ref,Decl) -?> (Ref,Decl)
   match = ?(RefId(ns,n,_),DeclId(ns,n,_))
+
+rules
+  
+  pp-Resolution = map((pp-Analysis-string,fmap(map(pp-Analysis-string))))

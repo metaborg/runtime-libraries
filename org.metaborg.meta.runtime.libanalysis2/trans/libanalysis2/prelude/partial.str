@@ -73,3 +73,8 @@ rules
   fromP: Partial(x) -> x
 
   filterToP(s) = !Total(<map(s)>) <+ !Partial(<filter(s)>)
+
+rules
+
+  pp-Partial(s): Partial(t) -> $[Partial([<s> t])]
+  pp-Partial(s): Total(t) -> $[Total([<s> t])]

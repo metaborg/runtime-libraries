@@ -15,6 +15,7 @@ rules
   analyse: desugared-ast -> ( (analysed-ast, errors*, warnings*, notes*)
                             , [ ("constraints",c*)
                               , ("scopegraph",g)
+                              , ("resolution",r)
                               , ("solutions", sol*)
                               ])
   with
@@ -22,6 +23,7 @@ rules
   ; sol-i := <initial-solution>
   ; [(sol-wm1,c1*)] := <solve-constraints-phase1> (sol-i,c*)
   ; g := <fromWM;sol-g> sol-wm1
+  ; r := <resolve-all> g
   ; <solve-constraints-phase2;map(postprocess-errors)> (sol-wm1,c1*) => sol-wm*
   ; map( ![ ("final-scopegraph", <fromWM;sol-g>)
           , ("resolution", <fromWM;sol-r>)
@@ -54,10 +56,12 @@ rules
   pp-analysis: [
     ("constraints",c*)
   , ("scopegraph",g)
+  , ("resolution",r)
   , ("solutions", sol*)
   ] -> [
     ("constraints",<filter(not(irrelevant-constraint));map(pp-Analysis-string)> c*)
   , ("scopegraph", <pp-Graph> g)
+  , ("resolution", <pp-Resolution> r)
   , ("solutions", <map(pp-analysis-solution)> sol*)
   ]
 
@@ -73,14 +77,14 @@ rules
   , ("notes", n*)
   ] -> [
     ("final-scopegraph", <pp-Graph> g)
-  , ("resolution", <map(tapp(pp-Analysis-string,pp-Analysis-string))> r*)
+  , ("resolution", <map((pp-Analysis-string,pp-Analysis-string))> r*)
   , ("sub-types", <pp-SubtypeRelation> x*)
-  , ("pos-types", <filter(not(irrelevant-pos));map(tapp(pp-Analysis-string,pp-Analysis-string))> p*)
-  , ("subst", <map(tapp(pp-Analysis-string,pp-Analysis-string))> s*)
-  , ("lower-bounds", <map(tapp(pp-Analysis-string,pp-Analysis-string))> lb*)
-  , ("errors", <map(tapp(pp-Analysis-string,id))> e*)
-  , ("warnings", <map(tapp(pp-Analysis-string,id))> w*)
-  , ("notes", <map(tapp(pp-Analysis-string,id))> n*)
+  , ("pos-types", <filter(not(irrelevant-pos));map((pp-Analysis-string,pp-Analysis-string))> p*)
+  , ("subst", <map((pp-Analysis-string,pp-Analysis-string))> s*)
+  , ("lower-bounds", <map((pp-Analysis-string,pp-Analysis-string))> lb*)
+  , ("errors", <map((pp-Analysis-string,id))> e*)
+  , ("warnings", <map((pp-Analysis-string,id))> w*)
+  , ("notes", <map((pp-Analysis-string,id))> n*)
   ]
     
   irrelevant-constraint = fail

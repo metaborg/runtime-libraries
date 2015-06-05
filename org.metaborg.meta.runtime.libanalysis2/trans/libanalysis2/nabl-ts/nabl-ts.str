@@ -9,8 +9,9 @@ imports
 
 rules
   
-  nabl-ts-constraint(|scope) = fail
-  
+  // nabl-ts-constraint(|iset,Scope) :: Term -> Term
+  nabl-ts-constraint(|constraints,scopes) = ?t ; <debug(!"Unmatched: ")> (scopes,t) ; fail
+
 rules
 
   do-extract-constraint =
@@ -20,22 +21,27 @@ rules
     dr-scope-all-start;
     scope-counter := <new-counter>;
     decl-var-counter := <new-counter>;
+    scope-var-counter := <new-counter>;
+    type-var-counter := <new-counter>;
     rules( NewScope: _ -> <next-counter> scope-counter
+           NewScopeVar: _ -> <next-counter> scope-var-counter
            NewDeclVar: _ -> <next-counter> decl-var-counter
+           NewTVar: _ -> <next-counter> type-var-counter
          );
-    s := Scope(<NewScope>);
-    <nabl-ts-traverse(|s)> ast => (ast',c*);
-    c'* := [FParent(s,NoneScope())|c*];
-    !(ast',c'*)
+    constraints := <new-iset>;
+    <nabl-ts-traverse(|constraints,[Global()])> ast => ast';
+    c* := <iset-elements> constraints;
+    try(dr-scope-all-end);
+    !(ast',c*)
 
-  nabl-ts-traverse(|scope) =
-       nabl-ts-constraint(|scope)
-    <+ nabl-ts-traverse-children(|scope)
+  nabl-ts-traverse(|constraints,scopes) =
+       nabl-ts-constraint(|constraints,scopes)
+    <+ nabl-ts-traverse-children(|constraints,scopes)
 
-  nabl-ts-traverse-children(|scope) =
+  nabl-ts-traverse-children(|constraints,scopes) =
     ?t@c#(p*){a*};
-    (p'*, c*) := <map(nabl-ts-traverse(|scope));unzip> p*;
+    p'* := <map(nabl-ts-traverse(|constraints,scopes))> p*;
     t'' := <try( ?t'
                ; o := <origin-location-offset> t
                ; <origin-location-offset-set(|o)> t' )> c#(p'*){a*};
-    !(t'', <concat> c*)
+    !t''

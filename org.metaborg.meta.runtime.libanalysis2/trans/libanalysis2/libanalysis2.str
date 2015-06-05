@@ -11,5 +11,3 @@ imports
     libanalysis2/typechecking/-
     libanalysis2/analysis
     libanalysis2/pp
-    analysis
-    pp
