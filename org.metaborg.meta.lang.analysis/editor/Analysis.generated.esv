@@ -1,4 +1,7 @@
 module Analysis.generated
 
-completions
+language Generated properties
   
+  name:          Analysis
+  id:            org.metaborg.meta.lang.analysis
+  version:       1.5.0-SNAPSHOT

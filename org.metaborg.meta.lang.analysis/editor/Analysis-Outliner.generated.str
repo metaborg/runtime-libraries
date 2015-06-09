@@ -3,8 +3,8 @@ module editor/Analysis-Outliner.generated
 imports
   
   include/Analysis
-  lib/runtime/editor/outline-library
+  runtime/editor/outline-library
 
 rules
   
-  to-outline-label = ?Index(<id>, _)
+  to-outline-label = fail

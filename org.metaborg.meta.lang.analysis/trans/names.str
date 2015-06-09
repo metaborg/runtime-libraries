@@ -1,15 +1,12 @@
 module names
 
 imports
-  lib/runtime/nabl/-
-  lib/runtime/task/-
-  lib/runtime/properties/-
-  lib/runtime/types/-
-  lib/runtime/relations/-
-  lib/runtime/editor/-
-
-
-imports
+  runtime/nabl/-
+  runtime/task/-
+  runtime/properties/-
+  runtime/types/-
+  runtime/relations/-
+  runtime/editor/-
   include/Analysis
 
 
@@ -30,6 +27,10 @@ rules
 
 
 rules
+
+  nabl-scoping-site =
+    ?Sections(_)
+    ; nabl-scope(|[NablNsTask()])
 
   nabl-get-scope =
     ?Sections(_) ; ![NablNsTask()]
