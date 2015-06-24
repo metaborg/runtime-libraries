@@ -1,0 +1,21 @@
+module Analysis.main
+
+imports
+
+  runtime-libraries.generated
+
+language General properties
+  
+  name              : runtime-libraries
+  extends           : Root
+  
+  description       : "Constraint based Analysis"
+  url               : http://metaborg.org/spoofax
+
+  extensions        : analysis
+  table             : include/runtime-libraries.tbl
+  start symbols     : NotImplemented
+
+  Stratego includes : include/lib
+
+  provider          : include/runtime-libraries.ctree

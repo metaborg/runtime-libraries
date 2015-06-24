@@ -2,16 +2,15 @@ module Term
 
 imports
 
-	Common
+  Common
 
-templates
+context-free syntax
 
-	Term.Tupl = <(<Terms>)>
-	Term.Appl = <<ID>(<Terms>)>
-	Term.List = <[<Terms>]>
-	Term.Str  = <<STRING>>
-	Term.Int  = <<INT>>
-	Term.Real = <<FLOAT>>
-	Term.Anno = <<Term>{<Terms>}>
-	
-	Terms = <<Term*; separator=", ">>
+  Term.Tupl = <(<Terms>)> 
+  Term.Appl = <<ID>(<Terms>)> 
+  Term.List = <[<Terms>]> 
+  Term.Str = <<STRING>> 
+  Term.Int = <<INT>> 
+  Term.Real = <<FLOAT>> 
+  Term.Anno = <<Term>{<Terms>}> 
+  Terms = <<{Term ", "}*>> 

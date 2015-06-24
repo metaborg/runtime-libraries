@@ -2,19 +2,17 @@ module Analysis
 
 imports
 
-	Task
-	Instruction
-	Index
-	
-	Term
-	URI
-	
-	Common
-	
+  Task  
+  Instruction 
+  Index 
+  Term  
+  URI 
+  Common
+
 context-free start-symbols
 
   Start
 
-templates
+context-free syntax
 
-	Start.Sections = <<Section*; separator="\n\n">>
+  Start.Sections = <<{Section "\n\n"}*>> 

@@ -3,9 +3,9 @@ module convert
 imports
 	
 	include/Analysis
-	lib/runtime/task/tasks
-	lib/runtime/task/messages
-	lib/runtime/nabl/tasks
+	runtime/task/tasks
+	runtime/task/messages
+	runtime/nabl/tasks
 	pp
 
 rules // All
