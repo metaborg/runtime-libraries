@@ -32,7 +32,7 @@ rules
     tvars := <new-hashtable>;
     ast' := <
     	annotate-keys; 
-      nabl-ts-traverse(|tvars, facts, constraints, [])> ast;
+      nabl-ts-traverse(|tvars, facts, constraints, [None()])> ast;
     f* := <iset-elements> facts;
     c* := <iset-elements> constraints;
     try(dr-scope-all-end);
@@ -52,10 +52,15 @@ rules
     	get-arguments;
     	map(nabl-ts-traverse(|tvars, facts, constraints, scopes))
     )
+  
+  get-type-constraint(|tvars, tp, msg):
+    DeclVar(_) -> CEqType(<id>, tp, msg)
     
+  get-type-constraint(|tvars, tp, msg):
+    _ -> CEqType(<get-type-var(|tvars)>, tp, msg)
+      
   get-type-var(|tvars) =
-     ?DeclVar(_)
-  <+ [key] := <get-annos>
+     [key] := <get-annos>
    ; (    tvar := <hashtable-get(|key)> tvars 
        <+ tvar := TVar(<NewTVar>)
         ; <hashtable-put(|key, tvar)> tvars
