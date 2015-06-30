@@ -43,9 +43,10 @@ rules
   annotate-key: t -> t{<newname> ""}
   
   nabl-ts-traverse(|tvars, facts, constraints, scopes) =
-     nabl-ts-constraint(|tvars, facts, constraints, scopes)
-  <+ nabl-ts-traverse-children(|tvars, facts, constraints, scopes)
-
+     debug(!"enter "); nabl-ts-constraint(|tvars, facts, constraints, scopes); debug(!"custom rule successful ")
+  <+ debug(!"custom rule failed "); nabl-ts-traverse-children(|tvars, facts, constraints, scopes); debug(!"generic rule successful ")
+  <+ <debug(!"generic rule failed ")> scopes ; fail
+  
   nabl-ts-traverse-children(|tvars, facts, constraints, scopes) =
     with(
     	get-arguments;
@@ -53,9 +54,12 @@ rules
     )
     
   get-type-var(|tvars) =
-  	[key] := <get-annos>
-  ; (    <hashtable-get(|key)> tvars 
-      <+ with(tvar := <NewTVar>)
-       ; <hashtable-put(|key, tvar)> tvars
-    )
+     ?DeclVar(_)
+  <+ [key] := <get-annos>
+   ; (    tvar := <hashtable-get(|key)> tvars 
+       <+ tvar := TVar(<NewTVar>)
+        ; <hashtable-put(|key, tvar)> tvars
+     )
    ; !tvar
+  <+ debug(!"missing tvar "); fail
+ 
