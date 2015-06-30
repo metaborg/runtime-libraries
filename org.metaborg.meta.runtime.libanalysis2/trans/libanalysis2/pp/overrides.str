@@ -1,0 +1,27 @@
+module pp/overrides
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  src-gen/signatures/libanalysis2/-
+
+rules
+
+  // allow printing of actual Ints as well
+  prettyprint-Int: i -> [S(<int-to-string> i)]
+  where is-int
+
+  // print origins more compactly
+  prettyprint-Pos :
+    Origin(file, line, column, begin, end) -> [ H(
+                                                   [SOpt(HS(), "0")]
+                                                 , [ S("@(")
+                                                   , line'
+                                                   , S(",")
+                                                   , column'
+                                                   , S(")")
+                                                   ]
+                                                 )
+                                              ]
+    with line'   := <pp-one-Z(prettyprint-Int)> line
+    with column' := <pp-one-Z(prettyprint-Int)> column

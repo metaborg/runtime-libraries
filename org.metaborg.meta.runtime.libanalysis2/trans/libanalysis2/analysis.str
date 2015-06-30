@@ -25,17 +25,17 @@ rules
   ; g := <fromWM;sol-g> sol-wm1
   ; r := <resolve-all> g
   ; <solve-constraints-phase2;map(postprocess-errors)> (sol-wm1,c1*) => sol-wm*
-  ; map( ![ ("final-scopegraph", <fromWM;sol-g>)
-          , ("resolution", <fromWM;sol-r>)
-          , ("sub-types", <fromWM;sol-x>)
-          , ("pos-types", <fromWM;sol-p>)
-          , ("subst", <fromWM;sol-s>)
-          , ("lower-bounds", <fromWM;sol-lb>)
-          , ("errors", <wm-errors>)
-          , ("warnings", <wm-warnings>)
-          , ("notes", <wm-notes>)
-          ]
-       ) => sol*
+  ; sol* := <map( ![ ("final-scopegraph", <fromWM;sol-g>)
+                   , ("resolution", <fromWM;sol-r>)
+                   , ("sub-types", <fromWM;sol-x>)
+                   , ("pos-types", <fromWM;sol-p>)
+                   , ("subst", <fromWM;sol-s>)
+                   , ("lower-bounds", <fromWM;sol-lb>)
+                   , ("errors", <wm-errors>)
+                   , ("warnings", <wm-warnings>)
+                   , ("notes", <wm-notes>)
+                   ]
+                )> sol-wm*
   ; <partition(not(is-erronious))> sol-wm* => (good-wm*, bad-wm*)
   ; n := (None(),$[Found [<length> good-wm*] correct and [<length> bad-wm*] erronious solutions.])
   ; ( ( <Hd> good-wm* <+ <Hd> bad-wm* ) => sol-wm
