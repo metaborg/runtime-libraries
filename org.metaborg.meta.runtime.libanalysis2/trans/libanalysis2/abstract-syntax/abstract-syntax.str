@@ -12,6 +12,7 @@ rules
 
   get-position: t -> Origin(f,l,c,s,e)
   with (f,l,c,s,e) := <origin-location-offset> t
+    <+ <debug;fail> $[ERR: Cannot get position for [<write-to-string> t]]
 
   position-to-origin:
     Origin(f,l,c,s,e) -> (f,l,c,s,e)
