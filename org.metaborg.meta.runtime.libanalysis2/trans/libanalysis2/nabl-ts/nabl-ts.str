@@ -9,8 +9,7 @@ imports
 
 rules
   
-  // nabl-ts-constraint(|iset,Scope) :: Term -> Term
-  nabl-ts-constraint(|constraints,scopes) = ?t ; <debug(!"Unmatched: ")> (scopes,t) ; fail
+  nabl-ts-constraint(|tvars, facts, constraints, scopes) = fail
 
 rules
 
@@ -28,20 +27,35 @@ rules
            NewDeclVar: _ -> <next-counter> decl-var-counter
            NewTVar: _ -> <next-counter> type-var-counter
          );
+    facts := <new-iset>;
     constraints := <new-iset>;
-    <nabl-ts-traverse(|constraints,[Global()])> ast => ast';
+    tvars := <new-hashtable>;
+    ast' := <
+    	annotate-keys; 
+      nabl-ts-traverse(|tvars, facts, constraints, [])> ast;
+    f* := <iset-elements> facts;
     c* := <iset-elements> constraints;
     try(dr-scope-all-end);
-    !(ast',c*)
+    !(ast', [f*, c*])
 
-  nabl-ts-traverse(|constraints,scopes) =
-       nabl-ts-constraint(|constraints,scopes)
-    <+ nabl-ts-traverse-children(|constraints,scopes)
+  annotate-keys = topdown(annotate-key)
+  
+  annotate-key: t -> t{<newname> ""}
+  
+  nabl-ts-traverse(|tvars, facts, constraints, scopes) =
+     nabl-ts-constraint(|tvars, facts, constraints, scopes)
+  <+ nabl-ts-traverse-children(|tvars, facts, constraints, scopes)
 
-  nabl-ts-traverse-children(|constraints,scopes) =
-    ?t@c#(p*){a*};
-    p'* := <map(nabl-ts-traverse(|constraints,scopes))> p*;
-    t'' := <try( ?t'
-               ; o := <origin-location-offset> t
-               ; <origin-location-offset-set(|o)> t' )> c#(p'*){a*};
-    !t''
+  nabl-ts-traverse-children(|tvars, facts, constraints, scopes) =
+    with(
+    	get-arguments;
+    	map(nabl-ts-traverse(|tvars, facts, constraints, scopes))
+    )
+    
+  get-type-var(|tvars) =
+  	[key] := <get-annos>
+  ; (    <hashtable-get(|key)> tvars 
+      <+ with(tvar := <NewTVar>)
+       ; <hashtable-put(|key, tvar)> tvars
+    )
+   ; !tvar
