@@ -178,14 +178,14 @@ public class TaskManager {
 
     public void unloadTaskEngine(URI removedProject) {
         synchronized(TaskManager.class) {
-            WeakReference<ITaskEngine> removedTaskEngine = taskEngineCache.remove(removedProject);
+            final WeakReference<ITaskEngine> removedTaskEngine = taskEngineCache.remove(removedProject);
 
-            ITaskEngine taskEngine = current.get();
-            if(taskEngine != null && taskEngine == removedTaskEngine.get()) {
+            final ITaskEngine taskEngine = current.get();
+            if(taskEngine != null && removedTaskEngine != null && taskEngine == removedTaskEngine.get()) {
                 current.set(null);
             }
 
-            URI project = currentProject.get();
+            final URI project = currentProject.get();
             if(project != null && project.equals(removedProject)) {
                 currentProject.set(null);
             }
