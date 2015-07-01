@@ -27,7 +27,7 @@ context-free syntax
 
   RefId.RefId               = <ref(<Namespace>,<String>,<Pos>)>
 
-  Pos.Origin                = <@(<String>,<Int>,<Int>,<Int>,<Int>)>
+  Pos.Pos                   = <<String>@(<String>,<Int>,<Int>,<Int>,<Int>)>
   Pos.POfDecl               = <posOf(<DeclId>)>
   Pos.POfRef                = <posOf(<RefId>)>
 

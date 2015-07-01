@@ -10,16 +10,22 @@ imports
 
 rules
 
-  get-position: t -> Origin(f,l,c,s,e)
+  get-position: t{k} -> Pos(k,f,l,c,s,e)
+  with <is-string> k <+ <debug;fail> $[ERR: Cannot get key for [<write-to-string> t]]
   with (f,l,c,s,e) := <origin-location-offset> t
     <+ <debug;fail> $[ERR: Cannot get position for [<write-to-string> t]]
 
   position-to-origin:
-    Origin(f,l,c,s,e) -> (f,l,c,s,e)
+    Pos(_,f,l,c,s,e) -> (f,l,c,s,e)
 
+  position-to-key:
+    Pos(k,_,_,_,_,_) -> k
+
+rules
+ 
   apply-annotations(s|aa*): ast -> ast'
   with <topdown(try(apply-annotations-to-term(s|aa*)))> ast => ast'
 
   apply-annotations-to-term(s|aa*): t{a*} -> t{a''*}
-  where a'* := <filter(<lookup> (<id>,aa*) ; s)> a*;
+  where a'* := <filter(<lookup> (<id>,aa*));map(s)> a*;
         a''* := [a*,a'*]

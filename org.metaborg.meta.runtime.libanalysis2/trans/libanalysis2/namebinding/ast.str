@@ -15,13 +15,12 @@ signature
 rules
 
   apply-resolution(|r*) =
-    apply-annotations(make-ref|r*)
+    apply-annotations(make-ref|<mapk(refid-to-key)> r*)
+
+  refid-to-key = ?RefId(_,_,<position-to-key>)
 
   make-ref: d@DeclId(_,_,pos) -> r
   with o := <position-to-origin> pos
      ; r := <origin-location-offset-set(|o)> Ref(d)
-
-  get-declid(|ns) = get-annotation(?DeclId(ns,_,_))
-  get-refid(|ns) = get-annotation(?RefId(ns,_,_))
 
   get-decl = get-annotation(?Ref(<id>))

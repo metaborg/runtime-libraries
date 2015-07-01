@@ -39,7 +39,7 @@ rules
     !(ast', [f*, c*])
 
   annotate-keys = topdown(annotate-key)
-  
+ 
   annotate-key: t -> t{<newname> ""}
   
   nabl-ts-traverse(|tvars, facts, constraints, scopes) =

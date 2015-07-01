@@ -12,16 +12,9 @@ rules
   where is-int
 
   // print origins more compactly
-  prettyprint-Pos :
-    Origin(file, line, column, begin, end) -> [ H(
-                                                   [SOpt(HS(), "0")]
-                                                 , [ S("@(")
-                                                   , line'
-                                                   , S(",")
-                                                   , column'
-                                                   , S(")")
-                                                   ]
-                                                 )
-                                              ]
+  prettyprint-Pos:
+    Pos(key, file, line, column, begin, end) ->
+      [ H( [SOpt(HS(), "0")],
+           [ S(key), S("@("), line', S(","), column', S(")") ] ) ]
     with line'   := <pp-one-Z(prettyprint-Int)> line
     with column' := <pp-one-Z(prettyprint-Int)> column

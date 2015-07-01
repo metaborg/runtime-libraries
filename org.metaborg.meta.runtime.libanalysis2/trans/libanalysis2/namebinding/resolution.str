@@ -84,8 +84,10 @@ rules // resolution internal
   match-all(|r) = filter(if(<match> (r,<id>)))
 
   // match :: (Ref,Decl) -?> (Ref,Decl)
-  match = ?(RefId(ns,n,_),DeclId(ns,n,_))
+  match: (RefId(ns,n,_),DeclId(ns',n',_)) -> <id>
+  where <strip-annos;eq> (ns,ns')
+  where <strip-annos;eq> (n,n')
 
 rules
-  
+ 
   pp-Resolution = map((pp-Analysis-string,fmap(map(pp-Analysis-string))))
