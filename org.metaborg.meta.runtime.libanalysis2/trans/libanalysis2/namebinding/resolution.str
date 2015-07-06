@@ -16,39 +16,30 @@ rules
 
   // resolve :: Ref * Graph -> Partial([(Decl,[Label])])
   resolve =
-  res-debugwrap(!"resolve_0_0",
   	?(<id>,g) ; resolve(|g,[])
-  )
 
 rules // resolution internal
 
   // resolve :: Ref -> Partial [(Decl,[Label])]
   resolve(|g,ir*) =
-  res-debugwrap(!"resolve_0_2",
     ?r
   ; <G-scope> (g,r) => s
   ; <resolve_v(|g,[r|ir*],[])> (r,s)
-  )
 
   // resolve_v :: Ref * Scope -> Partial [(Decl,[Label])]
   resolve_v(|g,ir*,s*) =
-  res-debugwrap(!"resolve_v_0_3",
     shadows( resolve_l(|g,ir*,s*)
            , resolve_p(|g,ir*,s*)
            )
-  )
 
   // resolve_l :: Ref * Scope -> Partial([(Decl,[Label])])
   resolve_l(|g,ir*,s*) =
-  res-debugwrap(!"resolve_l_0_3",
     shadows ( resolve_d(|g,ir*,s*)
             , resolve_i(|g,ir*,s*)
             )
-  )
 
   // resolve_d :: Ref * Scope -> Partial [(Decl,[Label])]
   resolve_d(|g,ir*,s*) =
-  res-debugwrap(!"resolve_d_0_3",
     ?(r,s)
   ; ( <elem> (s,s*)
     < <pureP> []
@@ -57,11 +48,9 @@ rules // resolution internal
     ; map(!(<id>,[]))
     ; pureP
     )
-  )
 
   // resolve_i :: Ref * Scope -> Partial [(Decl,[Label])]
   resolve_i(|g,ir*,s*) =
-  res-debugwrap(!"resolve_i_0_3",
     ?(r,s)
   ; ( <elem> (s,s*)
     < <pureP> []
@@ -84,27 +73,21 @@ rules // resolution internal
           ) // :: Partial(Partial([(Decl,[Label])]))
     ; join // :: Partial([(Decl,[Label])])
     )
-  )
 
   // (Ref,Label) -> Partial([(Decl,Label)])
   resolve_i_ref2s(|g,ir*) =
-  res-debugwrap(!"resolve_i_ref2s_0_2",
     ?(r,l)
   ; <resolve(|g,ir*)> r // :: Partial([(Decl,[Label])])
   ; fmap(map(!(<Fst>,l))) // :: Partial([(Decl,Label)])
-  )
 
   // (Ref,(Scope,Label)) -> Partial([(Decl,[Label])])
   resolve_i_l(|g,ir*,s*) =
-  res-debugwrap(!"resolve_i_l_0_3",
     ?(r,(s,l))
   ; <resolve_l(|g,ir*,s*)> (r,s) // :: Partial([(Decl,[Label])])
   ; fmap(map((id,![l|<id>]))) // :: Partial([(Decl,[Label])])
-  )
 
   // resolve_p :: Ref * Scope -> Partial [(Decl,[Label])]
   resolve_p(|g,ir*,s*) = 
-  res-debugwrap(!"resolve_p_0_3",
     ?(r,s)
   ; ( <elem> (s,s*)
     < <pureP> []
@@ -113,7 +96,6 @@ rules // resolution internal
       + <pureP> []
       )
     )
-  )
 
   // shadows(s1: (Ref * Scope) -> Partial [(Decl,[Label])]
   //        ,s2: (Ref * Scope) -> Partial [(Decl,[Label])]) :: (Ref * Scope) -> Partial [(Decl,[Label])]
@@ -131,5 +113,3 @@ rules // resolution internal
 rules
  
   pp-Resolution = map((pp-Analysis-string,fmap(map((pp-Analysis-string,map(pp-Analysis-string))))))
-
-  res-debugwrap(n,s) = debugwrapall(n,s)
