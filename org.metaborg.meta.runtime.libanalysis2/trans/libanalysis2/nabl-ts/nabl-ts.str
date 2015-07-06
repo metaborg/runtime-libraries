@@ -19,13 +19,9 @@ rules
     try(dr-scope-all-end);
     dr-scope-all-start;
     scope-counter := <new-counter>;
-    decl-var-counter := <new-counter>;
-    scope-var-counter := <new-counter>;
-    type-var-counter := <new-counter>;
+    var-counter := <new-counter>;
     rules( NewScope: _ -> <next-counter> scope-counter
-           NewScopeVar: _ -> <next-counter> scope-var-counter
-           NewDeclVar: _ -> <next-counter> decl-var-counter
-           NewTVar: _ -> <next-counter> type-var-counter
+           NewVar: _ -> <next-counter> var-counter
          );
     facts := <new-iset>;
     constraints := <new-iset>;
@@ -54,7 +50,7 @@ rules
     )
   
   get-type-constraint(|tvars, tp, msg):
-    DeclVar(_) -> CEqType(<id>, tp, msg)
+    Var(_) -> CEqType(<id>, tp, msg)
     
   get-type-constraint(|tvars, tp, msg):
     _ -> CEqType(<get-type-var(|tvars)>, tp, msg)
@@ -62,7 +58,7 @@ rules
   get-type-var(|tvars) =
      [key] := <get-annos>
    ; (    tvar := <hashtable-get(|key)> tvars 
-       <+ tvar := TVar(<NewTVar>)
+       <+ tvar := Var(<NewVar>)
         ; <hashtable-put(|key, tvar)> tvars
      )
    ; !tvar

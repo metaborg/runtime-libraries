@@ -15,15 +15,17 @@ sorts
 
 context-free syntax
 
+  Var.Var                   = <v<Int>>
+
   Scope.Global              = <global>
   Scope.Scope               = <scope(<Int>)>
-  Scope.ScopeVar            = <s<Int>>
+  Scope                     = Var
 
   OptionScope.NoneScope     = <->
   OptionScope.SomeScope     = <<Scope>>
 
   DeclId.DeclId             = <decl(<Namespace>,<String>,<Pos>)>
-  DeclId.DeclVar            = <d<Int>>
+  DeclId                    = Var
 
   RefId.RefId               = <ref(<Namespace>,<String>,<Pos>)>
 
@@ -44,7 +46,7 @@ sorts
 context-free syntax
 
   Type.TApp                 = <<TypeCon>[<{Type ","}*>]>
-  Type.TVar                 = <t<Int>>
+  Type                      = Var
 
   TypeDef.TDef              = <<TypeCon>[<{TypeArg ","}*>]>
   TypeArg.TArg              = <<Variance><Type>>
@@ -79,7 +81,6 @@ context-free syntax
   Constraint.CSubType       = [[Type] <= [Type] [Pos]]
   Constraint.CAssoc         = [[DeclId] ~~> [Scope] [Pos]]
   Constraint.CTypeOf        = <<Pos> : <Type> <Pos>>
-
 
 lexical syntax
 

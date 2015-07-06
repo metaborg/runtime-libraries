@@ -78,7 +78,7 @@ rules
   , ("notes", n*)
   ] -> [
     ("final-scopegraph", <pp-Graph> g)
-  , ("resolution", <map((pp-Analysis-string,pp-Analysis-string))> r*)
+  , ("resolution", <map((pp-Analysis-string,(pp-Analysis-string,map(pp-Analysis-string))))> r*)
   , ("sub-types", <pp-SubtypeRelation> x*)
   , ("pos-types", <filter(not(irrelevant-pos));map((pp-Analysis-string,pp-Analysis-string))> p*)
   , ("subst", <map((pp-Analysis-string,pp-Analysis-string))> s*)

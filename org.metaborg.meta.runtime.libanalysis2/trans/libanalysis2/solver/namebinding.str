@@ -47,7 +47,7 @@ rules
   solve-namebinding-constraint: (CResolves(r,d,pos),sol-wm) -> [(sol-wm',[])]
   where <fromWM;sol-r> sol-wm => r*
       ; <lookup> (r,r*) => (d',l)
-  with <unifyd(|pos)> (d,d') => s-wm
+  with <unify-wm(|pos)> (d,d') => s-wm
      ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm) => sol-wm'
 
   solve-namebinding-constraint: (CResolves(r,d,pos),sol-wm) -> res*
@@ -58,14 +58,14 @@ rules
 
   solve-namebinding-constraint-step(|r,d,pos,sol-wm): (d',l) -> (sol-wm'',[])
   with <fmap(sol-set-r(|r,(d',l)))> sol-wm => sol-wm'
-     ; <unifyd(|pos)> (d,d') => s-wm
+     ; <unify-wm(|pos)> (d,d') => s-wm
      ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm') => sol-wm''
 
   solve-namebinding-constraint: (CAssoc(d,s,pos),sol-wm) -> [(sol-wm',[])]
   where <is-ground> d
       ; <fromWM;sol-g> sol-wm => g
       ; <G-assoc> (g,d) => s'
-  with <unifys(|pos)> (s,s') => s-wm
+  with <unify-wm(|pos)> (s,s') => s-wm
      ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm) => sol-wm'
  
 rules
@@ -73,4 +73,4 @@ rules
   is-var: t -> t
   where <is-decl-var> t
 
-  is-decl-var: DeclVar(_) -> <id>
+  is-decl-var: Var(_) -> <id>

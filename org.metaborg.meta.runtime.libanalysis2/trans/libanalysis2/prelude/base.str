@@ -2,8 +2,6 @@ module libanalysis2/prelude/base
 
 rules
 
-  if(s) = ?x ; s ; !x
-
   noop(s) = id
 
   xmlencode =

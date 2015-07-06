@@ -24,7 +24,7 @@ rules
 rules
 
   solve-eqtype-constraint: (CEqType(ty1,ty2,pos),sol-wm) -> [(sol-wm',[])]
-  with <unifyt(|pos)> (ty1,ty2) => s-wm
+  with <unify-wm(|pos)> (ty1,ty2) => s-wm
      ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm) => sol-wm'
 
   solve-eqtype-constraint: (CLubType(ty,ty1@TApp(tc1,_),ty2@TApp(tc2,_),pos),sol-wm) -> [res]
@@ -39,8 +39,8 @@ rules
 rules
 
   check-subtype-constraint: (CSubType(ty1,ty2,pos),sol-wm) -> [res]
-  where <not(is-type-var)> ty1
-      ; <not(is-type-var)> ty2
+  where <not(is-var)> ty1
+      ; <not(is-var)> ty2
   with <fromWM;sol-x> sol-wm => x*
      ; ( <is-subtype-traverse(!CEqType(<Fst>,<Snd>,pos)
                              ,!CSubType(<Fst>,<Snd>,pos)

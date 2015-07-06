@@ -21,7 +21,7 @@ signature
     Sol : Graph
         * List((RefId,DeclId))
         * List((Pos,Type))
-        * List((TVar,Type))
+        * List((Var,Type))
         * SubtypeRelation
         * List(Type,Type) -> Solution
 

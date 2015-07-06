@@ -102,7 +102,7 @@ rules // resolution internal
   shadows(s1,s2) = ?(r,s) ; <s1> (r,s) ; ( ?Total([]) < <s2> (r,s) + id )
 
   // match(|r: Ref) :: [Decl] -> [Decl]
-  match-all(|r) = filter(if(<match> (r,<id>)))
+  match-all(|r) = filter(where(<match> (r,<id>)))
 
   // match :: (Ref,Decl) -?> (Ref,Decl)
   match = 

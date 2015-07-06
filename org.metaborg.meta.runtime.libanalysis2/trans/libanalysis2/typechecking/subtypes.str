@@ -27,7 +27,7 @@ rules
     ![ (TInt(), ( [] , [ (TInt(),[]) ]))
      , (TBool(), ( [] , [ (TBool(),[]) ]))
      , (TFun(), ( [Contravariant(),Covariant()]
-                  , [ (TFun(),[TVar("T"),TVar("R")]) ]))
+                  , [ (TFun(),[Var("T"),Var("R")]) ]))
      ]
   */
 
@@ -101,7 +101,7 @@ rules
         ) => (tc,a*,tc',a'*)
   with <lookup> (tc, x*) => (v*,sr*@[(tc,fa*)|_])
       ; <lookup> (tc',sr*) => fa'*
-      ; <zip;S-foldr(![],unifyt)> (fa'*,a'*) => s
+      ; <zip;S-foldr(![],unify)> (fa'*,a'*) => s
       ; <zip> (v*, <zip> (a*,fa'*)) => a'*
   where <map( ?(Invariant(),<id>) ; ( !(<Fst>,<lookup> (<Snd>, s)) < inv + Fst )
            <+ ?(Covariant(),<id>) ; ( !(<Fst>,<lookup> (<Snd>, s)) < cov + Fst )
