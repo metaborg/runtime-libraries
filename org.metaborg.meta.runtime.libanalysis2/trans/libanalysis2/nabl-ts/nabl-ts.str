@@ -32,7 +32,7 @@ rules
     tvars := <new-hashtable>;
     ast' := <
     	annotate-keys; 
-      nabl-ts-traverse(|tvars, facts, constraints, [None()])> ast;
+      nabl-ts-traverse(|tvars, facts, constraints, [Global()])> ast;
     f* := <iset-elements> facts;
     c* := <iset-elements> constraints;
     try(dr-scope-all-end);

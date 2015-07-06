@@ -12,8 +12,6 @@ sorts
   RefId
   Pos
   Namespace
-  Label
-  Path
 
 context-free syntax
 
@@ -34,13 +32,6 @@ context-free syntax
   Pos.POfRef                = <posOf(<RefId>)>
 
   Namespace.None            = <->
-
-  Label.NoLabel             = <->
-  Label.Label               = <[<Term>]>
-
-  Path.D                    = <D>
-  Path.P                    = <P.<Path>>
-  Path.I                    = <I<Label>.<Path>>
 
 sorts
 
@@ -75,8 +66,8 @@ context-free syntax
 
   Constraint.FDecl          = <<DeclId> in <Scope>>
   Constraint.FRef           = <<RefId> in <Scope>>
-  Constraint.FImportR       = <import <RefId><Label> in <Scope>>
-  Constraint.FImportS       = <import <Scope><Label> in <Scope>>
+  Constraint.FImportR       = <import <RefId><Term> in <Scope>>
+  Constraint.FImportS       = <import <Scope><Term> in <Scope>>
   Constraint.FParent        = <parent(<Scope>) is <OptionScope>>
   Constraint.FAssoc         = <<DeclId> with <Scope>>
 
@@ -89,3 +80,10 @@ context-free syntax
   Constraint.CAssoc         = [[DeclId] ~~> [Scope] [Pos]]
   Constraint.CTypeOf        = <<Pos> : <Type> <Pos>>
 
+
+lexical syntax
+
+  // this needs to go at the end, or prettyprint-Analysis-string will try this
+  // early and always use the generic Term printer instead of the grammar
+  // prettyprinter for all terms
+  Term           = ~[]+

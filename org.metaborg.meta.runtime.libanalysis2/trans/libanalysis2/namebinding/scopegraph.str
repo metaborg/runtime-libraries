@@ -18,7 +18,7 @@ signature
 
 rules
 
-  G-new = !G([],[])
+  G-new = !G([(Global(),<G--new_s>)],[])
   G--new_s = !S(NoneScope(),[],[],[],[])
   G-with-parent   = ?(G(s*,a*),s,p)  ; !G(<update(?S(_,d*,r*,ri*,si*);!S(p,d*,r*,ri*,si*)      ,G--new_s)> (s,s*), a*)
   G-with-decl     = ?(G(s*,a*),s,d)  ; !G(<update(?S(p,d*,r*,ri*,si*);!S(p,[d|d*],r*,ri*,si*)  ,G--new_s)> (s,s*), a*)

@@ -11,4 +11,12 @@ rules
   ; try(string-replace(|"<","&lt;"))
   ; try(string-replace(|">","&gt;"))
 
+  debugwrap(n,s) = ?t ; <s> t ; debug(!$[[<n>]: [<write-to-string> t] -> ])
   debugwrap(s) = ?t ; <s> t ; debug(!$[[<write-to-string> t] -> ])
+
+  debugwrapall(n,s) =
+    ?t
+  ; ( <s> t
+    < debug(!$[[<n>]: [<write-to-string> t] -> ])
+    + <debug> $[[<n>]: [<write-to-string> t] -> fail] ; fail
+    )

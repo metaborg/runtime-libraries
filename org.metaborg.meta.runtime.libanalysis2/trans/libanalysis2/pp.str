@@ -4,8 +4,9 @@ imports
 
   libstratego-gpp
   include/libanalysis2-parenthesize
+  libanalysis2/pp/overrides-post
   src-gen/pp/libanalysis2/-
-  libanalysis2/pp/-
+  libanalysis2/pp/overrides-pre
 
 rules
 

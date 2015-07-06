@@ -44,19 +44,22 @@ rules
 
 rules
 
+  solve-namebinding-constraint: (CResolves(r,d,pos),sol-wm) -> [(sol-wm',[])]
+  where <fromWM;sol-r> sol-wm => r*
+      ; <lookup> (r,r*) => (d',l)
+  with <unifyd(|pos)> (d,d') => s-wm
+     ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm) => sol-wm'
+
   solve-namebinding-constraint: (CResolves(r,d,pos),sol-wm) -> res*
-  where <resolve> (r, <fromWM;sol-g> sol-wm) => Total(d*@[_|_])
-      ; <fromWM;sol-r> sol-wm => r*
-  with ( <lookup> (r,r*)
-       < <unifyd(|pos)> (d,<id>) => s-wm
-       ; !( <S-apply> (<fromWM> s-wm, d)
-          , <sol-wm-apply-s(|pos)> (s-wm,sol-wm)
-          )
-       + !(d, <fmap(sol-set-r(|r,d))> sol-wm)
-       ) => (d', sol-wm')
-       ; <map( <unifyd(|pos)> (d',<id>)
-             ; !(<sol-wm-apply-s(|pos)> (<id>,sol-wm'),[])
-             )> d* => res*
+  where <fromWM;sol-r> sol-wm => r*
+      ; <not(lookup)> (r,r*)
+      ; <resolve> (r, <fromWM;sol-g> sol-wm) => Total(dl*@[_|_])
+  with <map(solve-namebinding-constraint-step(|r,d,pos,sol-wm))> dl* => res*
+
+  solve-namebinding-constraint-step(|r,d,pos,sol-wm): (d',l) -> (sol-wm'',[])
+  with <fmap(sol-set-r(|r,(d',l)))> sol-wm => sol-wm'
+     ; <unifyd(|pos)> (d,d') => s-wm
+     ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm') => sol-wm''
 
   solve-namebinding-constraint: (CAssoc(d,s,pos),sol-wm) -> [(sol-wm',[])]
   where <is-ground> d

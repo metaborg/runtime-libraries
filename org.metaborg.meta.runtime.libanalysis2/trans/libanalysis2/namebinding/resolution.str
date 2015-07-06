@@ -6,93 +6,130 @@ imports
   libanalysis2/pp
   libanalysis2/prelude/-
 
+// Resolution = [(Ref,Partial([(Decl,[Label])]))]
+
 rules
 
-  // resolve-all :: Graph -> [(Ref * Partial([(Decl,Path)]))]
-  resolve-all = ?g ; G-refs ; map(!(<id>,<resolve(|g,[])>))
+  // resolve-all :: Graph -> [(Ref * Partial([(Decl,[Label])]))]
+  resolve-all =
+  	?g ; G-refs ; map(!(<id>,<resolve(|g,[])>))
 
-  // resolve :: Ref * Graph -> Partial([(Decl,Path)])
-  resolve = ?(<id>,g) ; resolve(|g,[])
+  // resolve :: Ref * Graph -> Partial([(Decl,[Label])])
+  resolve =
+  res-debugwrap(!"resolve_0_0",
+  	?(<id>,g) ; resolve(|g,[])
+  )
 
 rules // resolution internal
 
-  // resolve :: Ref -> Partial [(Decl,Path)]
+  // resolve :: Ref -> Partial [(Decl,[Label])]
   resolve(|g,ir*) =
+  res-debugwrap(!"resolve_0_2",
     ?r
   ; <G-scope> (g,r) => s
   ; <resolve_v(|g,[r|ir*],[])> (r,s)
+  )
 
-  // resolve_v :: Ref * Scope -> Partial [(Decl,Path)]
+  // resolve_v :: Ref * Scope -> Partial [(Decl,[Label])]
   resolve_v(|g,ir*,s*) =
+  res-debugwrap(!"resolve_v_0_3",
     shadows( resolve_l(|g,ir*,s*)
            , resolve_p(|g,ir*,s*)
            )
+  )
 
-  // resolve_l :: Ref * Scope -> Partial([(Decl,Path)])
+  // resolve_l :: Ref * Scope -> Partial([(Decl,[Label])])
   resolve_l(|g,ir*,s*) =
+  res-debugwrap(!"resolve_l_0_3",
     shadows ( resolve_d(|g,ir*,s*)
             , resolve_i(|g,ir*,s*)
             )
+  )
 
-  // resolve_d :: Ref * Scope -> Partial [(Decl,Path)]
+  // resolve_d :: Ref * Scope -> Partial [(Decl,[Label])]
   resolve_d(|g,ir*,s*) =
+  res-debugwrap(!"resolve_d_0_3",
     ?(r,s)
   ; ( <elem> (s,s*)
     < <pureP> []
-    + <G-decls;match-all(|r);!(<id>,D());pureP> (g,s)
+    + <G-decls> (g,s) // :: [Decl]
+    ; match-all(|r) // :: [Decl]
+    ; map(!(<id>,[]))
+    ; pureP
     )
+  )
 
-  // resolve_i :: Ref * Scope -> Partial [Decl]
+  // resolve_i :: Ref * Scope -> Partial [(Decl,[Label])]
   resolve_i(|g,ir*,s*) =
+  res-debugwrap(!"resolve_i_0_3",
     ?(r,s)
   ; ( <elem> (s,s*)
     < <pureP> []
-    + <G-r-imports> (g,s)
-    ; filter(not(<elem> (<Fst>,ir*)))
-    ; map(( resolve(|g,ir*) // Partial [(Decl,Path)]
-          ; map(Fst) // drop labels // carefull, Partial!
-          ; sequenceP
-          ; fmap( unions
-                ; filter(<G-assoc> (g,<id>))
-                )
-          , id))
-    // here we should have Partial([(Scope,Path)])
-    ; fmap( <union> (<G-s-imports>  (g,s), <id>) // from here on we're good?
-          ; filter(not(<elem> (<Fst>,s*)))
-          ; filterToP(?Scope(_)) // tuple now!
-          )
-    ; join
-    ; fmap( <diff> (<id>,s*) // wut?
-          ; map(<resolve_l(|g,ir*,[s|s*])> (r,<id>)) // add I() to the path here?
-          ; sequenceP
-          ; fmap( unions )
-          )
-    ; join
+    + <G-r-imports> (g,s) // :: [(Ref,Label)]
+    ; filter(not(<elem> (<Fst>,ir*))) // :: [(Ref,Label)]
+    ; map(resolve_i_ref2s(|g,ir*)) // :: [Partial([(Decl,Label)])]
+    ; sequenceP // :: Partial([[(Decl,Label)]])
+    ; fmap( unions // :: [(Decl,Label)]
+          ; filter((<G-assoc> (g,<id>),id)) // :: [(Scope,Label)]
+          ; <union> (<G-s-imports>  (g,s) // :: [(Scope,Label)]
+                    ,<id> // :: [(Scope,Label)]
+                    ) // :: [(Scope,Label)]
+          ; filter(not(<elem> (<Fst>,s*))) // :: [(Scope,Label)]
+          ; filterToP(?(Scope(_),_)) // Partial([(Scope,Label)])
+          ) // :: Partial(Partial([(Scope,Label)]))
+    ; join // :: Partial([(Scope,Label)])
+    ; fmap( map(<resolve_i_l(|g,ir*,[s|s*])> (r,<id>)) // :: [Partial([(Decl,[Label])])]
+          ; sequenceP // :: Partial([[(Decl,[Label])]])
+          ; fmap(unions) // :: Partial([(Decl,[Label])])
+          ) // :: Partial(Partial([(Decl,[Label])]))
+    ; join // :: Partial([(Decl,[Label])])
     )
+  )
 
-  // resolve_p :: Ref * Scope -> Partial [(Decl,Path)]
+  // (Ref,Label) -> Partial([(Decl,Label)])
+  resolve_i_ref2s(|g,ir*) =
+  res-debugwrap(!"resolve_i_ref2s_0_2",
+    ?(r,l)
+  ; <resolve(|g,ir*)> r // :: Partial([(Decl,[Label])])
+  ; fmap(map(!(<Fst>,l))) // :: Partial([(Decl,Label)])
+  )
+
+  // (Ref,(Scope,Label)) -> Partial([(Decl,[Label])])
+  resolve_i_l(|g,ir*,s*) =
+  res-debugwrap(!"resolve_i_l_0_3",
+    ?(r,(s,l))
+  ; <resolve_l(|g,ir*,s*)> (r,s) // :: Partial([(Decl,[Label])])
+  ; fmap(map((id,![l|<id>]))) // :: Partial([(Decl,[Label])])
+  )
+
+  // resolve_p :: Ref * Scope -> Partial [(Decl,[Label])]
   resolve_p(|g,ir*,s*) = 
+  res-debugwrap(!"resolve_p_0_3",
     ?(r,s)
   ; ( <elem> (s,s*)
     < <pureP> []
     + ( <G-parent> (g,s)
-      < <resolve_v(|g,ir*,[s|s*]);map((id,!P(<id>)))> (r,<id>)
+      < <resolve_v(|g,ir*,[s|s*])> (r,<id>)
       + <pureP> []
       )
     )
+  )
 
-  // shadows(s1: (Ref * Scope) -> Partial [(Decl,Path)]
-  //        ,s2: (Ref * Scope) -> Partial [(Decl,Path)]) :: (Ref * Scope) -> Partial [(Decl,Path)]
+  // shadows(s1: (Ref * Scope) -> Partial [(Decl,[Label])]
+  //        ,s2: (Ref * Scope) -> Partial [(Decl,[Label])]) :: (Ref * Scope) -> Partial [(Decl,[Label])]
   shadows(s1,s2) = ?(r,s) ; <s1> (r,s) ; ( ?Total([]) < <s2> (r,s) + id )
 
   // match(|r: Ref) :: [Decl] -> [Decl]
   match-all(|r) = filter(if(<match> (r,<id>)))
 
   // match :: (Ref,Decl) -?> (Ref,Decl)
-  match: (RefId(ns,n,_),DeclId(ns',n',_)) -> <id>
-  where <strip-annos;eq> (ns,ns')
-  where <strip-annos;eq> (n,n')
+  match = 
+    ?(RefId(ns,n,_),DeclId(ns',n',_))
+  ; where(<strip-annos;eq> (ns,ns'))
+  ; where(<strip-annos;eq> (n,n'))
 
 rules
  
-  pp-Resolution = map((pp-Analysis-string,fmap(map(pp-Analysis-string))))
+  pp-Resolution = map((pp-Analysis-string,fmap(map((pp-Analysis-string,map(pp-Analysis-string))))))
+
+  res-debugwrap(n,s) = debugwrapall(n,s)

@@ -1,4 +1,4 @@
-module pp/overrides
+module pp/overrides-pre
 
 imports
   libstratego-gpp
@@ -6,8 +6,6 @@ imports
   src-gen/signatures/libanalysis2/-
 
 rules
-
-  prettyprint-Term: t -> [S(<write-to-string> t)]
 
   // allow printing of actual Ints as well
   prettyprint-Int: i -> [S(<int-to-string> i)]
