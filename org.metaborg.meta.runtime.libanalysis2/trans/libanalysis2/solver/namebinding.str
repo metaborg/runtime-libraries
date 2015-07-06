@@ -22,14 +22,14 @@ rules
      ; <G-with-ref> (g,s,r) => g'
      ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
 
-  solve-namebinding-fact: (FImportR(r,s),sol-wm)  -> [(sol-wm',[])]
+  solve-namebinding-fact: (FImportR(r,l,s),sol-wm)  -> [(sol-wm',[])]
   with <fromWM;sol-g> sol-wm => g
-     ; <G-with-r-import> (g,s,r) => g'
+     ; <G-with-r-import> (g,s,(r,l)) => g'
      ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
 
-  solve-namebinding-fact: (FImportS(s',s),sol-wm) -> [(sol-wm',[])]
+  solve-namebinding-fact: (FImportS(s',l,s),sol-wm) -> [(sol-wm',[])]
   with <fromWM;sol-g> sol-wm => g
-     ; <G-with-s-import> (g,s,s') => g'
+     ; <G-with-s-import> (g,s,(s',l)) => g'
      ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
 
   solve-namebinding-fact: (FParent(s,p),sol-wm)   -> [(sol-wm',[])]

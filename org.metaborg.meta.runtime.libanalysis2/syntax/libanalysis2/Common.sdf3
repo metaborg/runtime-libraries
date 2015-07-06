@@ -4,6 +4,7 @@ lexical syntax
 
   Int            = "-"? [0-9]+
   String         = [a-zA-Z0-9]+
+  Term           = ~[]*
 
 lexical restrictions
 

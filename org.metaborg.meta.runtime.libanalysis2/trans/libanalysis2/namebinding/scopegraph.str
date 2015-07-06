@@ -12,7 +12,9 @@ signature
 
   constructors
     G : List((Scope,ScopeImpl)) * List((DeclId,Scope)) -> Graph
-    S : OptionScope * List(DeclId) * List(RefId) * List(RefId) * List(Scope) -> ScopeImpl
+    S : OptionScope * List(DeclId) * List(RefId) *
+        List((Label,RefId)) * List((Label,Scope)) -> ScopeImpl
+    // S : OptionScope * List(DeclId) * List(RefId) * List(RefId) * List(Scope) -> ScopeImpl
 
 rules
 
@@ -37,5 +39,10 @@ rules
 
 rules
   
-  pp-Graph = G(map((pp-Analysis-string,pp-ScopeImpl)),map((pp-Analysis-string,pp-Analysis-string)))
-  pp-ScopeImpl = S(pp-Analysis-string,map(pp-Analysis-string),map(pp-Analysis-string),map(pp-Analysis-string),map(pp-Analysis-string))
+  pp-Graph = G( map((pp-Analysis-string,pp-ScopeImpl))
+              , map((pp-Analysis-string,pp-Analysis-string)))
+  pp-ScopeImpl = S( pp-Analysis-string
+                  , map(pp-Analysis-string)
+                  , map(pp-Analysis-string)
+                  , map((pp-Analysis-string,pp-Analysis-string))
+                  , map((pp-Analysis-string,pp-Analysis-string)))

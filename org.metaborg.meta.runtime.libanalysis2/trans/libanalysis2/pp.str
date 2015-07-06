@@ -9,8 +9,6 @@ imports
 
 rules
 
-  pp-Analysis-string-debug = pp-Analysis-string <+ <debug;fail> $[Cannot pp: [<id>]]
-
   pp-Analysis-string =
     parenthesize-libanalysis2
     ; prettyprint-example

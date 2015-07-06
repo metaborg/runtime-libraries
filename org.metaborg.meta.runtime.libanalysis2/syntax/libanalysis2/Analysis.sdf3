@@ -12,6 +12,8 @@ sorts
   RefId
   Pos
   Namespace
+  Label
+  Path
 
 context-free syntax
 
@@ -19,7 +21,7 @@ context-free syntax
   Scope.Scope               = <scope(<Int>)>
   Scope.ScopeVar            = <s<Int>>
 
-  OptionScope.NoneScope     = <none>
+  OptionScope.NoneScope     = <->
   OptionScope.SomeScope     = <<Scope>>
 
   DeclId.DeclId             = <decl(<Namespace>,<String>,<Pos>)>
@@ -31,7 +33,14 @@ context-free syntax
   Pos.POfDecl               = <posOf(<DeclId>)>
   Pos.POfRef                = <posOf(<RefId>)>
 
-  Namespace.None            = <>
+  Namespace.None            = <->
+
+  Label.NoLabel             = <->
+  Label.Label               = <[<Term>]>
+
+  Path.D                    = <D>
+  Path.P                    = <P.<Path>>
+  Path.I                    = <I<Label>.<Path>>
 
 sorts
 
@@ -66,10 +75,11 @@ context-free syntax
 
   Constraint.FDecl          = <<DeclId> in <Scope>>
   Constraint.FRef           = <<RefId> in <Scope>>
-  Constraint.FImportR       = <import <RefId> in <Scope>>
-  Constraint.FImportS       = <import <Scope> in <Scope>>
+  Constraint.FImportR       = <import <RefId><Label> in <Scope>>
+  Constraint.FImportS       = <import <Scope><Label> in <Scope>>
   Constraint.FParent        = <parent(<Scope>) is <OptionScope>>
   Constraint.FAssoc         = <<DeclId> with <Scope>>
+
   Constraint.FSubType       = [[TypeDef] <: [Type] [Pos]]
 
   Constraint.CResolves      = [[RefId] |--> [DeclId] [Pos]]

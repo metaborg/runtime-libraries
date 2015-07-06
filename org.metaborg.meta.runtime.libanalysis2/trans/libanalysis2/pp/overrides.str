@@ -7,6 +7,8 @@ imports
 
 rules
 
+  prettyprint-Term: t -> [S(<write-to-string> t)]
+
   // allow printing of actual Ints as well
   prettyprint-Int: i -> [S(<int-to-string> i)]
   where is-int

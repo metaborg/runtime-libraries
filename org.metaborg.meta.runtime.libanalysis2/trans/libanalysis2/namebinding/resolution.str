@@ -8,76 +8,81 @@ imports
 
 rules
 
-  // resolve-all :: Graph -> [(Name * Partial([Decl]))]
+  // resolve-all :: Graph -> [(Ref * Partial([(Decl,Path)]))]
   resolve-all = ?g ; G-refs ; map(!(<id>,<resolve(|g,[])>))
 
-  // resolve :: Ref * Graph -> Partial([Decl])
+  // resolve :: Ref * Graph -> Partial([(Decl,Path)])
   resolve = ?(<id>,g) ; resolve(|g,[])
 
 rules // resolution internal
 
-  // resolve :: Ref -> Partial [Decl]
+  // resolve :: Ref -> Partial [(Decl,Path)]
   resolve(|g,ir*) =
     ?r
   ; <G-scope> (g,r) => s
   ; <resolve_v(|g,[r|ir*],[])> (r,s)
 
-  // resolve_v :: Ref * Scope -> Partial [Decl]
+  // resolve_v :: Ref * Scope -> Partial [(Decl,Path)]
   resolve_v(|g,ir*,s*) =
     shadows( resolve_l(|g,ir*,s*)
            , resolve_p(|g,ir*,s*)
            )
 
-  // resolve_v :: Ref * Scope -> Partial([Decl])
+  // resolve_l :: Ref * Scope -> Partial([(Decl,Path)])
   resolve_l(|g,ir*,s*) =
     shadows ( resolve_d(|g,ir*,s*)
             , resolve_i(|g,ir*,s*)
             )
 
-  // resolve_v :: Ref * Scope -> Partial [Decl]
+  // resolve_d :: Ref * Scope -> Partial [(Decl,Path)]
   resolve_d(|g,ir*,s*) =
     ?(r,s)
   ; ( <elem> (s,s*)
     < <pureP> []
-    + <G-decls;match-all(|r);pureP> (g,s)
+    + <G-decls;match-all(|r);!(<id>,D());pureP> (g,s)
     )
 
-  // resolve_v :: Ref * Scope -> Partial [Decl]
+  // resolve_i :: Ref * Scope -> Partial [Decl]
   resolve_i(|g,ir*,s*) =
     ?(r,s)
   ; ( <elem> (s,s*)
     < <pureP> []
     + <G-r-imports> (g,s)
-    ; <diff> (<id>,ir*)
-    ; map(resolve(|g,ir*))
-    ; sequenceP
-    ; fmap( unions
-          ; filter(<G-assoc> (g,<id>))
-          ; <union> (<G-s-imports>  (g,s), <id>)
-          ; <diff> (<id>,s*)
-          ; filterToP(?Scope(_))
+    ; filter(not(<elem> (<Fst>,ir*)))
+    ; map(( resolve(|g,ir*) // Partial [(Decl,Path)]
+          ; map(Fst) // drop labels // carefull, Partial!
+          ; sequenceP
+          ; fmap( unions
+                ; filter(<G-assoc> (g,<id>))
+                )
+          , id))
+    // here we should have Partial([(Scope,Path)])
+    ; fmap( <union> (<G-s-imports>  (g,s), <id>) // from here on we're good?
+          ; filter(not(<elem> (<Fst>,s*)))
+          ; filterToP(?Scope(_)) // tuple now!
           )
     ; join
-    ; fmap( <diff> (<id>,s*)
-          ; map(<resolve_l(|g,ir*,[s|s*])> (r,<id>))
+    ; fmap( <diff> (<id>,s*) // wut?
+          ; map(<resolve_l(|g,ir*,[s|s*])> (r,<id>)) // add I() to the path here?
           ; sequenceP
           ; fmap( unions )
           )
     ; join
     )
 
-  // resolve_p :: Ref * Scope -> Partial [Decl]
+  // resolve_p :: Ref * Scope -> Partial [(Decl,Path)]
   resolve_p(|g,ir*,s*) = 
     ?(r,s)
   ; ( <elem> (s,s*)
     < <pureP> []
     + ( <G-parent> (g,s)
-      < <resolve_v(|g,ir*,[s|s*])> (r,<id>)
+      < <resolve_v(|g,ir*,[s|s*]);map((id,!P(<id>)))> (r,<id>)
       + <pureP> []
       )
     )
 
-  // shadows(s1: (Ref * Scope) -> Partial [Decl], s2: (Ref * Scope) -> Partial [Decl]) :: (Ref * Scope) -> Partial [Decl]
+  // shadows(s1: (Ref * Scope) -> Partial [(Decl,Path)]
+  //        ,s2: (Ref * Scope) -> Partial [(Decl,Path)]) :: (Ref * Scope) -> Partial [(Decl,Path)]
   shadows(s1,s2) = ?(r,s) ; <s1> (r,s) ; ( ?Total([]) < <s2> (r,s) + id )
 
   // match(|r: Ref) :: [Decl] -> [Decl]
