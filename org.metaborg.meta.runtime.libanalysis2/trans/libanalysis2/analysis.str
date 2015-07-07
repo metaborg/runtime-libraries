@@ -42,7 +42,7 @@ rules
   ; ( ( <Hd> good-wm* <+ <Hd> bad-wm* ) => sol-wm
     < <(fromWM;sol-r,id);conc;mapv(Fst)> (sol-wm,r') => r*
     ; resolved-ast := <apply-resolution(|r*)> annotated-ast
-    ; <fromWM;sol-p> sol-wm => p*
+    ; <fromWM;sol-p;mapk(position-to-key)> sol-wm => p*
     ; typed-ast := <apply-types(|p*)> resolved-ast
     ; analysed-ast := typed-ast
     ; errors* := <wm-errors;mapv(xmlencode)> sol-wm
