@@ -87,7 +87,7 @@ context-free syntax
   Constraint.CComposeSub    = <<Substitution> == <SubstitutionList> <Pos>>
   Constraint.CApplySub      = <<Type> == <Substitution>.<Type> <Pos>>
 
-  Substitution.Substitution = <{<{Mapping ","}*>}>
+  Substitution.Sub          = <{<{Mapping ","}*>}>
   Substitution              = Var
 
 //-------------------

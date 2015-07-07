@@ -11,25 +11,26 @@ imports
   libanalysis2/pp
 
 rules
-  
+
+  get-S: Sub(s) -> s
+
   solve-substitution-constraint: (c@CMkSub(s,d*,r*,pos),sol-wm) -> [(sol-wm',[])]
   where <is-var> s
       ; <not(is-var)> d*
       ; <not(is-var)> r*
-  with s' := <zip> (d*,r*)
+  with s' := Sub(<zip> (d*,r*))
      ; s-wm := <unify-wm(|pos)> (s,s')
      ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm) => sol-wm'
 
-
   solve-substitution-constraint: (c@CComposeSub(s,s*,pos),sol-wm) -> [(sol-wm',[])]
   where <is-var> s
-      ; <not(is-var)> s*
-  with s' := <S-compose> s*
+      ; <not(is-var);map(not(is-var))> s*
+  with s' := <map(get-S);S-compose> s*
      ; s-wm := <unify-wm(|pos)> (s,s')
      ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm) => sol-wm'
 
   solve-substitution-constraint: (c@CApplySub(ty,s,ty',pos),sol-wm) -> [(sol-wm,[])]
   where <not(is-var)> s
-  with ty'' := <S-apply> (s,ty')
+  with ty'' := <S-apply> (<get-S> s,ty')
      ; s-wm := <unify-wm(|pos)> (ty,ty'')
      ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm) => sol-wm'

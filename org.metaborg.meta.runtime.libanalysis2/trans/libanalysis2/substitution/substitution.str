@@ -29,6 +29,8 @@ rules
   unify: (t,t) -> []
   unify: (v@Var(_),t) -> [(v,t)]
   unify: (t,v@Var(_)) -> [(v,t)]
+  unify: (Sub(_),_) -> <fail>
+  unify: (_,Sub(_)) -> <fail>
   unify: (c#(a1*), c#(a2*)) -> <zip;S-foldr(![],unify)> (a1*, a2*)
 
 rules
