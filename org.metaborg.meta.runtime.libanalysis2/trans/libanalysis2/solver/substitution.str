@@ -1,0 +1,36 @@
+module solver/substitution
+
+imports
+  src-gen/signatures/libanalysis2/-
+  libanalysis2/abstract-syntax/-
+  libanalysis2/substitution/-
+  libanalysis2/namebinding/-
+  libanalysis2/typechecking/-
+  libanalysis2/solver/-
+  libanalysis2/prelude/-
+  libanalysis2/pp
+
+rules
+  
+  solve-substitution-constraint: (c@CMkSub(s,d*,r*,pos),sol-wm) -> [(sol-wm',[])]
+  where <is-var> s
+      ; <not(is-var)> d*
+      ; <not(is-var)> r*
+  with s' := <zip> (d*,r*)
+     ; s-wm := <unify-wm(|pos)> (s,s')
+     ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm) => sol-wm'
+
+
+  solve-substitution-constraint: (c@CComposeSub(s,s1,s2,pos),sol-wm) -> [(sol-wm',[])]
+  where <is-var> s
+      ; <not(is-var)> s1
+      ; <not(is-var)> s2
+  with s' := <S-compose> (s1,s2)
+     ; s-wm := <unify-wm(|pos)> (s,s')
+     ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm) => sol-wm'
+
+  solve-substitution-constraint: (c@CApplySub(ty,s,ty',pos),sol-wm) -> [(sol-wm,[])]
+  where <not(is-var)> s
+  with ty'' := <S-apply> (s,ty')
+     ; s-wm := <unify-wm(|pos)> (ty,ty'')
+     ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm) => sol-wm'

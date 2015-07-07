@@ -59,6 +59,22 @@ context-free syntax
 
 sorts
 
+  TypeList
+  Mapping
+  Substitution
+
+context-free syntax
+
+  TypeList                  = <[<{Type ","}*>]>
+  TypeList                  = Var
+
+  Mapping                   = [[Type] |--> [Type]]
+
+  Substitution.Substitution = <{<{Mapping ","}*>}>
+  Substitution              = Var
+
+sorts
+
   Constraint
 
 context-free syntax
@@ -81,6 +97,10 @@ context-free syntax
   Constraint.CSubType       = [[Type] <= [Type] [Pos]]
   Constraint.CAssoc         = [[DeclId] ~~> [Scope] [Pos]]
   Constraint.CTypeOf        = <<Pos> : <Type> <Pos>>
+
+  Constraint.CMkSub         = [[Substitution] == {[TypeList] |-->* [TypeList]} [Pos]]
+  Constraint.CComposeSub    = <<Substitution> == <Substitution> . <Substitution> <Pos>>
+  Constraint.CApplySub      = <<Type> == <Substitution>.<Type> <Pos>>
 
 lexical syntax
 

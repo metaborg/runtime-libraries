@@ -98,6 +98,7 @@ rules
                         <+ solve-subtype-fact
                         <+ solve-position-constraint
                         <+ solve-eqtype-constraint
+                        <+ solve-substitution-constraint
                         <+ check-subtype-constraint
                         <+ solve-trivial-constraints
                         <+ solve-ignore
