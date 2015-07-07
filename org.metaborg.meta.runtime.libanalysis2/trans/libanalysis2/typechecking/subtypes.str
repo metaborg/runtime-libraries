@@ -17,7 +17,7 @@ signature
 
 rules
 
-  new-subtype-relation = <debug> "WARN: Using default empty subtype relation" ; ![]
+  new-subtype-relation = <debug;fail> "ERROR: Forgot to define/include subtype relation"
 
   // The first supertype must be the itself, any variables used as type arguments
   // can be used also as arguments to super types

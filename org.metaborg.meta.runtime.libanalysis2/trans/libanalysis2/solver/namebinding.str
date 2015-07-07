@@ -44,22 +44,26 @@ rules
 
 rules
 
-  solve-namebinding-constraint: (CResolves(r,d,pos),sol-wm) -> [(sol-wm',[])]
+  solve-namebinding-constraint: (CResolves(r,l,d,pos),sol-wm) -> [(sol-wm'',[])]
   where <fromWM;sol-r> sol-wm => r*
-      ; <lookup> (r,r*) => (d',l)
+      ; <lookup> (r,r*) => (d',l')
   with <unify-wm(|pos)> (d,d') => s-wm
      ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm) => sol-wm'
+     ; <unify-wm(|pos)> (l,l') => s-wm'
+     ; <sol-wm-apply-s(|pos)> (s-wm',sol-wm') => sol-wm''
 
-  solve-namebinding-constraint: (CResolves(r,d,pos),sol-wm) -> res*
+  solve-namebinding-constraint: (CResolves(r,l,d,pos),sol-wm) -> res*
   where <fromWM;sol-r> sol-wm => r*
       ; <not(lookup)> (r,r*)
       ; <resolve> (r, <fromWM;sol-g> sol-wm) => Total(dl*@[_|_])
-  with <map(solve-namebinding-constraint-step(|r,d,pos,sol-wm))> dl* => res*
+  with <map(solve-namebinding-constraint-step(|r,l,d,pos,sol-wm))> dl* => res*
 
-  solve-namebinding-constraint-step(|r,d,pos,sol-wm): (d',l) -> (sol-wm'',[])
-  with <fmap(sol-set-r(|r,(d',l)))> sol-wm => sol-wm'
+  solve-namebinding-constraint-step(|r,l,d,pos,sol-wm): (d',l') -> (sol-wm''',[])
+  with <fmap(sol-set-r(|r,(d',l')))> sol-wm => sol-wm'
      ; <unify-wm(|pos)> (d,d') => s-wm
      ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm') => sol-wm''
+     ; <unify-wm(|pos)> (l,l') => s-wm'
+     ; <sol-wm-apply-s(|pos)> (s-wm',sol-wm'') => sol-wm'''
 
   solve-namebinding-constraint: (CAssoc(d,s,pos),sol-wm) -> [(sol-wm',[])]
   where <is-ground> d

@@ -59,23 +59,8 @@ context-free syntax
 
 sorts
 
-  TypeList
-  Mapping
-  Substitution
-
-context-free syntax
-
-  TypeList                  = <[<{Type ","}*>]>
-  TypeList                  = Var
-
-  Mapping                   = [[Type] |--> [Type]]
-
-  Substitution.Substitution = <{<{Mapping ","}*>}>
-  Substitution              = Var
-
-sorts
-
   Constraint
+  Substitution
 
 context-free syntax
 
@@ -91,7 +76,7 @@ context-free syntax
 
   Constraint.FSubType       = [[TypeDef] <: [Type] [Pos]]
 
-  Constraint.CResolves      = [[RefId] |--> [DeclId] [Pos]]
+  Constraint.CResolves      = [[RefId] |-[Term]-> [DeclId] [Pos]]
   Constraint.CEqType        = [[Type] == [Type] [Pos]]
   Constraint.CLubType       = [[Type] == lub([Type],[Type]) [Pos]]
   Constraint.CSubType       = [[Type] <= [Type] [Pos]]
@@ -99,12 +84,34 @@ context-free syntax
   Constraint.CTypeOf        = <<Pos> : <Type> <Pos>>
 
   Constraint.CMkSub         = [[Substitution] == {[TypeList] |-->* [TypeList]} [Pos]]
-  Constraint.CComposeSub    = <<Substitution> == <Substitution> . <Substitution> <Pos>>
+  Constraint.CComposeSub    = <<Substitution> == <SubstitutionList> <Pos>>
   Constraint.CApplySub      = <<Type> == <Substitution>.<Type> <Pos>>
+
+  Substitution.Substitution = <{<{Mapping ","}*>}>
+  Substitution              = Var
+
+//-------------------
+// Ordering is a bit sensitive here, so prettyprinting works reasonably well
+// Term needs to go after all rules for constructors, because it will succeed
+// on anything. Rules without constructors (which produce unwrapped lists or
+// tuples) need to go after Term, so they won't break.
 
 lexical syntax
 
-  // this needs to go at the end, or prettyprint-Analysis-string will try this
-  // early and always use the generic Term printer instead of the grammar
-  // prettyprinter for all terms
   Term           = ~[]+
+
+sorts
+
+  TypeList
+  Mapping
+  SubstitutionList
+
+context-free syntax
+
+  TypeList                  = <[<{Type ","}*>]>
+  TypeList                  = Var
+
+  Mapping                   = [[Type] |--> [Type]]
+
+  SubstitutionList          = <[<{Substitution ","}*>]>
+  SubstitutionList          = Var

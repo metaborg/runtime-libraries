@@ -21,11 +21,10 @@ rules
      ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm) => sol-wm'
 
 
-  solve-substitution-constraint: (c@CComposeSub(s,s1,s2,pos),sol-wm) -> [(sol-wm',[])]
+  solve-substitution-constraint: (c@CComposeSub(s,s*,pos),sol-wm) -> [(sol-wm',[])]
   where <is-var> s
-      ; <not(is-var)> s1
-      ; <not(is-var)> s2
-  with s' := <S-compose> (s1,s2)
+      ; <not(is-var)> s*
+  with s' := <S-compose> s*
      ; s-wm := <unify-wm(|pos)> (s,s')
      ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm) => sol-wm'
 

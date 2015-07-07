@@ -40,6 +40,10 @@ rules
   where <S-apply;s> (s,t) => s'
       ; <S-compose> (s',s) => s''
 
+  S-compose: s* -> s
+  where is-list
+  with s := <foldr([],S-compose)> s*
+
   S-compose: (s',s) ->  <conc> (s', <mapv(<S-apply> (s',<id>))> s)
 
   S-apply: (s,t) -> t'

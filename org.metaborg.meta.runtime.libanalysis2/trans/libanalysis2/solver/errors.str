@@ -18,7 +18,7 @@ rules
      ; <map(bound-error)> lb* => be*
      ; <add-errors(|[fe*,use*,be*])> sol-wm => sol-wm'
 
-  unsolved-error: CResolves(r,d,pos) -> (pos,$[Could not resolve [<pp-Analysis-string> r] to [<pp-Analysis-string> d]])
+  unsolved-error: CResolves(r,l,d,pos) -> (pos,$[Could not resolve [<pp-Analysis-string> r] to [<pp-Analysis-string> d]])
   unsolved-error: CTypeOf(p,ty,pos) -> (pos,$[Could not unify type of [<pp-Analysis-string> p] with [<pp-Analysis-string> ty]])
   unsolved-error: CAssoc(d,s,pos) -> (pos,$[Could not find associated scope [<pp-Analysis-string> s] of [<pp-Analysis-string> d]])
   unsolved-error: CSubType(ty1,ty2,pos) -> (pos,$[Could not determine if [<pp-Analysis-string> ty1] subtype of [<pp-Analysis-string> ty2]])
