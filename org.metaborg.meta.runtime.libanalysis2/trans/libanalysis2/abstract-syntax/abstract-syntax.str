@@ -10,6 +10,8 @@ imports
 
 rules
 
+  get-position: Var(_) -> POfDecl(<id>)
+  
   get-position: t{k} -> Pos(k,f,l,c,s,e)
   with <is-string> k <+ <debug;fail> $[ERR: Cannot get key for [<write-to-string> t]]
   with (f,l,c,s,e) := <origin-location-offset> t

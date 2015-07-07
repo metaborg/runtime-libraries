@@ -9,7 +9,7 @@ imports
 
 rules
   
-  nabl-ts-constraint(|tvars, facts, constraints, scopes) = fail
+  nabl-ts-constraint(|facts, constraints, scopes) = fail
 
 rules
 
@@ -28,7 +28,7 @@ rules
     tvars := <new-hashtable>;
     ast' := <
     	annotate-keys; 
-      nabl-ts-traverse(|tvars, facts, constraints, [Global()])> ast;
+      nabl-ts-traverse(|facts, constraints, [Global()])> ast;
     f* := <iset-elements> facts;
     c* := <iset-elements> constraints;
     try(dr-scope-all-end);
@@ -38,29 +38,15 @@ rules
  
   annotate-key: t -> t{<newname> ""}
   
-  nabl-ts-traverse(|tvars, facts, constraints, scopes) =
-     debug(!"enter "); nabl-ts-constraint(|tvars, facts, constraints, scopes); debug(!"custom rule successful ")
-  <+ debug(!"custom rule failed "); nabl-ts-traverse-children(|tvars, facts, constraints, scopes); debug(!"generic rule successful ")
+  nabl-ts-traverse(|facts, constraints, scopes) =
+     debug(!"enter "); nabl-ts-constraint(|facts, constraints, scopes); debug(!"custom rule successful ")
+  <+ debug(!"custom rule failed "); nabl-ts-traverse-children(|facts, constraints, scopes); debug(!"generic rule successful ")
   <+ <debug(!"generic rule failed ")> scopes ; fail
   
-  nabl-ts-traverse-children(|tvars, facts, constraints, scopes) =
+  nabl-ts-traverse-children(|facts, constraints, scopes) =
     with(
     	get-arguments;
-    	map(nabl-ts-traverse(|tvars, facts, constraints, scopes))
+    	map(nabl-ts-traverse(|facts, constraints, scopes))
     )
-  
-  get-type-constraint(|tvars, tp, msg):
-    Var(_) -> CEqType(<id>, tp, msg)
-    
-  get-type-constraint(|tvars, tp, msg):
-    _ -> CEqType(<get-type-var(|tvars)>, tp, msg)
-      
-  get-type-var(|tvars) =
-     [key] := <get-annos>
-   ; (    tvar := <hashtable-get(|key)> tvars 
-       <+ tvar := Var(<NewVar>)
-        ; <hashtable-put(|key, tvar)> tvars
-     )
-   ; !tvar
-  <+ debug(!"missing tvar "); fail
- 
+
+  type-app = ?Var(_)
