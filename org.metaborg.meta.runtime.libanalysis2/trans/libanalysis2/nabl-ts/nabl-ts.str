@@ -6,10 +6,11 @@ imports
   runtime/editor/annotations
   src-gen/signatures/libanalysis2/-
   libanalysis2/pp
-
+  libanalysis2/abstract-syntax/-
+  
 rules
   
-  nabl-ts-constraint(|facts, constraints, scopes) = fail
+  nabl-ts-constraint(|facts, constraints, scopes, position) = fail
 
 rules
 
@@ -28,7 +29,7 @@ rules
     tvars := <new-hashtable>;
     ast' := <
     	annotate-keys; 
-      nabl-ts-traverse(|facts, constraints, [Global()])> ast;
+      nabl-ts-traverse(|facts, constraints, [Global()], <get-position>)> ast;
     f* := <iset-elements> facts;
     c* := <iset-elements> constraints;
     try(dr-scope-all-end);
@@ -38,15 +39,17 @@ rules
  
   annotate-key: t -> t{<newname> ""}
   
-  nabl-ts-traverse(|facts, constraints, scopes) =
-     debug(!"enter "); nabl-ts-constraint(|facts, constraints, scopes); debug(!"custom rule successful ")
-  <+ debug(!"custom rule failed "); nabl-ts-traverse-children(|facts, constraints, scopes); debug(!"generic rule successful ")
-  <+ <debug(!"generic rule failed ")> scopes ; fail
+  nabl-ts-traverse(|facts, constraints, scopes, position) =
+  	with(position' := <get-position <+ !position>)
+  ; (  debug(!"enter "); nabl-ts-constraint(|facts, constraints, scopes, position'); debug(!"custom rule successful ")
+	  <+ debug(!"custom rule failed "); nabl-ts-traverse-children(|facts, constraints, scopes, position'); debug(!"generic rule successful ")
+	  <+ <debug(!"generic rule failed ")> scopes ; fail 
+	  )
   
-  nabl-ts-traverse-children(|facts, constraints, scopes) =
+  nabl-ts-traverse-children(|facts, constraints, scopes, position) =
     with(
     	get-arguments;
-    	map(nabl-ts-traverse(|facts, constraints, scopes))
+    	map(nabl-ts-traverse(|facts, constraints, scopes, position))
     )
 
   type-app = ?Var(_)
