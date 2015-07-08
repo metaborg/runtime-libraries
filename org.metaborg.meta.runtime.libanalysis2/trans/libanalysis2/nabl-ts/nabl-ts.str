@@ -5,8 +5,8 @@ imports
   runtime/editor/origins
   runtime/editor/annotations
   src-gen/signatures/libanalysis2/-
-  libanalysis2/pp
   libanalysis2/abstract-syntax/-
+  libanalysis2/pp
   
 rules
   
@@ -35,10 +35,6 @@ rules
     try(dr-scope-all-end);
     !(ast', [f*, c*])
 
-  annotate-keys = topdown(annotate-key)
- 
-  annotate-key: t -> t{<newname> ""}
-  
   nabl-ts-traverse(|facts, constraints, scopes, position) =
   	with(position' := <get-position <+ !position>)
   ; (  debug(!"enter "); nabl-ts-constraint(|facts, constraints, scopes, position'); debug(!"custom rule successful ")
