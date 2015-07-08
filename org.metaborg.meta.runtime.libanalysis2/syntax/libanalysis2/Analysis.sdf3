@@ -47,7 +47,7 @@ context-free syntax
 
   Type.TApp                 = <<TypeCon>[<{Type ","}*>]>
   Type                      = Var
-
+  Type.TList                = <[<{Type ", "}*>]>
   TypeDef.TDef              = <<TypeCon>[<{TypeArg ","}*>]>
   TypeArg.TArg              = <<Variance><Type>>
 

@@ -11,7 +11,7 @@ imports
 rules
   
   nabl-ts-constraint(|facts, constraints, scopes, position) = fail
-
+  
 rules
 
   do-extract-constraint =
@@ -53,3 +53,13 @@ rules
     )
 
   type-app = ?Var(_)
+  type-app = !TList(<is-list>)
+  
+  type-of-constraints(|ty, msg):
+    l* -> [CEqType(ty, TList(tv*), msg), c*]
+    where
+      debug(!"list "); is-list
+    with
+      tv* := <map(!Var(<NewVar>))> l*
+    ; c*  := <zip(!CTypeOf(<Fst; get-position>, <Snd>, msg))> (l*, tv*)
+    
