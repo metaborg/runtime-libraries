@@ -74,10 +74,10 @@ rules
      ; foldr(!sol-wm',sol-wm-apply-s-error(|pos)) => sol-wm''
 
   sol-wm-apply-s-error(|pos): ((v,t),sol-wm) -> sol-wm'
-  with <not(?None())<+!v> pos => pos'
-     ; msg := $[Recursive type: [<pp-Analysis-string> v] = [<pp-Analysis-string> t]]
-     ; sol-wm' := <add-error(|(pos',msg))> sol-wm
-  
+  where debug(!1)
+  with msg := $[Recursive type: [<pp-Analysis-string> v] = [<pp-Analysis-string> t]]
+     ; sol-wm' := <add-error(|(pos,msg))> sol-wm
+
 rules
 
   initial-solution = sol-new;pureWM

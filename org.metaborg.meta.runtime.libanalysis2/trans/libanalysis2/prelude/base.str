@@ -12,7 +12,7 @@ rules
   debugwrap(n,s) = ?t ; <s> t ; debug(!$[[<n>]: [<write-to-string> t] -> ])
   debugwrap(s) = ?t ; <s> t ; debug(!$[[<write-to-string> t] -> ])
 
-  debugwrapall(n,s) =
+  debugwrapfail(n,s) =
     ?t
   ; ( <s> t
     < debug(!$[[<n>]: [<write-to-string> t] -> ])

@@ -14,11 +14,13 @@ rules
 
   get-S: Sub(s) -> s
 
+  get-Ts: TList(t*) -> t*
+
   solve-substitution-constraint: (c@CMkSub(s,d*,r*,pos),sol-wm) -> [(sol-wm',[])]
   where <is-var> s
       ; <not(is-var)> d*
       ; <not(is-var)> r*
-  with s' := Sub(<zip> (d*,r*))
+  with s' := Sub(<zip> (<get-Ts> d*, <get-Ts> r*))
      ; s-wm := <unify-wm(|pos)> (s,s')
      ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm) => sol-wm'
 

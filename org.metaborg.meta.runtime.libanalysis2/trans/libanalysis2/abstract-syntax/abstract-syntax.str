@@ -10,14 +10,17 @@ imports
 
 rules
   
-  annotate-keys = 
-    try(dr-scope-all-end);
-    dr-scope-all-start;
-    key-counter := <new-counter>;
-    rules( NewKey: _ -> <next-counter> key-counter
-         );
+  annotate-keys =
+    where(
+      dr-begin-scope(|"NewKey");
+      key-counter := <new-counter>;
+      rules( NewKey: _ -> <next-counter> key-counter )
+    );
     topdown(annotate-key);
-    try(dr-scope-all-end)
+    where(
+      try(dr-end-scope(|"NewKey"))
+    )
+    ;debug
 
   annotate-key: t -> t{<NewKey>}
   
@@ -26,7 +29,7 @@ rules
   get-position: Var(_) -> POfDecl(<id>)
   
   get-position: t{k} -> Pos(k,f,l,c,s,e)
-  with <is-string<+is-int> k <+ debug(!"ERROR: Cannot get key for ") ; fail
+  with <is-int> k <+ debug(!"ERROR: Cannot get key for ") ; fail
   with (origin-location-offset <+ debug(!"WARNING: Cannot get origin for ") ; !("",-1,-1,-1,-1)) => (f,l,c,s,e)
 
   position-to-origin:

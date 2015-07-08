@@ -17,8 +17,7 @@ rules
   do-extract-constraint =
     ?ast;
     // Ensure all dynamic rules are properly scoped
-    try(dr-scope-all-end);
-    dr-scope-all-start;
+    dr-begin-scopes(|["NewScope","NewVar"]);
     scope-counter := <new-counter>;
     var-counter := <new-counter>;
     rules( NewScope: _ -> <next-counter> scope-counter
@@ -32,7 +31,7 @@ rules
       nabl-ts-traverse(|facts, constraints, [Global()], <get-position>)> ast;
     f* := <iset-elements> facts;
     c* := <iset-elements> constraints;
-    try(dr-scope-all-end);
+    try(dr-end-scopes(|["NewScope","NewVar"]));
     !(ast', [f*, c*])
 
   nabl-ts-traverse(|facts, constraints, scopes, position) =

@@ -15,6 +15,7 @@ rules
   prettyprint-Pos:
     Pos(key, file, line, column, begin, end) ->
       [ H( [SOpt(HS(), "0")],
-           [ S(key), S("@("), line', S(","), column', S(")") ] ) ]
+           [ key', S("@("), line', S(","), column', S(")") ] ) ]
+    with key'    :=  <pp-one-Z(prettyprint-Int)> key
     with line'   := <pp-one-Z(prettyprint-Int)> line
     with column' := <pp-one-Z(prettyprint-Int)> column
