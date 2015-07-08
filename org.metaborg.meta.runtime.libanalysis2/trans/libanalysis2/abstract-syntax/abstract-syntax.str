@@ -14,7 +14,7 @@ rules
   
   get-position: t{k} -> Pos(k,f,l,c,s,e)
   with <is-string> k <+ <debug;fail> $[ERR: Cannot get key for [<write-to-string> t]]
-  with (f,l,c,s,e) := <origin-location-offset> t
+  where (f,l,c,s,e) := <origin-location-offset> t
     <+ <debug;fail> $[ERR: Cannot get position for [<write-to-string> t]]
 
   position-to-origin:
