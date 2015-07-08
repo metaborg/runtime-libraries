@@ -87,6 +87,6 @@ rules
   , ("warnings", <map((pp-Analysis-string,id))> w*)
   , ("notes", <map((pp-Analysis-string,id))> n*)
   ]
-    
+ 
   irrelevant-constraint = fail
   irrelevant-pos = fail

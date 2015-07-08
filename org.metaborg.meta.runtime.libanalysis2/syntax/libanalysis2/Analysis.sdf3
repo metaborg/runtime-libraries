@@ -57,6 +57,9 @@ context-free syntax
 
   TypeCon                   = NotImplemented
 
+  Eqable                    = Type
+  Eqable                    = DeclId
+
 sorts
 
   Constraint
@@ -77,13 +80,13 @@ context-free syntax
   Constraint.FSubType       = [[TypeDef] <: [Type] [Pos]]
 
   Constraint.CResolves      = [[RefId] |-[Term]-> [DeclId] [Pos]]
-  Constraint.CEqType        = [[Type] == [Type] [Pos]]
+  Constraint.CEqual        = [[Eqable] == [Eqable] [Pos]]
   Constraint.CLubType       = [[Type] == lub([Type],[Type]) [Pos]]
   Constraint.CSubType       = [[Type] <= [Type] [Pos]]
   Constraint.CAssoc         = [[DeclId] ~~> [Scope] [Pos]]
   Constraint.CTypeOf        = <<Pos> : <Type> <Pos>>
 
-  Constraint.CMkSub         = [[Substitution] == {[TypeList] |-->* [TypeList]} [Pos]]
+  Constraint.CMkSub         = [[Substitution] == [Type] |-->* [Type] [Pos]]
   Constraint.CComposeSub    = <<Substitution> == <SubstitutionList> <Pos>>
   Constraint.CApplySub      = <<Type> == <Substitution>.<Type> <Pos>>
 

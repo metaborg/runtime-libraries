@@ -23,7 +23,7 @@ rules
 
 rules
 
-  solve-eqtype-constraint: (CEqType(ty1,ty2,pos),sol-wm) -> [(sol-wm',[])]
+  solve-eqtype-constraint: (CEqual(ty1,ty2,pos),sol-wm) -> [(sol-wm',[])]
   with <unify-wm(|pos)> (ty1,ty2) => s-wm
      ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm) => sol-wm'
 
@@ -32,7 +32,7 @@ rules
       ; <fromWM;sol-x> sol-wm => x*
       ; <all-tcs;map(<lookup> (<id>, x*))> (ty1,ty2)
   with ( <lub(|x*)> (ty1,ty2) => ty'
-       < !(sol-wm,[CEqType(ty,ty',pos)])
+       < !(sol-wm,[CEqual(ty,ty',pos)])
        + !(<add-error(|(pos,$[Types [<pp-Analysis-string> ty1] and [<pp-Analysis-string> ty2] have no least upper bound.]))> sol-wm, [])
        ) => res
 
@@ -42,7 +42,7 @@ rules
   where <not(is-var)> ty1
       ; <not(is-var)> ty2
   with <fromWM;sol-x> sol-wm => x*
-     ; ( <is-subtype-traverse(!CEqType(<Fst>,<Snd>,pos)
+     ; ( <is-subtype-traverse(!CEqual(<Fst>,<Snd>,pos)
                              ,!CSubType(<Fst>,<Snd>,pos)
                              ,!CSubType(<Snd>,<Fst>,pos)
                              ,id|x*);Snd> (ty1,ty2) => c*
