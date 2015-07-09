@@ -16,6 +16,6 @@ language General properties
   table             : include/runtime-libraries.tbl
   start symbols     : NotImplemented
 
-  Stratego includes : include/lib
+  Stratego-Sugar includes : include/lib
 
   provider          : include/runtime-libraries.ctree
