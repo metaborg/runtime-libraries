@@ -39,7 +39,7 @@ rules
      ; <reverse; stmts(sg-dot-node(|"square"))> ir* => ir-nodes
      ; <reverse; stmts(sg-dot-arrow-from(|s,"empty"))> ir* => ir-arrows
      ; <reverse; stmts(sg-dot-arrow-from(|s,"empty"))> is* => is-arrows
-     ; <collect(?ScopeVar(_)); stmts(sg-dot-node(|"circle"))> is* => scope-var-nodes
+     ; <collect(?Var(_)); stmts(sg-dot-node(|"circle"))> is* => scope-var-nodes
 
 
   sg-dot-parent(|s): NoneScope() -> ""
@@ -57,8 +57,8 @@ rules
   sg-dot-id: Scope(s) -> $["[s]"]
   sg-dot-lbl: Scope(s) -> $[<[s]>]
 
-  sg-dot-id: ScopeVar(s) -> $["s[s]?"]
-  sg-dot-lbl: ScopeVar(s) -> $[<&sigmaf;<sub>[s]</sub>>]
+  sg-dot-id: Var(s) -> $["s[s]?"]
+  sg-dot-lbl: Var(s) -> $[<&sigmaf;<sub>[s]</sub>>]
 
   sg-dot-id: DeclId(ns,n,i) -> ${"{n}_{i}"}
   sg-dot-lbl: DeclId(ns,n,i) -> ${<{n}<sub>{i}</sub>>}

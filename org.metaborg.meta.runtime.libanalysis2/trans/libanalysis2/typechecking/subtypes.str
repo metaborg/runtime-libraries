@@ -17,7 +17,7 @@ signature
 
 rules
 
-  new-subtype-relation = fail
+  new-subtype-relation = <debug;fail> "ERROR: Forgot to define/include subtype relation"
 
   // The first supertype must be the itself, any variables used as type arguments
   // can be used also as arguments to super types
@@ -27,7 +27,7 @@ rules
     ![ (TInt(), ( [] , [ (TInt(),[]) ]))
      , (TBool(), ( [] , [ (TBool(),[]) ]))
      , (TFun(), ( [Contravariant(),Covariant()]
-                  , [ (TFun(),[TVar("T"),TVar("R")]) ]))
+                  , [ (TFun(),[Var("T"),Var("R")]) ]))
      ]
   */
 
@@ -101,7 +101,7 @@ rules
         ) => (tc,a*,tc',a'*)
   with <lookup> (tc, x*) => (v*,sr*@[(tc,fa*)|_])
       ; <lookup> (tc',sr*) => fa'*
-      ; <zip;S-foldr(![],unifyt)> (fa'*,a'*) => s
+      ; <zip;S-foldr(![],unify)> (fa'*,a'*) => s
       ; <zip> (v*, <zip> (a*,fa'*)) => a'*
   where <map( ?(Invariant(),<id>) ; ( !(<Fst>,<lookup> (<Snd>, s)) < inv + Fst )
            <+ ?(Covariant(),<id>) ; ( !(<Fst>,<lookup> (<Snd>, s)) < cov + Fst )
@@ -130,5 +130,5 @@ rules
 
 rules
   
-  pp-Supertype = tapp(pp-Analysis-string,map(pp-Analysis-string))
-  pp-SubtypeRelation = map(tapp(pp-Analysis-string,tapp(map(pp-Analysis-string),map(pp-Supertype))))
+  pp-Supertype = (pp-Analysis-string,map(pp-Analysis-string))
+  pp-SubtypeRelation = map((pp-Analysis-string,(map(pp-Analysis-string),map(pp-Supertype))))

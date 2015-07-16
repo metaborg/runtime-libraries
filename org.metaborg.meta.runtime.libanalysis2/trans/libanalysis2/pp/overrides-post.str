@@ -1,0 +1,10 @@
+module pp/overrides-post
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  src-gen/signatures/libanalysis2/-
+
+rules
+
+  prettyprint-Term: t -> [S(<write-to-string> t)]

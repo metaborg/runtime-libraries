@@ -21,7 +21,7 @@ signature
     Sol : Graph
         * List((RefId,DeclId))
         * List((Pos,Type))
-        * List((TVar,Type))
+        * List((Var,Type))
         * SubtypeRelation
         * List(Type,Type) -> Solution
 
@@ -74,10 +74,9 @@ rules
      ; foldr(!sol-wm',sol-wm-apply-s-error(|pos)) => sol-wm''
 
   sol-wm-apply-s-error(|pos): ((v,t),sol-wm) -> sol-wm'
-  with <not(?None())<+!v> pos => pos'
-     ; msg := $[Recursive type: [<pp-Analysis-string> v] = [<pp-Analysis-string> t]]
-     ; sol-wm' := <add-error(|(pos',msg))> sol-wm
-  
+  with msg := $[Recursive type: [<pp-Analysis-string> v] = [<pp-Analysis-string> t]]
+     ; sol-wm' := <add-error(|(pos,msg))> sol-wm
+
 rules
 
   initial-solution = sol-new;pureWM
@@ -98,6 +97,7 @@ rules
                         <+ solve-subtype-fact
                         <+ solve-position-constraint
                         <+ solve-eqtype-constraint
+                        <+ solve-substitution-constraint
                         <+ check-subtype-constraint
                         <+ solve-trivial-constraints
                         <+ solve-ignore

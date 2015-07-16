@@ -12,11 +12,13 @@ signature
 
   constructors
     G : List((Scope,ScopeImpl)) * List((DeclId,Scope)) -> Graph
-    S : OptionScope * List(DeclId) * List(RefId) * List(RefId) * List(Scope) -> ScopeImpl
+    S : OptionScope * List(DeclId) * List(RefId) *
+        List((Label,RefId)) * List((Label,Scope)) -> ScopeImpl
+    // S : OptionScope * List(DeclId) * List(RefId) * List(RefId) * List(Scope) -> ScopeImpl
 
 rules
 
-  G-new = !G([],[])
+  G-new = !G([(Global(),<G--new_s>)],[])
   G--new_s = !S(NoneScope(),[],[],[],[])
   G-with-parent   = ?(G(s*,a*),s,p)  ; !G(<update(?S(_,d*,r*,ri*,si*);!S(p,d*,r*,ri*,si*)      ,G--new_s)> (s,s*), a*)
   G-with-decl     = ?(G(s*,a*),s,d)  ; !G(<update(?S(p,d*,r*,ri*,si*);!S(p,[d|d*],r*,ri*,si*)  ,G--new_s)> (s,s*), a*)
@@ -37,5 +39,10 @@ rules
 
 rules
   
-  pp-Graph = tapp(map(tapp(pp-Analysis-string,pp-ScopeImpl)),map(tapp(pp-Analysis-string,pp-Analysis-string))|"G")
-  pp-ScopeImpl = tapp(pp-Analysis-string,map(pp-Analysis-string),map(pp-Analysis-string),map(pp-Analysis-string),map(pp-Analysis-string)|"S")
+  pp-Graph = G( map((pp-Analysis-string,pp-ScopeImpl))
+              , map((pp-Analysis-string,pp-Analysis-string)))
+  pp-ScopeImpl = S( pp-Analysis-string
+                  , map(pp-Analysis-string)
+                  , map(pp-Analysis-string)
+                  , map((pp-Analysis-string,pp-Analysis-string))
+                  , map((pp-Analysis-string,pp-Analysis-string)))

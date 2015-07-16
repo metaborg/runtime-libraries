@@ -2,8 +2,6 @@ module libanalysis2/prelude/base
 
 rules
 
-  if(s) = ?x ; s ; !x
-
   noop(s) = id
 
   xmlencode =
@@ -11,4 +9,12 @@ rules
   ; try(string-replace(|"<","&lt;"))
   ; try(string-replace(|">","&gt;"))
 
+  debugwrap(n,s) = ?t ; <s> t ; debug(!$[[<n>]: [<write-to-string> t] -> ])
   debugwrap(s) = ?t ; <s> t ; debug(!$[[<write-to-string> t] -> ])
+
+  debugwrapfail(n,s) =
+    ?t
+  ; ( <s> t
+    < debug(!$[[<n>]: [<write-to-string> t] -> ])
+    + <debug> $[[<n>]: [<write-to-string> t] -> fail] ; fail
+    )

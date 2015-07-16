@@ -16,13 +16,9 @@ rules
     do-extract-constraint
   ; (id,constraint-to-list;constraints-nontrivial)
 
-  constraint-to-list:
-    CAndStar(c*) -> <constraint-to-list> c*
-  constraint-to-list:
-    c* -> <map(constraint-to-list);concat> c*
-    where <is-list> c*
-  constraint-to-list:
-    c -> [c]
-    where <not(is-list)> c
-
-  constraints-nontrivial = filter(not(?CTrue()))
+  constraint-to-list = 
+     ?CAndStar(<constraint-to-list>) 
+  <+ mapconcat(constraint-to-list) 
+  <+ ![<id>]
+  
+  constraints-nontrivial = remove-all(?CTrue())

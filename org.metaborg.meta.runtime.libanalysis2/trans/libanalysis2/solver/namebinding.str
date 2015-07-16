@@ -22,14 +22,14 @@ rules
      ; <G-with-ref> (g,s,r) => g'
      ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
 
-  solve-namebinding-fact: (FImportR(r,s),sol-wm)  -> [(sol-wm',[])]
+  solve-namebinding-fact: (FImportR(r,l,s),sol-wm)  -> [(sol-wm',[])]
   with <fromWM;sol-g> sol-wm => g
-     ; <G-with-r-import> (g,s,r) => g'
+     ; <G-with-r-import> (g,s,(r,l)) => g'
      ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
 
-  solve-namebinding-fact: (FImportS(s',s),sol-wm) -> [(sol-wm',[])]
+  solve-namebinding-fact: (FImportS(s',l,s),sol-wm) -> [(sol-wm',[])]
   with <fromWM;sol-g> sol-wm => g
-     ; <G-with-s-import> (g,s,s') => g'
+     ; <G-with-s-import> (g,s,(s',l)) => g'
      ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
 
   solve-namebinding-fact: (FParent(s,p),sol-wm)   -> [(sol-wm',[])]
@@ -44,25 +44,32 @@ rules
 
 rules
 
-  solve-namebinding-constraint: (CResolves(r,d,pos),sol-wm) -> res*
-  where <resolve> (r, <fromWM;sol-g> sol-wm) => Total(d*@[_|_])
-      ; <fromWM;sol-r> sol-wm => r*
-  with ( <lookup> (r,r*)
-       < <unifyd(|pos)> (d,<id>) => s-wm
-       ; !( <S-apply> (<fromWM> s-wm, d)
-          , <sol-wm-apply-s(|pos)> (s-wm,sol-wm)
-          )
-       + !(d, <fmap(sol-set-r(|r,d))> sol-wm)
-       ) => (d', sol-wm')
-       ; <map( <unifyd(|pos)> (d',<id>)
-             ; !(<sol-wm-apply-s(|pos)> (<id>,sol-wm'),[])
-             )> d* => res*
+  solve-namebinding-constraint: (CResolves(r,l,d,pos),sol-wm) -> [(sol-wm'',[])]
+  where <fromWM;sol-r> sol-wm => r*
+      ; <lookup> (r,r*) => (d',l')
+  with <unify-wm(|pos)> (d,d') => s-wm
+     ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm) => sol-wm'
+     ; <unify-wm(|pos)> (l,l') => s-wm'
+     ; <sol-wm-apply-s(|pos)> (s-wm',sol-wm') => sol-wm''
+
+  solve-namebinding-constraint: (CResolves(r,l,d,pos),sol-wm) -> res*
+  where <fromWM;sol-r> sol-wm => r*
+      ; <not(lookup)> (r,r*)
+      ; <resolve> (r, <fromWM;sol-g> sol-wm) => Total(dl*@[_|_])
+  with <map(solve-namebinding-constraint-step(|r,l,d,pos,sol-wm))> dl* => res*
+
+  solve-namebinding-constraint-step(|r,l,d,pos,sol-wm): (d',l') -> (sol-wm''',[])
+  with <fmap(sol-set-r(|r,(d',l')))> sol-wm => sol-wm'
+     ; <unify-wm(|pos)> (d,d') => s-wm
+     ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm') => sol-wm''
+     ; <unify-wm(|pos)> (l,l') => s-wm'
+     ; <sol-wm-apply-s(|pos)> (s-wm',sol-wm'') => sol-wm'''
 
   solve-namebinding-constraint: (CAssoc(d,s,pos),sol-wm) -> [(sol-wm',[])]
   where <is-ground> d
       ; <fromWM;sol-g> sol-wm => g
       ; <G-assoc> (g,d) => s'
-  with <unifys(|pos)> (s,s') => s-wm
+  with <unify-wm(|pos)> (s,s') => s-wm
      ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm) => sol-wm'
  
 rules
@@ -70,4 +77,4 @@ rules
   is-var: t -> t
   where <is-decl-var> t
 
-  is-decl-var: DeclVar(_) -> <id>
+  is-decl-var: Var(_) -> <id>

@@ -14,14 +14,14 @@ rules
   csolve-repeat(preprocess,solve,postprocess): (e,c*) -> res*
   with csolve(preprocess,solve)
      ; map( !(<postprocess>, <Snd>)
-          ; if(<eq> (e,<Fst>)) ; ![<id>]
+          ; where(<eq> (e,<Fst>)) ; ![<id>]
          <+ csolve-repeat(preprocess,solve,postprocess)
           );concat => res*
 
   // csolve :: (e,[c]) -> [(e,[c]])]
   csolve(preprocess,solve): (e,c*) -> res*
   with <csolve-step(preprocess,solve)> (c*,e,[])
-     ; map( if(<eq> (<Snd>,[]) <+ <set-eq> (<Snd>,c*)) ; ![<id>]
+     ; map( where(<eq> (<Snd>,[]) <+ <set-eq> (<Snd>,c*)) ; ![<id>]
           <+ csolve(preprocess,solve)
           );concat => res*
 
