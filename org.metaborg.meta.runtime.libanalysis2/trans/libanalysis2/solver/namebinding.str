@@ -74,7 +74,6 @@ rules
  
 rules
 
-  is-var: t -> t
-  where <is-decl-var> t
+  is-var = is-decl-var
 
-  is-decl-var: Var(_) -> <id>
+  is-decl-var = ?Var(_)
