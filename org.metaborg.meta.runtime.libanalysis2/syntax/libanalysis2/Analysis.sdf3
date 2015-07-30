@@ -65,10 +65,17 @@ sorts
   Constraint
   Substitution
 
-context-free syntax
+context-free syntax // unification
 
   Constraint.CTrue          = <T>
   Constraint.CAndStar       = <<{Constraint "/\\"}*>> {longest-match}
+  Constraint.CEqual        = [[Eqable] == [Eqable] [Pos]]
+
+context-free syntax // types
+
+  Constraint.CTypeOf        = <<Pos> : <Type> <Pos>>
+
+context-free syntax // name resolution
 
   Constraint.FDecl          = <<DeclId> in <Scope>>
   Constraint.FRef           = <<RefId> in <Scope>>
@@ -77,14 +84,19 @@ context-free syntax
   Constraint.FParent        = <parent(<Scope>) is <OptionScope>>
   Constraint.FAssoc         = <<DeclId> with <Scope>>
 
+  Constraint.CResolves      = [[RefId] |-[Term]-> [DeclId] [Pos]]
+  Constraint.CAssoc         = [[DeclId] ~~> [Scope] [Pos]]
+  Constraint.CDistinct      = <distinct <Scope> <Pos>>
+  Constraint.CInit          = <init <Scope> <Pos>>
+
+context-free syntax // subtyping
+
   Constraint.FSubType       = [[TypeDef] <: [Type] [Pos]]
 
-  Constraint.CResolves      = [[RefId] |-[Term]-> [DeclId] [Pos]]
-  Constraint.CEqual        = [[Eqable] == [Eqable] [Pos]]
   Constraint.CLubType       = [[Type] == lub([Type],[Type]) [Pos]]
   Constraint.CSubType       = [[Type] <= [Type] [Pos]]
-  Constraint.CAssoc         = [[DeclId] ~~> [Scope] [Pos]]
-  Constraint.CTypeOf        = <<Pos> : <Type> <Pos>>
+
+context-free syntax // substitutions
 
   Constraint.CMkSub         = [[Substitution] == [Type] |-->* [Type] [Pos]]
   Constraint.CComposeSub    = <<Substitution> == <SubstitutionList> <Pos>>
@@ -118,3 +130,5 @@ context-free syntax
 
   SubstitutionList          = <[<{Substitution ","}*>]>
   SubstitutionList          = Var
+
+  Atom                      = <atom(<Namespace>,<String>)>

@@ -6,109 +6,112 @@ imports
   libanalysis2/pp
   libanalysis2/prelude/-
 
-// Resolution = [(Ref,Partial([(Decl,[Label])]))]
+signature
+  // types
+  //   Atom = (Ns,String)
+  //   Resolution = Partial [(Atom,Partial [(Decl,[Label])])]
 
 rules
 
-  // resolve-all :: Graph -> [(Ref * Partial([(Decl,[Label])]))]
+  // resolve-all(|Graph) :: [(Ref,Partial [(Decl,[Label])])]
   resolve-all =
-  	?g ; G-refs ; map(!(<id>,<resolve(|g,[])>))
+    ?g
+  ; G-refs
+  ; map(!(<id>,<resolve(|g)>))
 
-  // resolve :: Ref * Graph -> Partial([(Decl,[Label])])
-  resolve =
-  	?(<id>,g) ; resolve(|g,[])
+  // resolve(|Graph) :: Ref -> Partial [(Decl,[Label])]
+  resolve(|g) = resolve(|g,[])
 
 rules // resolution internal
 
   // resolve :: Ref -> Partial [(Decl,[Label])]
   resolve(|g,ir*) =
     ?r
-  ; <G-scope> (g,r) => s
-  ; <resolve_v(|g,[r|ir*],[])> (r,s)
+  ; <G-scope> (g,r) // :: Scope
+  ; env_v(|g,[r|ir*],[]) // :: Partial [(Atom,Partial [(Decl,[Label])])]
+  ; ( <lookup> (<atom> r, <fromP>) // :: Partial [(Decl,[Label])]
+   <+ fmap(![])
+    ) // :: Partial [(Decl,[Label])]
 
-  // resolve_v :: Ref * Scope -> Partial [(Decl,[Label])]
-  resolve_v(|g,ir*,s*) =
-    shadows( resolve_l(|g,ir*,s*)
-           , resolve_p(|g,ir*,s*)
-           )
+  // env_v(|Graph,[Ref],[Scope]) :: Scope -> Partial [(Atom,Partial [(Decl,[Label])])]
+  env_v(|g,ir*,s*) =
+    <shadow> ( <env_l(|g,ir*,s*)>
+             , <env_p(|g,ir*,s*)>
+             )
 
-  // resolve_l :: Ref * Scope -> Partial([(Decl,[Label])])
-  resolve_l(|g,ir*,s*) =
-    shadows ( resolve_d(|g,ir*,s*)
-            , resolve_i(|g,ir*,s*)
-            )
+  // env_l(|Graph,[Ref],[Scope]) :: Scope -> Partial [(Atom,Partial [(Decl,[Label])])]
+  env_l(|g,ir*,s*) =
+    <shadow> ( <env_d(|g,ir*,s*)>
+             , <env_i(|g,ir*,s*)>
+             )
 
-  // resolve_d :: Ref * Scope -> Partial [(Decl,[Label])]
-  resolve_d(|g,ir*,s*) =
-    ?(r,s)
+  // env_d(|Graph,[Ref],[Scope]) :: Scope -> Partial [(Atom,Partial [(Decl,[Label])])]
+  env_d(|g,ir*,s*) =
+    ?s
   ; ( <elem> (s,s*)
-    < <pureP> []
+    < []
     + <G-decls> (g,s) // :: [Decl]
-    ; match-all(|r) // :: [Decl]
-    ; map(!(<id>,[]))
-    ; pureP
+    ; group(atom) // :: [(Atom,[Decl])]
+    ; mapv(map(!(<id>,[]));pureP) // :: [(Atom,Partial [(Decl,[Label])])]
     )
+  ; pureP // :: Partial [(Atom,Partial [(Decl,[Label])])]
 
-  // resolve_i :: Ref * Scope -> Partial [(Decl,[Label])]
-  resolve_i(|g,ir*,s*) =
-    ?(r,s)
+  // env_i(|Graph,[Ref],[Scope]) :: Scope -> Partial [(Atom,Partial [(Decl,[Label])])]
+  env_i(|g,ir*,s*) =
+    ?s
   ; ( <elem> (s,s*)
     < <pureP> []
     + <G-r-imports> (g,s) // :: [(Ref,Label)]
     ; filter(not(<elem> (<Fst>,ir*))) // :: [(Ref,Label)]
-    ; map(resolve_i_ref2s(|g,ir*)) // :: [Partial([(Decl,Label)])]
-    ; sequenceP // :: Partial([[(Decl,Label)]])
+    ; map(resolve_i_r2s(|g,ir*)) // :: [Partial [(Decl,Label)]]
+    ; sequenceP // :: Partial [[(Decl,Label)]] | outer partial
     ; fmap( unions // :: [(Decl,Label)]
           ; filter((<G-assoc> (g,<id>),id)) // :: [(Scope,Label)]
-          ; <union> (<G-s-imports>  (g,s) // :: [(Scope,Label)]
-                    ,<id> // :: [(Scope,Label)]
+          ; <union> ( <id> // :: [(Scope,Label)]
+                    , <G-s-imports>  (g,s) // :: [(Scope,Label)]
                     ) // :: [(Scope,Label)]
           ; filter(not(<elem> (<Fst>,s*))) // :: [(Scope,Label)]
-          ; filterToP(?(Scope(_),_)) // Partial([(Scope,Label)])
-          ) // :: Partial(Partial([(Scope,Label)]))
-    ; join // :: Partial([(Scope,Label)])
-    ; fmap( map(<resolve_i_l(|g,ir*,[s|s*])> (r,<id>)) // :: [Partial([(Decl,[Label])])]
-          ; sequenceP // :: Partial([[(Decl,[Label])]])
-          ; fmap(unions) // :: Partial([(Decl,[Label])])
-          ) // :: Partial(Partial([(Decl,[Label])]))
-    ; join // :: Partial([(Decl,[Label])])
+          ; map( ?(Scope(_),_)
+               < env_i_l(|g,ir*,[s|s*]) // :: Partial [(Atom,Partial [(Decl,[Label])])]
+               + !Partial([]) // :: Partial [(Atom,Partial [(Decl,[Label])])]
+               ) // :: [Partial [(Atom,Partial [(Decl,[Label])])]]
+          ; sequenceP // :: Partial [[(Atom,Partial [(Decl,[Label])])]]
+          ; fmap( foldr(![],merge(union,mplus(union))) // :: [(Atom,Partial [(Decl,[Label])])]
+                ) // :: Partial [(Atom,Partial [(Decl,[Label])])]
+          ) // :: Partial (Partial [(Atom,Partial [(Decl,[Label])])])
+    ; join // :: Partial [(Atom,Partial [(Decl,[Label])])]
     )
 
-  // (Ref,Label) -> Partial([(Decl,Label)])
-  resolve_i_ref2s(|g,ir*) =
+  // resolve_i_r2s(|Graph,[Ref]) :: (Ref,Label) -> Partial [(Decl,Label)]
+  resolve_i_r2s(|g,ir*) =
     ?(r,l)
-  ; <resolve(|g,ir*)> r // :: Partial([(Decl,[Label])])
+  ; <resolve(|g,ir*)> r // :: Partial [(Decl,[Label])]
   ; fmap(map(!(<Fst>,l))) // :: Partial([(Decl,Label)])
 
-  // (Ref,(Scope,Label)) -> Partial([(Decl,[Label])])
-  resolve_i_l(|g,ir*,s*) =
-    ?(r,(s,l))
-  ; <resolve_l(|g,ir*,s*)> (r,s) // :: Partial([(Decl,[Label])])
-  ; fmap(map((id,![l|<id>]))) // :: Partial([(Decl,[Label])])
+  // env_i_l(|Graph,[Ref],[Scope]) :: (Scope,Label) -> Partial [(Atom,Partial [(Decl,[Label])])]
+  env_i_l(|g,ir*,s*) =
+    ?(s,l)
+  ; <env_l(|g,ir*,s*)> s // :: Partial [(Atom,Partial [(Decl,[Label])])]
+  ; fmap(map((id,fmap(map((id,![l|<id>])))))) // :: Partial [(Atom,Partial [(Decl,[Label])])]
 
-  // resolve_p :: Ref * Scope -> Partial [(Decl,[Label])]
-  resolve_p(|g,ir*,s*) = 
-    ?(r,s)
+  // env_p(|Graph,[Ref],[Scope]) :: Scope -> Partial [(Atom,Partial [(Decl,[Label])])]
+  env_p(|g,ir*,s*) =
+    ?s
   ; ( <elem> (s,s*)
     < <pureP> []
     + ( <G-parent> (g,s)
-      < <resolve_v(|g,ir*,[s|s*])> (r,<id>)
+      < env_v(|g,ir*,[s|s*])
       + <pureP> []
       )
     )
 
-  // shadows(s1: (Ref * Scope) -> Partial [(Decl,[Label])]
-  //        ,s2: (Ref * Scope) -> Partial [(Decl,[Label])]) :: (Ref * Scope) -> Partial [(Decl,[Label])]
-  shadows(s1,s2) = ?(r,s) ; <s1> (r,s) ; ( ?Total([]) < <s2> (r,s) + id )
+  // shadow :: (Partial [(Atom,Partial [(Decl,[Label])])], Partial [(Atom,Partial [(Decl,[Label])])]) -> Partial [(Atom,Partial [(Decl,[Label])])]
+  shadow =
+    twrapP // :: Partial ([(Atom,Partial [(Decl,[Label])])], [(Atom,Partial [(Decl,[Label])])])
+  ; fmap(merge(union,Fst)) // :: Partial [(Atom,Partial [(Decl,[Label])])]
 
-  // match(|r: Ref) :: [Decl] -> [Decl]
-  match-all(|r) = filter(where(<match> (r,<id>)))
-
-  // match :: (Ref,Decl) -?> (Ref,Decl)
-  match = 
-    ?(RefId(ns,n,_),DeclId(ns',n',_))
-  ; where(<strip-annos;eq> (ns,ns'))
-  ; where(<strip-annos;eq> (n,n'))
+  atom: RefId(ns,n,_) -> <strip-annos> (ns, n)
+  atom: DeclId(ns,n,_) -> <strip-annos> (ns, n)
 
 rules
  
