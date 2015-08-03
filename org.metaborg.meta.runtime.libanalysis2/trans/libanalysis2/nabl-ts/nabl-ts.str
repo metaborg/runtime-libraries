@@ -11,32 +11,36 @@ imports
 rules
   
   nabl-ts-constraint(|facts, constraints, scopes, position) = fail
+  nabl-ts-scope(|facts, constraints, scopes, position) = fail
   
 rules
 
   do-extract-constraint =
     ?ast;
     // Ensure all dynamic rules are properly scoped
-    dr-begin-scopes(|["NewScope","NewVar"]);
-    scope-counter := <new-counter>;
-    var-counter := <new-counter>;
-    rules( NewScope: _ -> <next-counter> scope-counter
-           NewVar: _ -> <next-counter> var-counter
-         );
-    facts := <new-iset>;
-    constraints := <new-iset>;
-    tvars := <new-hashtable>;
-    ast' := <
-    	annotate-keys; 
-      nabl-ts-traverse(|facts, constraints, [Global()], <get-position>)> ast;
-    f* := <iset-elements> facts;
-    c* := <iset-elements> constraints;
-    try(dr-end-scopes(|["NewScope","NewVar"]));
+    {| NewScope, NewVar, NewImplicit:
+	    scope-counter    := <new-counter>;
+	    var-counter      := <new-counter>;
+	    implicit-counter := <new-counter>;
+	    rules( NewScope: _ -> <next-counter> scope-counter
+	           NewVar: _ -> <next-counter> var-counter
+	           NewImplicit: _ -> <next-counter> implicit-counter
+	         );
+	    facts := <new-iset>;
+	    constraints := <new-iset>;
+	    tvars := <new-hashtable>;
+	    ast' := <
+	    	annotate-keys; 
+	      nabl-ts-traverse(|facts, constraints, [Global()], <get-position>)> ast;
+	    f* := <iset-elements> facts;
+	    c* := <iset-elements> constraints
+	  |};
     !(ast', [f*, c*])
 
   nabl-ts-traverse(|facts, constraints, scopes, position) =
   	with(position' := <get-position <+ !position>)
-  ; (  debug(!"enter "); nabl-ts-constraint(|facts, constraints, scopes, position'); debug(!"custom rule successful ")
+  ; (  debug(!"enter "); nabl-ts-constraint(|facts, constraints, scopes, position'); debug(!"ERROR: custom constraint rule successful ")
+	  <+ nabl-ts-scope(|facts, constraints, scopes, position'); debug(!"custom scope rule successful ")
 	  <+ debug(!"custom rule failed "); nabl-ts-traverse-children(|facts, constraints, scopes, position'); debug(!"generic rule successful ")
 	  <+ <debug(!"generic rule failed ")> scopes ; fail 
 	  )
@@ -57,4 +61,18 @@ rules
     with
       tv* := <map(!Var(<NewVar>))> l*
     ; c*  := <zip(!CTypeOf(<Fst; get-position>, <Snd>, msg))> (l*, tv*)
-    
+  
+  new-var = !Var(<NewVar>)
+  
+  get-implicit-decl-position(|term):
+    Pos(_, f, _, _, _, _) -> Pos($[[s][<NewImplicit>]], f, -1, -1, -1, -1)
+    with
+      s := <term-to-string> term
+  
+  get-implicit-ref-position(|term):
+    Pos(k, f, _, _, _, _) -> Pos($[[s][k]], f, -1, -1, -1, -1)
+    with
+      s := <term-to-string> term
+  
+  term-to-string = is-string <+ get-constructor <+ int-to-string
+  

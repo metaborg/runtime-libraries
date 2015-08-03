@@ -23,14 +23,10 @@ rules
 
 rules
 
-  is-op: t -> t
-  where <is-pos-op> t
+  is-op = is-pos-op
 
-  is-pos-op: POfDecl(_) -> <id>
-  is-pos-op: POfRef(_) -> <id>
+  is-pos-op = ?POfDecl(_) + ?POfRef(_)
 
-  reduce-op(|x*): t -> t'
-  where <reduce-pos-op(|x*)> t => t'
+  reduce-op(|x*) = reduce-pos-op(|x*)
 
-  reduce-pos-op(|x*): POfDecl(d@DeclId(_,_,pos)) -> pos
-  reduce-pos-op(|x*): POfRef(r@RefId(_,_,pos)) -> pos
+  reduce-pos-op(|x*) =?POfDecl(DeclId(_, _, <id>)) + ?POfRef(RefId(_, _, <id>))

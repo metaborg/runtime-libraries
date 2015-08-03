@@ -55,7 +55,8 @@ rules
   solve-namebinding-constraint: (CResolves(r,l,d,pos),sol-wm) -> res*
   where <fromWM;sol-r> sol-wm => r*
       ; <not(lookup)> (r,r*)
-      ; <resolve> (r, <fromWM;sol-g> sol-wm) => Total(dl*@[_|_])
+      ; <fromWM;sol-g> sol-wm => g
+      ; <resolve(|g)> r => Total(dl*@[_|_])
   with <map(solve-namebinding-constraint-step(|r,l,d,pos,sol-wm))> dl* => res*
 
   solve-namebinding-constraint-step(|r,l,d,pos,sol-wm): (d',l') -> (sol-wm''',[])
@@ -72,9 +73,22 @@ rules
   with <unify-wm(|pos)> (s,s') => s-wm
      ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm) => sol-wm'
  
-rules
+  solve-namebinding-constraint: (CDistinct(s,pos),sol-wm) -> [(sol-wm',[])]
+  where <is-ground> s
+      ; <sol-g> sol-wm => g
+      ; <G-decls;map(atom)> (g,s) => d*
+  with ( <dups> d* => d'*
+       < <add-error(|(pos,$[Duplicate declarations [<write-to-string> d'*]]))> sol-wm
+       + !sol-wm
+       ) => sol-wm'
 
-  is-var: t -> t
-  where <is-decl-var> t
-
-  is-decl-var: Var(_) -> <id>
+  solve-namebinding-constraint: (CInit(s,pos),sol-wm) -> [(sol-wm',[])]
+  where <is-ground> s
+      ; <sol-g> sol-wm => g
+      ; <G-refs;map(atom)> (g,s) => r*
+      ; <env_v(|g,[],[]);fmap(keys)> s => Total(d*)
+  with <isect> (r*,d*) => i*
+     ; ( ?[]
+       < !sol-wm
+       + <add-error(|(pos,$[Mismatch [<write-to-string> i*]]))> sol-wm
+       ) => sol-wm'

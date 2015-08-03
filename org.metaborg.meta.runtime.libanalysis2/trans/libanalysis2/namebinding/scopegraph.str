@@ -14,7 +14,6 @@ signature
     G : List((Scope,ScopeImpl)) * List((DeclId,Scope)) -> Graph
     S : OptionScope * List(DeclId) * List(RefId) *
         List((Label,RefId)) * List((Label,Scope)) -> ScopeImpl
-    // S : OptionScope * List(DeclId) * List(RefId) * List(RefId) * List(Scope) -> ScopeImpl
 
 rules
 
