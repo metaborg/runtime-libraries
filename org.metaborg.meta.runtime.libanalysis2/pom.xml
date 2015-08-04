@@ -6,7 +6,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <name>libanalysis2</name>
-    <artifactId>org.spoofax.meta.runtime.libanalysis2</artifactId>
+    <artifactId>org.metaborg.meta.runtime.libanalysis2</artifactId>
     <packaging>spoofax-language</packaging>
 
     <parent>
@@ -43,6 +43,7 @@
             <plugin>
                 <groupId>org.metaborg</groupId>
                 <artifactId>spoofax-maven-plugin</artifactId>
+                <extensions>true</extensions>
                 <dependencies>
                     <dependency>
                         <groupId>org.metaborg</groupId>
