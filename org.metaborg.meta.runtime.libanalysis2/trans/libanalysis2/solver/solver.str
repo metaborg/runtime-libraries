@@ -26,7 +26,9 @@ signature
         * List(Type,Type) -> Solution
 
 rules
-  
+ 
+  new-subtype-relation = where(<debug;fail> "ERROR: Define new-subtype-relation")
+ 
   sol-new = !Sol(<G-new>,[],[],[],<new-subtype-relation>,[])
 
   sol-g = ?Sol(<id>,_,_,_,_,_) 
