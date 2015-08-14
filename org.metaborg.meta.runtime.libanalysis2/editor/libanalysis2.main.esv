@@ -16,9 +16,9 @@ language General properties
   table             : include/libanalysis2.tbl
   start symbols     : NotImplemented
 
-  SDF includes          : include/libanalysis2.def
-  TemplateLang includes : include/sdf3
-  ds includes           : include/ds
-  Stratego includes     : include/lib
+  SDF includes            : include/libanalysis2.def
+  TemplateLang includes   : syntax
+  ds includes             : src-gen/ds-signatures
+  Stratego-Sugar includes : trans
 
   provider          : include/libanalysis2.ctree
