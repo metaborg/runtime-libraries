@@ -23,6 +23,21 @@
       <version>${metaborg-version}</version>
       <type>spoofax-language</type>
     </dependency>
+
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>org.metaborg.meta.lang.template</artifactId>
+      <version>${metaborg-version}</version>
+      <type>spoofax-language</type>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.metaborg</groupId>
+      <artifactId>org.metaborg.meta.lang.esv</artifactId>
+      <version>${metaborg-version}</version>
+      <type>spoofax-language</type>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -46,20 +61,6 @@
         <groupId>org.metaborg</groupId>
         <artifactId>spoofax-maven-plugin</artifactId>
         <extensions>true</extensions>
-        <dependencies>
-          <dependency>
-            <groupId>org.metaborg</groupId>
-            <artifactId>org.metaborg.meta.lang.template</artifactId>
-            <version>${metaborg-version}</version>
-            <type>spoofax-language</type>
-          </dependency>
-          <dependency>
-            <groupId>org.metaborg</groupId>
-            <artifactId>org.metaborg.meta.lang.esv</artifactId>
-            <version>${metaborg-version}</version>
-            <type>spoofax-language</type>
-          </dependency>
-        </dependencies>
       </plugin>
     </plugins>
   </build>
