@@ -1,7 +1,7 @@
 module solver/substitution
 
 imports
-  src-gen/signatures/libanalysis2/-
+  signatures/libanalysis2/-
   libanalysis2/abstract-syntax/-
   libanalysis2/substitution/-
   libanalysis2/namebinding/-

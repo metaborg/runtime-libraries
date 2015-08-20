@@ -2,7 +2,7 @@ module libanalysis2/solver/namebinding
 
 imports
   
-  src-gen/signatures/libanalysis2/-
+  signatures/libanalysis2/-
   libanalysis2/substitution/-
   libanalysis2/namebinding/-
   libanalysis2/typechecking/-

@@ -1,7 +1,7 @@
 module libanalysis2/namebinding/dot
 
 imports
-  src-gen/signatures/libanalysis2/-
+  signatures/libanalysis2/-
   libanalysis2/namebinding/-
   libanalysis2/pp
  

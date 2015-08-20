@@ -7,7 +7,7 @@ imports
   libanalysis2/typechecking/-
   libanalysis2/solver/-
   libanalysis2/pp
-  src-gen/signatures/libanalysis2/-
+  signatures/libanalysis2/-
  
 rules
  

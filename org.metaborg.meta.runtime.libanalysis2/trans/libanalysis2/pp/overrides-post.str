@@ -3,7 +3,7 @@ module pp/overrides-post
 imports
   libstratego-gpp
   runtime/tmpl/pp
-  src-gen/signatures/libanalysis2/-
+  signatures/libanalysis2/-
 
 rules
 

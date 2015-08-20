@@ -52,8 +52,8 @@
         <targetPath>syntax</targetPath>
       </resource>
       <resource>
-        <directory>src-gen/ds-signatures</directory>
-        <targetPath>src-gen/ds-signatures</targetPath>
+        <directory>src-gen</directory>
+        <targetPath>src-gen</targetPath>
       </resource>
     </resources>
 
