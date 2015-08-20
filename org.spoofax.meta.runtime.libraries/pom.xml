@@ -21,7 +21,7 @@
       <artifactId>org.metaborg.meta.lang.esv</artifactId>
       <version>${metaborg-baseline-version}</version>
       <type>spoofax-language</type>
-      <scope>provided</scope>
+      <scope>${metaborg-meta-lang-scope}</scope>
     </dependency>
   </dependencies>
 
@@ -37,6 +37,8 @@
       <plugin>
         <groupId>org.metaborg</groupId>
         <artifactId>spoofax-maven-plugin</artifactId>
+        <version>${metaborg-version}</version>
+        <extensions>true</extensions>
       </plugin>
     </plugins>
   </build>
