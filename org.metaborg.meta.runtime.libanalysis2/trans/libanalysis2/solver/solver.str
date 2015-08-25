@@ -27,7 +27,7 @@ signature
 
 rules
   
-  sol-new = !Sol(<G-new>,[],[],[],<new-subtype-relation>,[])
+  sol-new = !Sol(<G-new>,[],[],[],[],[])
 
   sol-g = ?Sol(<id>,_,_,_,_,_) 
   sol-r = ?Sol(_,<id>,_,_,_,_) 

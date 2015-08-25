@@ -2,6 +2,7 @@ module libanalysis2/solver/errors
 
 imports
   src-gen/signatures/libanalysis2/-
+  libanalysis2/namebinding/-
   libanalysis2/substitution/-
   libanalysis2/solver/-
   libanalysis2/prelude/-
@@ -11,7 +12,9 @@ rules
 
   postprocess-errors: (sol-wm,c*) -> sol-wm'
   with <fromWM> sol-wm => sol
+     ; <sol-g> sol => g
      ; <sol-p> sol => p*
+     ; <sol-r> sol => r*
      ; <sol-lb> sol => lb*
      ; <free-errors> p* => fe*
      ; <map(unsolved-error)> c* => use*
@@ -24,6 +27,6 @@ rules
   unsolved-error: CSubType(ty1,ty2,pos) -> (pos,$[Could not determine if [<pp-Analysis-string> ty1] subtype of [<pp-Analysis-string> ty2]])
   unsolved-error: c -> (c,$[Unsolved: [<pp-Analysis-string> c]])
 
-  bound-error: (tv,ty)-> (tv,$[Unsolved bound: [<pp-Analysis-string> ty] <= [<pp-Analysis-string> tv]])
+  bound-error: (tv,ty) -> (tv,$[Unsolved bound: [<pp-Analysis-string> ty] <= [<pp-Analysis-string> tv]])
 
   free-errors = all-vars;nub;map(!(<id>,$[Free variable [<pp-Analysis-string>]]))

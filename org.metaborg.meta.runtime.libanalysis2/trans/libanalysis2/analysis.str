@@ -13,19 +13,18 @@ imports
 rules
 
   analyse: desugared-ast -> ( (analysed-ast, errors*, warnings*, notes*)
-                            , [ ("constraints",c*)
+                            , [ ("constraints",c1*)
                               , ("scopegraph",g)
                               , ("resolution",r)
                               , ("solutions", sol*)
                               ])
   with
-    (annotated-ast,c*) := <extract-constraints> desugared-ast
+    (annotated-ast,c1*) := <extract-constraints> desugared-ast
   ; sol-i := <initial-solution>
-  ; [(sol-wm1,c1*)] := <solve-constraints-phase1> (sol-i,c*)
-  ; g := <fromWM;sol-g> sol-wm1
+  ; [(sol-wm,c2*)] := <solve-constraints-phase1> (sol-i,c1*)
+  ; g := <fromWM;sol-g> sol-wm
   ; r := <resolve-all> g
-  ; r' := <filterv(fromP;Hd)> r
-  ; <solve-constraints-phase2;map(postprocess-errors)> (sol-wm1,c1*) => sol-wm*
+  ; <solve-constraints-phase2;map(postprocess-errors)> (sol-wm,c2*) => sol-wm*
   ; sol* := <map( ![ ("final-scopegraph", <fromWM;sol-g>)
                    , ("resolution", <fromWM;sol-r>)
                    , ("sub-types", <fromWM;sol-x>)
@@ -40,7 +39,7 @@ rules
   ; <partition(not(is-erronious))> sol-wm* => (good-wm*, bad-wm*)
   ; n := (None(),$[Found [<length> good-wm*] correct and [<length> bad-wm*] erronious solutions.])
   ; ( ( <Hd> good-wm* <+ <Hd> bad-wm* ) => sol-wm
-    < <(fromWM;sol-r,id);conc;mapv(Fst)> (sol-wm,r') => r*
+    < <fromWM;sol-r> sol-wm => r*
     ; resolved-ast := <apply-resolution(|r*)> annotated-ast
     ; <fromWM;sol-p;mapk(position-to-key)> sol-wm => p*
     ; typed-ast := <apply-types(|p*)> resolved-ast
@@ -48,12 +47,18 @@ rules
     ; errors* := <wm-errors;mapv(xmlencode)> sol-wm
     ; warnings* := <wm-warnings;mapv(xmlencode)> sol-wm
     ; notes* := [n,<wm-notes;mapv(xmlencode)> sol-wm]
-    + analysed-ast := <apply-resolution(|<mapv(Fst)> r')> annotated-ast
+    + analysed-ast := <apply-resolution(|<mapv(Fst)> r)> annotated-ast
     ; errors* := [(None(),"Error during analysis")]
     ; warnings* := []
     ; notes* := [n]
     )
 
+  get-editor-analysis = Fst
+  
+  get-debug-analysis = Snd
+
+rules
+  
   pp-analysis: [
     ("constraints",c*)
   , ("scopegraph",g)
