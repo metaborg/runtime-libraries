@@ -2,7 +2,6 @@ module libanalysis2/solver/csolve
 
 imports
   libanalysis2/prelude/-
-  libanalysis2/pp
 
 rules
 

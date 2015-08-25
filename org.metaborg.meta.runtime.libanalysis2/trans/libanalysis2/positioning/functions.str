@@ -1,4 +1,4 @@
-module libanalysis2/abstract-syntax/abstract-syntax
+module libanalysis2/positioning/functions
 
 imports
   runtime/editor/annotations

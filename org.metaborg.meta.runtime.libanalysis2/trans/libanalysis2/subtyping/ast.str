@@ -1,9 +1,9 @@
-module libanalysis2/typechecking/ast
+module libanalysis2/subtyping/ast
 
 imports
   runtime/editor/annotations
   runtime/editor/origins
-  libanalysis2/abstract-syntax/-
+  libanalysis2/positioning/functions
   libanalysis2/prelude/-
 
 signature

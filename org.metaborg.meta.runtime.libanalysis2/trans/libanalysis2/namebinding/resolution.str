@@ -1,10 +1,10 @@
 module libanalysis2/namebinding/resolution
 
 imports
-  src-gen/signatures/libanalysis2/-
-  libanalysis2/namebinding/-
+  libanalysis2/namebinding/scopegraph
   libanalysis2/pp
   libanalysis2/prelude/-
+  src-gen/signatures/libanalysis2/-
 
 signature
   // types
@@ -13,7 +13,7 @@ signature
 
 rules
 
-  // resolve-all(|Graph) :: [(Ref,Partial [(Decl,[Label])])]
+  // resolve-all :: Graph -> [(Ref,Partial [(Decl,[Label])])]
   resolve-all =
     ?g
   ; G-refs

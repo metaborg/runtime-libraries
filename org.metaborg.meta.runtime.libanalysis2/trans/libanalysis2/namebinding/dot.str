@@ -1,9 +1,9 @@
 module libanalysis2/namebinding/dot
 
 imports
-  src-gen/signatures/libanalysis2/-
-  libanalysis2/namebinding/-
+  libanalysis2/namebinding/scopegraph
   libanalysis2/pp
+  src-gen/signatures/libanalysis2/-
  
 rules
 

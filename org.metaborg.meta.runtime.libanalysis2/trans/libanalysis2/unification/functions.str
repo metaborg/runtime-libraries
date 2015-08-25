@@ -1,38 +1,12 @@
-module libanalysis2/substitution/substitution
+module libanalysis2/unification/functions
 
 imports
 
   libanalysis2/prelude/-
-  libanalysis2/namebinding/-
-  libanalysis2/typechecking/-
-  libanalysis2/solver/-
   libanalysis2/pp
+  libanalysis2/solver/varops
   src-gen/signatures/libanalysis2/-
  
-rules
- 
-  is-var: Var(_) -> <id>
-  all-vars = collect-all(is-var)
-
-  is-op = fail
-  reduce-op(|x*) = fail
-  reduce-ops(|x*) = innermost(reduce-op(|x*))
-
-  is-ground = where(collect-all(is-var <+ is-op) => [])
-
-rules
-  
-  unify-wm(|pos): (_,_) -> <unify;pureWM>
-  unify-wm(|pos): (t1,t2) ->  <pureWM;add-error(|(pos,msg))> []
-  with msg := $[Cannot unify [<pp-Analysis-string> t1] and [<pp-Analysis-string> t2]]
-
-  unify: (t,t) -> []
-  unify: (v@Var(_),t) -> [(v,t)]
-  unify: (t,v@Var(_)) -> [(v,t)]
-  unify: (Sub(_),_) -> <fail>
-  unify: (_,Sub(_)) -> <fail>
-  unify: (c#(a1*), c#(a2*)) -> <zip;S-foldr(![],unify)> (a1*, a2*)
-
 rules
 
   // S-foldr(s0: s, s: a -> s) :: [a] -> s

@@ -1,11 +1,12 @@
-module libanalysis2/typechecking/subtypes
+module libanalysis2/subtyping/functions
 
 imports
-  src-gen/signatures/libanalysis2/-
-  libanalysis2/substitution/-
-  libanalysis2/typechecking/-
   libanalysis2/prelude/-
   libanalysis2/pp
+  libanalysis2/subtyping/-
+  libanalysis2/solver/varops
+  libanalysis2/unification/functions
+  src-gen/signatures/libanalysis2/-
 
 signature
   sorts

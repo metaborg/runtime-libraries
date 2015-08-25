@@ -2,10 +2,11 @@ module libanalysis2/analysis
 
 imports
   src-gen/signatures/libanalysis2/-
-  libanalysis2/abstract-syntax/-
   libanalysis2/extraction/-
+  libanalysis2/positioning/-
+  libanalysis2/unification/-
   libanalysis2/namebinding/-
-  libanalysis2/typechecking/-
+  libanalysis2/subtyping/-
   libanalysis2/solver/-
   libanalysis2/prelude/-
   libanalysis2/pp
@@ -15,7 +16,7 @@ rules
   analyse: desugared-ast -> ( (analysed-ast, errors*, warnings*, notes*)
                             , [ ("constraints",c1*)
                               , ("scopegraph",g)
-                              , ("resolution",r)
+                              , ("resolution",pr*)
                               , ("solutions", sol*)
                               ])
   with
@@ -23,14 +24,14 @@ rules
   ; sol-i := <initial-solution>
   ; [(sol-wm,c2*)] := <solve-constraints-phase1> (sol-i,c1*)
   ; g := <fromWM;sol-g> sol-wm
-  ; r := <resolve-all> g
+  ; pr* := <resolve-all> g
+  ; r* := <filterv(fromP;Hd)> pr*
   ; <solve-constraints-phase2;map(postprocess-errors)> (sol-wm,c2*) => sol-wm*
   ; sol* := <map( ![ ("final-scopegraph", <fromWM;sol-g>)
                    , ("resolution", <fromWM;sol-r>)
                    , ("sub-types", <fromWM;sol-x>)
                    , ("pos-types", <fromWM;sol-p>)
                    , ("subst", <fromWM;sol-s>)
-                   , ("lower-bounds", <fromWM;sol-lb>)
                    , ("errors", <wm-errors>)
                    , ("warnings", <wm-warnings>)
                    , ("notes", <wm-notes>)
@@ -39,15 +40,15 @@ rules
   ; <partition(not(is-erronious))> sol-wm* => (good-wm*, bad-wm*)
   ; n := (None(),$[Found [<length> good-wm*] correct and [<length> bad-wm*] erronious solutions.])
   ; ( ( <Hd> good-wm* <+ <Hd> bad-wm* ) => sol-wm
-    < <fromWM;sol-r> sol-wm => r*
-    ; resolved-ast := <apply-resolution(|r*)> annotated-ast
+    < <fromWM;sol-r> sol-wm => r'*
+    ; resolved-ast := <apply-resolution(|<conc;mapv(Fst)> (r'*,r*))> annotated-ast
     ; <fromWM;sol-p;mapk(position-to-key)> sol-wm => p*
     ; typed-ast := <apply-types(|p*)> resolved-ast
     ; analysed-ast := typed-ast
     ; errors* := <wm-errors;mapv(xmlencode)> sol-wm
     ; warnings* := <wm-warnings;mapv(xmlencode)> sol-wm
     ; notes* := [n,<wm-notes;mapv(xmlencode)> sol-wm]
-    + analysed-ast := <apply-resolution(|<mapv(Fst)> r)> annotated-ast
+    + analysed-ast := <apply-resolution(|<mapv(Fst)> r*)> annotated-ast
     ; errors* := [(None(),"Error during analysis")]
     ; warnings* := []
     ; notes* := [n]
@@ -77,7 +78,6 @@ rules
   , ("sub-types", x*)
   , ("pos-types", p*)
   , ("subst", s*)
-  , ("lower-bounds", lb*)
   , ("errors", e*)
   , ("warnings", w*)
   , ("notes", n*)
@@ -87,7 +87,6 @@ rules
   , ("sub-types", <pp-SubtypeRelation> x*)
   , ("pos-types", <filter(not(irrelevant-pos));map((pp-Analysis-string,pp-Analysis-string))> p*)
   , ("subst", <map((pp-Analysis-string,pp-Analysis-string))> s*)
-  , ("lower-bounds", <map((pp-Analysis-string,pp-Analysis-string))> lb*)
   , ("errors", <map((pp-Analysis-string,id))> e*)
   , ("warnings", <map((pp-Analysis-string,id))> w*)
   , ("notes", <map((pp-Analysis-string,id))> n*)

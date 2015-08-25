@@ -1,0 +1,57 @@
+module libanalysis2/solver/solution
+
+imports
+  libanalysis2/namebinding/scopegraph
+  libanalysis2/pp
+  libanalysis2/prelude/-
+  libanalysis2/solver/varops
+  libanalysis2/unification/functions
+
+signature
+  sorts
+    Solution
+ 
+  constructors
+    Sol : Graph
+        * List((RefId,DeclId))
+        * List((Pos,Type))
+        * List((Var,Type))
+        * SubtypeRelation
+        -> Solution
+
+rules
+  
+  sol-new = !Sol(<G-new>,[],[],[],[])
+
+  sol-g = ?Sol(<id>,_,_,_,_) 
+  sol-r = ?Sol(_,<id>,_,_,_) 
+  sol-p = ?Sol(_,_,<id>,_,_)
+  sol-s = ?Sol(_,_,_,<id>,_)
+  sol-x = ?Sol(_,_,_,_,<id>)
+  
+  sol-with-g: (g,Sol(_,r*,p*,s*,x*)) -> Sol(g,r*,p*,s*,x*)
+
+  sol-apply-s: (s',Sol(g,r*,p*,s*,x*))
+    -> Sol(g',r'*,p'*,s'*,x*)
+    where g' := <S-apply> (s',g)
+        ; r'* := <S-apply;reduce-ops(|x*)> (s',r*)
+        ; p'* := <S-apply;reduce-ops(|x*)> (s',p*)
+        ; s'* := <S-compose;reduce-ops(|x*)> (s',s*)
+
+  sol-set-p(v): (p,Sol(g,r*,p*,s*,x*))
+    -> Sol(g,r*,p'*,s*,x*)
+  with ty := <v>
+     ; p'* := <set(!ty)> (p,p*)
+
+  sol-set-x(|ty*): (ty,Sol(g,r*,p*,s*,x*))
+    -> Sol(g,r*,p*,s*,x'*)
+  with <set(!ty*)> (ty,x*) => x'*
+
+  sol-set-r(|r,d): Sol(g,r*,p*,s*,x*)
+    -> Sol(g,r'*,p*,s*,x*)
+  with <set(!d)> (r,r*) => r'*
+
+rules
+  
+  sol-wm-apply-s: (s,sol-wm) -> sol-wm'
+  with <fmap(<sol-apply-s> (s,<id>))> sol-wm => sol-wm'

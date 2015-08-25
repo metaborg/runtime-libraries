@@ -2,12 +2,4 @@ module libanalysis2/libanalysis2
 
 imports
 
-    libanalysis2/abstract-syntax/-
-    libanalysis2/extraction/-
-    libanalysis2/namebinding/-
-    libanalysis2/prelude/-
-    libanalysis2/solver/-
-    libanalysis2/substitution/-
-    libanalysis2/typechecking/-
     libanalysis2/analysis
-    libanalysis2/pp

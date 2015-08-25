@@ -2,8 +2,6 @@ module libanalysis2/solver/errors
 
 imports
   src-gen/signatures/libanalysis2/-
-  libanalysis2/namebinding/-
-  libanalysis2/substitution/-
   libanalysis2/solver/-
   libanalysis2/prelude/-
   libanalysis2/pp
@@ -12,21 +10,11 @@ rules
 
   postprocess-errors: (sol-wm,c*) -> sol-wm'
   with <fromWM> sol-wm => sol
-     ; <sol-g> sol => g
-     ; <sol-p> sol => p*
-     ; <sol-r> sol => r*
-     ; <sol-lb> sol => lb*
-     ; <free-errors> p* => fe*
-     ; <map(unsolved-error)> c* => use*
-     ; <map(bound-error)> lb* => be*
-     ; <add-errors(|[fe*,use*,be*])> sol-wm => sol-wm'
-
-  unsolved-error: CResolves(r,l,d,pos) -> (pos,$[Could not resolve [<pp-Analysis-string> r] to [<pp-Analysis-string> d]])
-  unsolved-error: CTypeOf(p,ty,pos) -> (pos,$[Could not unify type of [<pp-Analysis-string> p] with [<pp-Analysis-string> ty]])
-  unsolved-error: CAssoc(d,s,pos) -> (pos,$[Could not find associated scope [<pp-Analysis-string> s] of [<pp-Analysis-string> d]])
-  unsolved-error: CSubType(ty1,ty2,pos) -> (pos,$[Could not determine if [<pp-Analysis-string> ty1] subtype of [<pp-Analysis-string> ty2]])
-  unsolved-error: c -> (c,$[Unsolved: [<pp-Analysis-string> c]])
-
-  bound-error: (tv,ty) -> (tv,$[Unsolved bound: [<pp-Analysis-string> ty] <= [<pp-Analysis-string> tv]])
+     ; <sol-p;free-errors> sol => fe*
+     ; <map(unsolved-error <+ default-unsolved-error)> c* => use*
+     ; <add-errors(|[fe*,use*])> sol-wm => sol-wm'
 
   free-errors = all-vars;nub;map(!(<id>,$[Free variable [<pp-Analysis-string>]]))
+
+  unsolved-error = fail
+  default-unsolved-error: c -> (c,$[Unsolved: [<pp-Analysis-string> c]])

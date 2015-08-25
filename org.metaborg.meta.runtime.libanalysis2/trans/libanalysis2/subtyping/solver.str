@@ -1,18 +1,15 @@
-module libanalysis2/solver/typechecking
+module libanalysis2/subtyping/solver
 
 imports
   src-gen/signatures/libanalysis2/-
-  libanalysis2/abstract-syntax/-
-  libanalysis2/substitution/-
-  libanalysis2/namebinding/-
-  libanalysis2/typechecking/-
   libanalysis2/solver/-
+  libanalysis2/subtyping/-
   libanalysis2/prelude/-
   libanalysis2/pp
 
 rules
  
-  solve-subtype-fact: (f@FSubType(tyd1@TDef(tc1,_),ty2,pos),sol-wm) -> [(sol-wm',[])]
+  solve-constraint: (f@FSubType(tyd1@TDef(tc1,_),ty2,pos),sol-wm) -> [(sol-wm',[])]
   where <is-ground> (tyd1,ty2)
       ; <fromWM;sol-x> sol-wm => x*
       ; <build-subtype-relation(|x*)> (tyd1,ty2) => sr
@@ -23,11 +20,7 @@ rules
 
 rules
 
-  solve-eqtype-constraint: (CEqual(ty1,ty2,pos),sol-wm) -> [(sol-wm',[])]
-  with <unify-wm(|pos)> (ty1,ty2) => s-wm
-     ; <sol-wm-apply-s(|pos)> (s-wm,sol-wm) => sol-wm'
-
-  solve-eqtype-constraint: (CLubType(ty,ty1@TApp(tc1,_),ty2@TApp(tc2,_),pos),sol-wm) -> [res]
+  solve-constraint: (CLubType(ty,ty1@TApp(tc1,_),ty2@TApp(tc2,_),pos),sol-wm) -> [res]
   where <is-ground> (ty1,ty2)
       ; <fromWM;sol-x> sol-wm => x*
       ; <all-tcs;map(<lookup> (<id>, x*))> (ty1,ty2)
@@ -38,7 +31,7 @@ rules
 
 rules
 
-  check-subtype-constraint: (CSubType(ty1,ty2,pos),sol-wm) -> [res]
+  solve-constraint: (CSubType(ty1,ty2,pos),sol-wm) -> [res]
   where <not(is-var)> ty1
       ; <not(is-var)> ty2
   with <fromWM;sol-x> sol-wm => x*
@@ -52,8 +45,8 @@ rules
 
 rules
 
-  postprocess-bounds: (sol-wm,c*) -> sol-wm'
-  with <fromWM;sol-p> sol-wm => p*
-     ; <fromWM;sol-lb;partitionv(is-ground)> sol-wm => (s*, lb'*)
-     ; <fmap(sol-with-lb(|lb'*))> sol-wm
-     ; <sol-wm-apply-s(|None())> (<pureWM> s*,<id>) => sol-wm'
+  unsolved-error: FSubType(ty1,ty2,pos) -> (pos,msg)
+  with msg := $[Could not set [<pp-Analysis-string> ty1] subtype of [<pp-Analysis-string> ty2]]
+
+  unsolved-error: CSubType(ty1,ty2,pos) -> (pos,msg)
+  with msg := $[Could not determine if [<pp-Analysis-string> ty1] subtype of [<pp-Analysis-string> ty2]]
