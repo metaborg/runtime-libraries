@@ -28,38 +28,11 @@ rules
 
   solve-constraint: (CEqual(t1@c1#(_),t2@c2#(_),pos),sol-wm) -> [(sol-wm,[])]
   where <not(eq)> (c1,c2)
+      ; <not(is-op)> t1
+      ; <not(is-op)> t2
   with msg := $[Cannot unify [<write-to-string> t1] with [<write-to-string> t2]]
      ; <add-error(|(pos,msg))> sol-wm => sol-wm' => sol-wm'
 
-  solve-constraint: (CEqual(c#(a1),c#(a2),pos),sol-wm) -> [(sol-wm,c*)]
+  solve-constraint: (CEqual(t@c#(a1),c#(a2),pos),sol-wm) -> [(sol-wm,c*)]
+  where <not(is-op)> t
   with c* := <zip(!CEqual(<Fst>,<Snd>,pos))> (a1,a2)
-
-rules
-
-  get-S: Sub(s) -> s
-
-  get-Ts: TList(t*) -> t*
-
-  solve-constraint: (c@CMkSub(s,d*,r*,pos),sol-wm) -> [(sol-wm',c*)]
-  where <is-var> s
-      ; <not(is-var)> d*
-      ; <not(is-var)> r*
-  with dt* := <get-Ts> d*
-     ; rt* := <get-Ts> r*
-     ; ( <(length,length);eq> (dt*,rt*)
-       < s' := Sub(<zip> (dt*, rt*))
-       ; !(sol-wm, [CEqual(s,s',pos)])
-       + msg := $[Different number of parameters [<write-to-string> rt*] and [<write-to-string> dt*]]
-       ; !(<add-error(|(pos,msg))> sol-wm, [])
-       ) => (sol-wm',c*)
-
-  solve-constraint: (c@CComposeSub(s,s*,pos),sol-wm) -> [(sol-wm,c*)]
-  where <is-var> s
-      ; <not(is-var);map(not(is-var))> s*
-  with s' := <map(get-S);S-compose> s*
-     ; c* := [CEqual(s,s',pos)]
-
-  solve-constraint: (c@CApplySub(ty,s,ty',pos),sol-wm) -> [(sol-wm,c*)]
-  where <not(is-var)> s
-  with ty'' := <S-apply> (<get-S> s,ty')
-     ; c* := [CEqual(ty,ty'',pos)]

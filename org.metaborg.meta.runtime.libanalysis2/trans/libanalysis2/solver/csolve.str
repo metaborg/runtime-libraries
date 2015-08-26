@@ -1,8 +1,5 @@
 module libanalysis2/solver/csolve
 
-imports
-  libanalysis2/prelude/-
-
 rules
 
   // solve : (c,e) -> [(e,[c])]

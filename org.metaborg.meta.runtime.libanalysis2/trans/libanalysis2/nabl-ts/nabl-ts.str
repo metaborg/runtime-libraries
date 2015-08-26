@@ -39,7 +39,8 @@ rules
 
   nabl-ts-traverse(|facts, constraints, scopes, position) =
   	with(position' := <get-position <+ !position>)
-  ; (  debug(!"enter "); nabl-ts-constraint(|facts, constraints, scopes, position'); debug(!"ERROR: custom constraint rule successful ")
+  ; (  debug(!"enter ");
+       nabl-ts-constraint(|facts, constraints, scopes, position'); debug(!"custom constraint rule successful ")
 	  <+ nabl-ts-scope(|facts, constraints, scopes, position'); debug(!"custom scope rule successful ")
 	  <+ debug(!"custom rule failed "); nabl-ts-traverse-children(|facts, constraints, scopes, position'); debug(!"generic rule successful ")
 	  <+ <debug(!"generic rule failed ")> scopes ; fail 

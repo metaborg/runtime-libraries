@@ -1,0 +1,37 @@
+module libanalysis2/substitution/solver
+
+imports
+  libanalysis2/unification/functions
+  libanalysis2/prelude/-
+  libanalysis2/solver/varops
+  src-gen/signatures/libanalysis2/-
+
+rules
+
+  get-S: Sub(s) -> s
+
+  get-Ts: TList(t*) -> t*
+
+  solve-constraint: (c@CMkSub(s,d*,r*,pos),sol-wm) -> [(sol-wm',c*)]
+  where <is-var> s
+      ; <not(is-var)> d*
+      ; <not(is-var)> r*
+  with dt* := <get-Ts> d*
+     ; rt* := <get-Ts> r*
+     ; ( <(length,length);eq> (dt*,rt*)
+       < s' := Sub(<zip> (dt*, rt*))
+       ; !(sol-wm, [CEqual(s,s',pos)])
+       + msg := $[Different number of parameters [<write-to-string> rt*] and [<write-to-string> dt*]]
+       ; !(<add-error(|(pos,msg))> sol-wm, [])
+       ) => (sol-wm',c*)
+
+  solve-constraint: (c@CComposeSub(s,s*,pos),sol-wm) -> [(sol-wm,c*)]
+  where <is-var> s
+      ; <not(is-var);map(not(is-var))> s*
+  with s' := <map(get-S);S-compose> s*
+     ; c* := [CEqual(s,s',pos)]
+
+  solve-constraint: (c@CApplySub(ty,s,ty',pos),sol-wm) -> [(sol-wm,c*)]
+  where <not(is-var)> s
+  with ty'' := <S-apply> (<get-S> s,ty')
+     ; c* := [CEqual(ty,ty'',pos)]
