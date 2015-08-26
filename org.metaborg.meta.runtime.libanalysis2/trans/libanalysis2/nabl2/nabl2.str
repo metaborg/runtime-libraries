@@ -10,8 +10,8 @@ imports
   
 rules
   
-  nabl-ts-constraint(|facts, constraints, scopes, position) = fail
-  nabl-ts-scope(|facts, constraints, scopes, position) = fail
+  nabl2-constraint(|facts, constraints, scopes, position) = fail
+  nabl2-scope(|facts, constraints, scopes, position) = fail
   
 rules
 
@@ -31,25 +31,25 @@ rules
 	    tvars := <new-hashtable>;
 	    ast' := <
 	    	annotate-keys; 
-	      nabl-ts-traverse(|facts, constraints, [Global()], <get-position>)> ast;
+	      nabl2-traverse(|facts, constraints, [Global()], <get-position>)> ast;
 	    f* := <iset-elements> facts;
 	    c* := <iset-elements> constraints
 	  |};
     !(ast', [f*, c*])
 
-  nabl-ts-traverse(|facts, constraints, scopes, position) =
+  nabl2-traverse(|facts, constraints, scopes, position) =
   	with(position' := <get-position <+ !position>)
   ; (  debug(!"enter ");
-       nabl-ts-constraint(|facts, constraints, scopes, position'); debug(!"custom constraint rule successful ")
-	  <+ nabl-ts-scope(|facts, constraints, scopes, position'); debug(!"custom scope rule successful ")
-	  <+ debug(!"custom rule failed "); nabl-ts-traverse-children(|facts, constraints, scopes, position'); debug(!"generic rule successful ")
+       nabl2-constraint(|facts, constraints, scopes, position'); debug(!"custom constraint rule successful ")
+	  <+ nabl2-scope(|facts, constraints, scopes, position'); debug(!"custom scope rule successful ")
+	  <+ debug(!"custom rule failed "); nabl2-traverse-children(|facts, constraints, scopes, position'); debug(!"generic rule successful ")
 	  <+ <debug(!"generic rule failed ")> scopes ; fail 
 	  )
   
-  nabl-ts-traverse-children(|facts, constraints, scopes, position) =
+  nabl2-traverse-children(|facts, constraints, scopes, position) =
     with(
     	get-arguments;
-    	map(nabl-ts-traverse(|facts, constraints, scopes, position))
+    	map(nabl2-traverse(|facts, constraints, scopes, position))
     )
 
   type-app = ?Var(_)
