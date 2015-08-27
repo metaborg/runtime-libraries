@@ -9,25 +9,14 @@ imports
 
 rules
  
-  solve-constraint: (f@FSubType(tyd1@TDef(tc1,_),ty2,pos),sol-wm) -> [(sol-wm',[])]
-  where <is-ground> (tyd1,ty2)
+  solve-constraint: (f@FSubType(tyd@TDef(tc,_),ty,pos),sol-wm) -> [(sol-wm',[])]
+  where <is-ground> (tyd,ty)
       ; <fromWM;sol-x> sol-wm => x*
-      ; <build-subtype-relation(|x*)> (tyd1,ty2) => sr
-  with ( <lookup> (tc1, x*)
+      ; <build-subtype-relation(|x*)> (tyd,ty) => sr
+  with ( <lookup> (tc, x*)
        < <add-error(|(pos,$[Duplicate fact [<pp-Analysis-string> f]]))> sol-wm
-       + <fmap(<sol-set-x(|sr)> (tc1,<id>))> sol-wm
+       + <fmap(<sol-set-x(|sr)> (tc,<id>))> sol-wm
        ) => sol-wm'
-
-rules
-
-  solve-constraint: (CLubType(ty,ty1@TApp(tc1,_),ty2@TApp(tc2,_),pos),sol-wm) -> [res]
-  where <is-ground> (ty1,ty2)
-      ; <fromWM;sol-x> sol-wm => x*
-      ; <all-tcs;map(<lookup> (<id>, x*))> (ty1,ty2)
-  with ( <lub(|x*)> (ty1,ty2) => ty'
-       < !(sol-wm,[CEqual(ty,ty',pos)])
-       + !(<add-error(|(pos,$[Types [<pp-Analysis-string> ty1] and [<pp-Analysis-string> ty2] have no least upper bound.]))> sol-wm, [])
-       ) => res
 
 rules
 
@@ -41,6 +30,15 @@ rules
                              ,id|x*);Snd> (ty1,ty2) => c*
        < !(sol-wm,c*)
        + !(<add-error(|(pos,$[[<pp-Analysis-string> ty1] is not a subtype of [<pp-Analysis-string> ty2]]))> sol-wm, [])
+       ) => res
+
+  solve-constraint: (CLubType(ty,ty1@TApp(tc1,_),ty2@TApp(tc2,_),pos),sol-wm) -> [res]
+  where <is-ground> (ty1,ty2)
+      ; <fromWM;sol-x> sol-wm => x*
+      ; <all-tcs;map(<lookup> (<id>, x*))> (ty1,ty2)
+  with ( <lub(|x*)> (ty1,ty2) => ty'
+       < !(sol-wm,[CEqual(ty,ty',pos)])
+       + !(<add-error(|(pos,$[Types [<pp-Analysis-string> ty1] and [<pp-Analysis-string> ty2] have no least upper bound.]))> sol-wm, [])
        ) => res
 
 rules

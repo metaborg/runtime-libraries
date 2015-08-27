@@ -15,19 +15,19 @@ imports
 rules
 
   analyse: desugared-ast -> ( (analysed-ast, errors*, warnings*, notes*)
-                            , [ ("constraints",c1*)
+                            , [ ("constraints",c*)
                               , ("scopegraph",g)
                               , ("resolution",pr*)
                               , ("solutions", sol*)
                               ])
   with
-    (annotated-ast,c1*) := <extract-constraints> desugared-ast
+    (annotated-ast,c*) := <extract-constraints> desugared-ast
   ; sol-i := <initial-solution>
-  ; [(sol-wm,c2*)] := <solve-constraints-phase1> (sol-i,c1*)
-  ; g := <fromWM;sol-g> sol-wm
+  ; [(sol-wm1,c1*)] := <solve-constraints-phase1> (sol-i,c*)
+  ; g := <fromWM;sol-g> sol-wm1
   ; pr* := <resolve-all> g
   ; r* := <filterv(fromP;Hd)> pr*
-  ; <solve-constraints-phase2;map(postprocess-errors)> (sol-wm,c2*) => sol-wm*
+  ; <solve-constraints-phase2;map(postprocess-errors)> (sol-wm1,c1*) => sol-wm*
   ; sol* := <map( ![ ("final-scopegraph", <fromWM;sol-g>)
                    , ("resolution", <fromWM;sol-r>)
                    , ("sub-types", <fromWM;sol-x>)

@@ -45,18 +45,6 @@ rules
   lookup-entries(|table):
     (tc, []) -> <hashtable-get(|tc)> table
       
-  // The first supertype must be the itself, any variables used as type arguments
-  // can be used also as arguments to super types
-  // all supertypes must be present in the list
-  /*
-  example-subtype-relation =
-    ![ (TInt(), ( [] , [ (TInt(),[]) ]))
-     , (TBool(), ( [] , [ (TBool(),[]) ]))
-     , (TFun(), ( [Contravariant(),Covariant()]
-                  , [ (TFun(),[Var("T"),Var("R")]) ]))
-     ]
-  */
-
   build-subtype-relation(|x*): (TDef(tc,ta*),TApp(tc,a*)) -> sr
   where <is-ground> tc
   with (n,n) := (<length> ta*,<length> a*)
