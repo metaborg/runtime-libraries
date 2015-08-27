@@ -40,21 +40,11 @@ rules // API
 	task-get-messages(|partition)                              = task-api-get-messages(|partition)
 	task-get-readers                                           = task-api-get-readers(|<id>)
 	task-invalidate-task-reads(|changedRead*)                  = task-api-invalidate-task-reads(|changedRead*)
-	task-merge                                                 = task-api-merge
 	task-sources-of(|task-id-or-task-id*)                      = task-api-sources-of(|task-id-or-task-id*)
-	task-persist                                               = task-api-persist
-	task-pop                                                   = task-api-pop
-	task-push                                                  = task-api-push
-	task-recover                                               = task-api-recover
-	task-reset                                                 = task-api-reset
 	task-result-combinations                                   = task-api-result-combinations(task-collect-result-ids-2, insert-results-hashmap|<id>, 0)
 	task-result-combinations-single                            = task-api-result-combinations(task-collect-result-ids-2, insert-results-hashmap|<id>, 1)
-	task-setup(|project-path)                                  = task-api-setup(|project-path)
-	task-setup                                                 = task-api-setup(|<id>)
 	task-start-collection(|partition)                          = task-api-start-collection(|partition)
 	task-stop-collection(|partition)                           = task-api-stop-collection(|partition)
-	task-unload                                                = task-unload(|<id>)
-	task-unload(|project-path)                                 = task-api-unload(|project-path)
 	
 	// Deprecated, use task-get-results
 	task-get-result = task-get-results

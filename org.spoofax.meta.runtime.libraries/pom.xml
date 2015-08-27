@@ -1,45 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
-  xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
->
-  <modelVersion>4.0.0</modelVersion>
-  <name>runtime-libraries</name>
-  <artifactId>org.spoofax.meta.runtime.libraries</artifactId>
-  <packaging>spoofax-language</packaging>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<name>runtime-libraries</name>
+	<artifactId>org.spoofax.meta.runtime.libraries</artifactId>
+	<packaging>spoofax-language</packaging>
 
-  <parent>
-    <groupId>org.metaborg</groupId>
-    <artifactId>org.metaborg.maven.parent.language</artifactId>
-    <version>1.5.0-SNAPSHOT</version>
-  </parent>
+	<parent>
+		<groupId>org.metaborg</groupId>
+		<artifactId>org.metaborg.maven.parent.language</artifactId>
+		<version>1.5.0-SNAPSHOT</version>
+	</parent>
 
-  <dependencies>
-    <dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>org.metaborg.meta.lang.esv</artifactId>
-      <version>${metaborg-baseline-version}</version>
-      <type>spoofax-language</type>
-      <scope>${metaborg-meta-lang-scope}</scope>
-    </dependency>
-  </dependencies>
+	<dependencies>
+		<dependency>
+			<groupId>org.metaborg</groupId>
+			<artifactId>org.metaborg.meta.lang.esv</artifactId>
+			<version>${metaborg-baseline-version}</version>
+			<type>spoofax-language</type>
+			<scope>${metaborg-meta-lang-scope}</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.metaborg</groupId>
+			<artifactId>org.metaborg.meta.lang.stratego</artifactId>
+			<version>${metaborg-baseline-version}</version>
+			<type>spoofax-language</type>
+			<scope>${metaborg-meta-lang-scope}</scope>
+		</dependency>
+	</dependencies>
 
-  <build>
-    <resources>
-      <resource>
-        <directory>trans</directory>
-        <targetPath>trans</targetPath>
-      </resource>
-    </resources>
+	<build>
+		<resources>
+			<resource>
+				<directory>trans</directory>
+				<targetPath>trans</targetPath>
+			</resource>
+		</resources>
 
-    <plugins>
-      <plugin>
-        <groupId>org.metaborg</groupId>
-        <artifactId>spoofax-maven-plugin</artifactId>
-        <version>${metaborg-version}</version>
-        <extensions>true</extensions>
-      </plugin>
-    </plugins>
-  </build>
+		<plugins>
+			<plugin>
+				<groupId>org.metaborg</groupId>
+				<artifactId>spoofax-maven-plugin</artifactId>
+				<version>${metaborg-version}</version>
+				<extensions>true</extensions>
+			</plugin>
+		</plugins>
+	</build>
 </project>

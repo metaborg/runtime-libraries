@@ -53,16 +53,3 @@ rules
     
 	merge-dependencies(|dep*):
   	term -> <union> (<dependent-tasks> dep*, <dependent-tasks> term)
-    
-	task-create-execute-ctx = !""
-	task-create-execute(create-task):
-		term -> result
-		with
-		  ctx := <task-create-execute-ctx>
-		; task-push
-		; task-start-collection(|ctx)
-		; Result(taskID) := <create-task> term
-		; task-stop-collection(|ctx)
-		; <task-evaluate-now> taskID
-		; result := <task-get-results> taskID
-		; task-pop

@@ -7,14 +7,6 @@ imports
 
 rules // Redirects
 	
-	index-setup(|language, project-path, current-partition) =
-		index-setup(|language, <index-setup-paths> project-path)
-		
-	index-clear = index-reset
-	index-clear-all = index-reset
-	
-	index-commit = index-persist
-	
 	index-clear-partition = index-clear-source
 	
 	index-get-all = index-get-all-values
