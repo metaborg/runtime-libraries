@@ -4,6 +4,7 @@ imports
   libanalysis2/unification/functions
   libanalysis2/prelude/-
   libanalysis2/solver/varops
+  libanalysis2/subtyping/functions
   src-gen/signatures/libanalysis2/-
 
 rules
@@ -28,10 +29,10 @@ rules
   solve-constraint: (c@CComposeSub(s,s*,pos),sol-wm) -> [(sol-wm,c*)]
   where <is-var> s
       ; <not(is-var);map(not(is-var))> s*
-  with s' := <map(get-S);S-compose> s*
+  with s' := <map(get-S);S-compose(is-tvar)> s*
      ; c* := [CEqual(s,s',pos)]
 
   solve-constraint: (c@CApplySub(ty,s,ty',pos),sol-wm) -> [(sol-wm,c*)]
   where <not(is-var)> s
-  with ty'' := <S-apply> (<get-S> s,ty')
+  with ty'' := <S-apply(is-tvar)> (<get-S> s,ty')
      ; c* := [CEqual(ty,ty'',pos)]

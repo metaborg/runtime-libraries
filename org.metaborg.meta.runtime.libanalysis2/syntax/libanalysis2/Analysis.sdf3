@@ -46,8 +46,9 @@ sorts
 context-free syntax
 
   Type.TApp                 = <<TypeCon>[<{Type ","}*>]>
-  Type                      = Var
+  Type.TVar                 = <'<String>>
   Type.TList                = <[<{Type ", "}*>]>
+  Type                      = Var
   TypeDef.TDef              = <<TypeCon>[<{TypeArg ","}*>]>
   TypeArg.TArg              = <<Variance><Type>>
 
@@ -58,7 +59,9 @@ context-free syntax
   TypeCon                   = NotImplemented
 
   Eqable                    = Type
+  Eqable                    = TypeCon
   Eqable                    = DeclId
+  Eqable                    = {Term ","}*
 
 sorts
 

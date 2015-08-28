@@ -21,8 +21,7 @@ rules
 rules
 
   solve-constraint: (CSubType(ty1,ty2,pos),sol-wm) -> [res]
-  where <not(is-var)> ty1
-      ; <not(is-var)> ty2
+  where <is-ground> (ty1,ty2)
   with <fromWM;sol-x> sol-wm => x*
      ; ( <is-subtype-traverse(!CEqual(<Fst>,<Snd>,pos)
                              ,!CSubType(<Fst>,<Snd>,pos)
@@ -34,8 +33,8 @@ rules
 
   solve-constraint: (CLubType(ty,ty1@TApp(tc1,_),ty2@TApp(tc2,_),pos),sol-wm) -> [res]
   where <is-ground> (ty1,ty2)
-      ; <fromWM;sol-x> sol-wm => x*
-      ; <all-tcs;map(<lookup> (<id>, x*))> (ty1,ty2)
+  with <fromWM;sol-x> sol-wm => x*
+  where <all-tcs;map(<lookup> (<id>, x*))> (ty1,ty2)
   with ( <lub(|x*)> (ty1,ty2) => ty'
        < !(sol-wm,[CEqual(ty,ty',pos)])
        + !(<add-error(|(pos,$[Types [<pp-Analysis-string> ty1] and [<pp-Analysis-string> ty2] have no least upper bound.]))> sol-wm, [])

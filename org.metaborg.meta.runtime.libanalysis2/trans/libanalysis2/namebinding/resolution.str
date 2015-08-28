@@ -116,3 +116,5 @@ rules // resolution internal
 rules
  
   pp-Resolution = map((pp-Analysis-string,fmap(map((pp-Analysis-string,map(pp-Analysis-string))))))
+
+  pp-Env = fmap(map((pp-Analysis-string,fmap(map((pp-Analysis-string,map(pp-Analysis-string)))))))

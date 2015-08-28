@@ -53,6 +53,7 @@ rules
     )
 
   type-app = ?Var(_)
+  type-app = ?TVar(_)
   type-app = !TList(<is-list>)
   
   type-of-constraints(|ty, msg):

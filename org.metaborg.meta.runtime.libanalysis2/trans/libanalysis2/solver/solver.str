@@ -41,9 +41,16 @@ rules
   solve-specialise: (sol-wm,c) -> c'
   with <fromWM;sol-s> sol-wm => s*
      ; <fromWM;sol-x> sol-wm => x*
-     ; <S-apply;reduce-ops(|x*)> (s*,c) => c'
+     ; <S-apply(is-var);reduce-ops(|x*)> (s*,c) => c'
+
+rules
+ 
+  solve-trivial-constraints: (CTrue(),sol-wm) -> [(sol-wm,[])]
+  solve-trivial-constraints: (CAndStar(c*),sol-wm) -> [(sol-wm,c*)]
 
 rules
   
-  solve-trivial-constraints: (CTrue(),sol-wm) -> [(sol-wm,[])]
-  solve-trivial-constraints: (CAndStar(c*),sol-wm) -> [(sol-wm,c*)]
+  debug-solve(s): i@(c,sol-wm) -> o*
+    where s => o*
+    with <debug> $[solve [<pp-Analysis-string> c]]
+       ; <map(Snd;map(pp-Analysis-string);debug(!"--> "))> o*

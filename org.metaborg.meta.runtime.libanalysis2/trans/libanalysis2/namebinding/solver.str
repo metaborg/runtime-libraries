@@ -10,17 +10,17 @@ imports
 
 rules
  
-  solve-fact: (FDecl(d,s),sol-wm)     -> [(sol-wm',[])]
+  solve-fact: (FDecl(d,s),sol-wm) -> [(sol-wm',[])]
   with <fromWM;sol-g> sol-wm => g
      ; <G-with-decl> (g,s,d) => g'
      ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
 
-  solve-fact: (FRef(r,s),sol-wm)      -> [(sol-wm',[])]
+  solve-fact: (FRef(r,s),sol-wm) -> [(sol-wm',[])]
   with <fromWM;sol-g> sol-wm => g
      ; <G-with-ref> (g,s,r) => g'
      ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
 
-  solve-fact: (FImportR(r,l,s),sol-wm)  -> [(sol-wm',[])]
+  solve-fact: (FImportR(r,l,s),sol-wm) -> [(sol-wm',[])]
   with <fromWM;sol-g> sol-wm => g
      ; <G-with-r-import> (g,s,(r,l)) => g'
      ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
@@ -56,13 +56,13 @@ rules
       ; <resolve(|g)> r => Total(dl*@[_|_])
   with <map(solve-namebinding-constraint-step(|r,l,d,pos,sol-wm))> dl* => res*
 
-  solve-namebinding-constraint-step(|r,l,d,pos,sol-wm): (d',l') -> (sol-wm',[])
+  solve-namebinding-constraint-step(|r,l,d,pos,sol-wm): (d',l') -> (sol-wm',c*)
   with <fmap(sol-set-r(|r,(d',l')))> sol-wm => sol-wm'
-  with c* := [ CEqual(d,d',pos),
-               CEqual(l,l',pos)
+  with c* := [ CEqual(d,d',pos)
+             , CEqual(l,l',pos)
              ]
  
-  solve-constraint: (CAssoc(d,s,pos),sol-wm) -> [(sol-wm,[])]
+  solve-constraint: (CAssoc(d,s,pos),sol-wm) -> [(sol-wm,c*)]
   where <is-ground> d
       ; <fromWM;sol-g> sol-wm => g
       ; <G-assoc> (g,d) => s'

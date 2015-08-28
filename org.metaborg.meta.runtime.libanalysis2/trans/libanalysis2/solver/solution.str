@@ -33,11 +33,11 @@ rules
 
   sol-apply-s: (s',Sol(g,r*,p*,s*,x*))
     -> Sol(g',r'*,p'*,s'*,x*)
-    where g'  := <S-apply> (s',g)
-        ; r'* := <S-apply;reduce-ops(|x*)> (s',r*)
-        ; p'* := <S-apply;reduce-ops(|x*)> (s',p*)
-        ; s'* := <S-compose;reduce-ops(|x*)> (s',s*)
-        ; x'* := <S-apply;reduce-ops(|x*)> (s',x*)
+    where g'  := <S-apply(is-var)> (s',g)
+        ; r'* := <S-apply(is-var);reduce-ops(|x*)> (s',r*)
+        ; p'* := <S-apply(is-var);reduce-ops(|x*)> (s',p*)
+        ; s'* := <S-compose(is-var);reduce-ops(|x*)> (s',s*)
+        ; x'* := <S-apply(is-var);reduce-ops(|x*)> (s',x*)
     where g''  := <reduce-ops(|x'*)> g'
         ; r''* := <reduce-ops(|x'*)> r'*
         ; p''* := <reduce-ops(|x'*)> p'*
