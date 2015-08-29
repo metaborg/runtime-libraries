@@ -34,6 +34,7 @@ context-free syntax
   Pos.POfRef                = <posOf(<RefId>)>
 
   Namespace.None            = <->
+  Namespace.Namespace       = String
 
 sorts
 
