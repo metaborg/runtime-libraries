@@ -32,7 +32,7 @@ rules
   solve-constraints-phase2: c* -> s
   with
     s := <csolve( solve-specialise
-                , ( debug-solve(solve-constraint)
+                , ( solve-constraint
                  <+ solve-trivial-constraints
                  <+ solve-ignore
                   )
