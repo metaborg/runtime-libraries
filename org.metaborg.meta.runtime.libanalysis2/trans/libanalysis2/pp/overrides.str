@@ -1,0 +1,44 @@
+module libanalysis2/pp/overrides
+
+imports
+  libstratego-gpp
+  runtime/tmpl/pp
+  src-gen/signatures/libanalysis2/-
+  src-gen/pp/libanalysis2/-
+
+rules
+
+  // allow printing of actual Ints as well
+  prettyprint-Int: i -> [S(<int-to-string> i)]
+  where is-int
+
+  // easy list printing
+  prettyprint-List(pp): t -> [ H( [SOpt(HS(), "0")],
+                                  [S("["),b,S("]")] ) ]
+  where is-list
+  with b := <pp-H-list(pp|",")> t
+
+  // print origins more compactly
+  prettyprint-Pos:
+    Pos(key, file, line, column, begin, end) ->
+      [ H( [SOpt(HS(), "0")],
+           [ key', S("@("), line', S(","), column', S(")") ] ) ]
+    with key'    :=  <pp-one-Z(prettyprint-Int)> key
+    with line'   := <pp-one-Z(prettyprint-Int)> line
+    with column' := <pp-one-Z(prettyprint-Int)> column
+
+rules
+
+  prettyprint-Term = prettyprint-DeclId
+  prettyprint-Term = prettyprint-RefId
+  prettyprint-Term = prettyprint-Atom
+  prettyprint-Term = prettyprint-Scope
+  prettyprint-Term = prettyprint-OptionScope
+  prettyprint-Term = prettyprint-Pos
+  prettyprint-Term = prettyprint-Var
+  prettyprint-Term = prettyprint-Constraint
+  prettyprint-Term = prettyprint-Type
+  prettyprint-Term = prettyprint-TypeDef
+  prettyprint-Term = prettyprint-TypeArg
+  prettyprint-Term = prettyprint-TypeCon
+  prettyprint-Term = prettyprint-List(prettyprint-Term)

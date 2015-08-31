@@ -20,7 +20,6 @@ rules
     where(
       try(dr-end-scope(|"NewKey"))
     )
-    ;debug
 
   annotate-key: t -> t{<NewKey>}
   

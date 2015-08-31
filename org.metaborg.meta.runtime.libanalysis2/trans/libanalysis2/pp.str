@@ -3,15 +3,31 @@ module libanalysis2/pp
 imports
 
   libstratego-gpp
+  runtime/tmpl/pp
   include/libanalysis2-parenthesize
-  libanalysis2/pp/overrides-post
+  libanalysis2/pp/preload
   src-gen/pp/libanalysis2/-
-  libanalysis2/pp/overrides-pre
+  libanalysis2/pp/overrides
 
 rules
 
-  pp-Analysis-string =
+  pp-Analysis(pp) =
     parenthesize-libanalysis2
-    ; prettyprint-example
+    ; (pp <+ debug(!"WARNING: Could not pp ") ; prettyprint-Term)
     ; !V([], <id>)
     ; box2text-string(|120)
+
+  pp-DeclId               = pp-Analysis(prettyprint-DeclId)
+  pp-RefId                = pp-Analysis(prettyprint-RefId)
+  pp-Atom                 = pp-Analysis(prettyprint-Atom)
+  pp-Scope                = pp-Analysis(prettyprint-Scope)
+  pp-OptionScope          = pp-Analysis(prettyprint-OptionScope)
+  pp-Pos                  = pp-Analysis(prettyprint-Pos)
+  pp-Var                  = pp-Analysis(prettyprint-Var)
+  pp-Constraint           = pp-Analysis(prettyprint-Constraint)
+  pp-Type                 = pp-Analysis(prettyprint-Type)
+  pp-TypeDef              = pp-Analysis(prettyprint-TypeDef)
+  pp-TypeArg              = pp-Analysis(prettyprint-TypeArg)
+  pp-TypeCon              = pp-Analysis(prettyprint-TypeCon)
+  pp-Term                 = pp-Analysis(prettyprint-Term)
+  pp-List(pp)             = pp-Analysis(prettyprint-List(pp))

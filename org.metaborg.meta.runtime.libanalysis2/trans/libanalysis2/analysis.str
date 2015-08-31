@@ -77,7 +77,7 @@ rules
   , ("resolution",r)
   , ("solutions", sol*)
   ] -> [
-    ("constraints",<filter(not(irrelevant-constraint));map(pp-Analysis-string)> c*)
+    ("constraints",<filter(not(irrelevant-constraint));map(pp-Constraint)> c*)
   , ("scopegraph", <pp-Graph> g)
   , ("resolution", <pp-Resolution> r)
   , ("solutions", <map(pp-analysis-solution)> sol*)
@@ -94,13 +94,13 @@ rules
   , ("notes", n*)
   ] -> [
     ("final-scopegraph", <pp-Graph> g)
-  , ("resolution", <map((pp-Analysis-string,(pp-Analysis-string,map(pp-Analysis-string))))> r*)
+  , ("resolution", <map((pp-RefId,(pp-DeclId,map(pp-Term))))> r*)
   , ("sub-types", <pp-SubtypeRelation> x*)
-  , ("pos-types", <filter(not(irrelevant-pos));map((pp-Analysis-string,pp-Analysis-string))> p*)
-  , ("subst", <map((pp-Analysis-string,pp-Analysis-string))> s*)
-  , ("errors", <map((pp-Analysis-string,id))> e*)
-  , ("warnings", <map((pp-Analysis-string,id))> w*)
-  , ("notes", <map((pp-Analysis-string,id))> n*)
+  , ("pos-types", <filter(not(irrelevant-pos));map((pp-Pos,pp-Term))> p*)
+  , ("subst", <map((pp-Var,pp-Term))> s*)
+  , ("errors", <map((pp-Term,id))> e*)
+  , ("warnings", <map((pp-Term,id))> w*)
+  , ("notes", <map((pp-Term,id))> n*)
   ]
  
   irrelevant-constraint = fail

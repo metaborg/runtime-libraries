@@ -123,14 +123,14 @@ rules // resolution internal
     twrapP // :: Partial ([(Atom,Partial [(Decl,[Label])])], [(Atom,Partial [(Decl,[Label])])])
   ; fmap(merge(union,Fst)) // :: Partial [(Atom,Partial [(Decl,[Label])])]
 
-  atom: RefId(ns,n,_) -> <strip-annos> (ns, n)
-  atom: DeclId(ns,n,_) -> <strip-annos> (ns, n)
+  atom: RefId(ns,n,_) -> <strip-annos> Atom(ns, n)
+  atom: DeclId(ns,n,_) -> <strip-annos> Atom(ns, n)
 
 rules
  
-  pp-Resolution = map((pp-Analysis-string,fmap(map((pp-Analysis-string,map(pp-Analysis-string))))))
+  pp-Resolution = map((pp-RefId,fmap(map((pp-DeclId,map(pp-Term))))))
 
-  pp-Env = fmap(map((pp-Analysis-string,fmap(map((pp-Analysis-string,map(pp-Analysis-string)))))))
+  pp-Env = fmap(map((pp-Atom,fmap(map((pp-DeclId,map(pp-Term)))))))
 
   dbg-res(s|n) = id // s ; debug(!n)
   dbg-res(|n) = dbg-res(id|n)

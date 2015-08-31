@@ -30,4 +30,4 @@ rules
 rules
   
   unsolved-error: CTypeOf(p,ty,pos) -> (pos,msg)
-  with msg := $[Could not unify type of [<pp-Analysis-string> p] with [<pp-Analysis-string> ty]]
+  with msg := $[Could not unify type of [<pp-Pos> p] with [<pp-Term> ty]]

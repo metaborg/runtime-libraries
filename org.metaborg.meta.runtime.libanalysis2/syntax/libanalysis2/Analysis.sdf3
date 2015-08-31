@@ -4,15 +4,6 @@ imports
 
   libanalysis2/Common
 
-sorts
-
-  Scope
-  OptionScope
-  DeclId
-  RefId
-  Pos
-  Namespace
-
 context-free syntax
 
   Var.Var                   = <v<Int>>
@@ -36,20 +27,15 @@ context-free syntax
   Namespace.None            = <->
   Namespace.Namespace       = String
 
-sorts
-
-  Type
-  TypeDef
-  TypeArg
-  Variance
-  TypeCon
+  Atom.Atom                 = <atom(<Namespace>,<String>)>
 
 context-free syntax
 
   Type.TApp                 = <<TypeCon>[<{Type ","}*>]>
   Type.TVar                 = <'<String>>
-  Type.TList                = <[<{Type ", "}*>]>
+  Type.TList                = <TY[<{Type ", "}*>]>
   Type                      = Var
+
   TypeDef.TDef              = <<TypeCon>[<{TypeArg ","}*>]>
   TypeArg.TArg              = <<Variance><Type>>
 
@@ -59,23 +45,11 @@ context-free syntax
 
   TypeCon                   = NotImplemented
 
-  Eqable                    = Type
-  Eqable                    = String
-  Eqable                    = Int
-  Eqable                    = TypeCon
-  Eqable                    = DeclId
-  Eqable                    = {Term ","}*
-
-sorts
-
-  Constraint
-  Substitution
-
 context-free syntax // unification
 
   Constraint.CTrue          = <T>
   Constraint.CAndStar       = <<{Constraint "/\\"}*>> {longest-match}
-  Constraint.CEqual        = [[Eqable] == [Eqable] [Pos]]
+  Constraint.CEqual        = [[Term] == [Term] [Pos]]
 
 context-free syntax // types
 
@@ -105,36 +79,10 @@ context-free syntax // subtyping
 context-free syntax // substitutions
 
   Constraint.CMkSub         = [[Substitution] == [Type] |-->* [Type] [Pos]]
-  Constraint.CComposeSub    = <<Substitution> == <SubstitutionList> <Pos>>
+  Constraint.CComposeSub    = <<Substitution> == <{Substitution " . "}+> <Pos>>
   Constraint.CApplySub      = <<Type> == <Substitution>.<Type> <Pos>>
-
-  Substitution.Sub          = <{<{Mapping ","}*>}>
-  Substitution              = Var
-
-//-------------------
-// Ordering is a bit sensitive here, so prettyprinting works reasonably well
-// Term needs to go after all rules for constructors, because it will succeed
-// on anything. Rules without constructors (which produce unwrapped lists or
-// tuples) need to go after Term, so they won't break.
-
-lexical syntax
-
-  Term           = ~[]+
-
-sorts
-
-  TypeList
-  Mapping
-  SubstitutionList
-
-context-free syntax
-
-  TypeList                  = <[<{Type ","}*>]>
-  TypeList                  = Var
 
   Mapping                   = [[Type] |--> [Type]]
 
-  SubstitutionList          = <[<{Substitution ","}*>]>
-  SubstitutionList          = Var
-
-  Atom                      = <atom(<Namespace>,<String>)>
+  Substitution.Sub          = <{<{Mapping ","}*>}>
+  Substitution              = Var

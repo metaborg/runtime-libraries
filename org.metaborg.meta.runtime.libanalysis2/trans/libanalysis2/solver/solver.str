@@ -32,7 +32,7 @@ rules
   solve-constraints-phase2: c* -> s
   with
     s := <csolve( solve-specialise
-                , ( solve-constraint
+                , ( debug-solve(solve-constraint)
                  <+ solve-trivial-constraints
                  <+ solve-ignore
                   )
@@ -49,8 +49,8 @@ rules
   solve-trivial-constraints: (CAndStar(c*),sol-wm) -> [(sol-wm,c*)]
 
 rules
-  
+ 
   debug-solve(s): i@(c,sol-wm) -> o*
     where s => o*
-    with <debug> $[solve [<pp-Analysis-string> c]]
-       ; <map(Snd;map(pp-Analysis-string);debug(!"--> "))> o*
+    with <debug> $[solve [<pp-Constraint> c]]
+       ; <map(Snd;map(pp-Constraint);debug(!"--> "))> o*

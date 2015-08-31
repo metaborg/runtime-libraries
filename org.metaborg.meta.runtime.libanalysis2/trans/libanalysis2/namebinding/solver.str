@@ -90,5 +90,5 @@ rules
 
 rules
  
-  unsolved-error: CResolves(r,l,d,pos) -> (pos,$[Could not resolve [<pp-Analysis-string> r] to [<pp-Analysis-string> d]])
-  unsolved-error: CAssoc(d,s,pos) -> (pos,$[Could not find associated scope [<pp-Analysis-string> s] of [<pp-Analysis-string> d]])
+  unsolved-error: CResolves(r,l,d,pos) -> (pos,$[Could not resolve [<pp-RefId> r] to [<pp-DeclId> d]])
+  unsolved-error: CAssoc(d,s,pos) -> (pos,$[Could not find associated scope [<pp-Scope> s] of [<pp-DeclId> d]])

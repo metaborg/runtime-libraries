@@ -14,7 +14,7 @@ rules
      ; <map(unsolved-error <+ default-unsolved-error)> c* => use*
      ; <add-errors(|[fe*,use*])> sol-wm => sol-wm'
 
-  free-errors = all-vars;nub;map(!(<id>,$[Free variable [<pp-Analysis-string>]]))
+  free-errors = all-vars;nub;map(!(<id>,$[Free variable [<pp-Var>]]))
 
   unsolved-error = fail
-  default-unsolved-error: c -> (c,$[Unsolved: [<pp-Analysis-string> c]])
+  default-unsolved-error: c -> (c,$[Unsolved: [<pp-Constraint> c]])

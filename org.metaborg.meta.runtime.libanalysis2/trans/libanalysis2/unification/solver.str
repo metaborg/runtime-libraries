@@ -26,7 +26,7 @@ rules
   with msg := $[Cannot unify subtitutions]
      ; <add-error(|(pos,msg))> sol-wm => sol-wm'
 
-  solve-constraint: (CEqual(t1@c1#(_),t2@c2#(_),pos),sol-wm) -> [(sol-wm,[])]
+  solve-constraint: (CEqual(t1@c1#(_),t2@c2#(_),pos),sol-wm) -> [(sol-wm',[])]
   where <not(eq)> (c1,c2)
       ; <not(is-op)> t1
       ; <not(is-op)> t2

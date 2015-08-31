@@ -25,7 +25,3 @@ rules
 
   S-occurs(isv): (v,t) -> <id>
   where <elem> (v, <collect-all(isv)> t)
-
-rules
-  
-  pp-S = map((pp-Analysis-string,pp-Analysis-string))

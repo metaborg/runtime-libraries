@@ -143,5 +143,5 @@ rules
 
 rules
   
-  pp-Supertype = (pp-Analysis-string,map(pp-Analysis-string))
-  pp-SubtypeRelation = map((pp-Analysis-string,(map(pp-Analysis-string),map(pp-Supertype))))
+  pp-Supertype = (pp-TypeCon,map(pp-Type))
+  pp-SubtypeRelation = map((pp-TypeCon,(map(pp-TypeArg),map(pp-Supertype))))
