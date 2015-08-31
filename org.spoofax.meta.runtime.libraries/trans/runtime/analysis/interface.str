@@ -2,6 +2,8 @@ module runtime/analysis/interface
 
 rules
 
+  editor-analyze = fail
+
   analysis-interface = fail
   
 	analysis-pre-trans = fail
