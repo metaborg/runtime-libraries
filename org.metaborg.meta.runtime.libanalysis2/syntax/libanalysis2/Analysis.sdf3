@@ -60,6 +60,8 @@ context-free syntax
   TypeCon                   = NotImplemented
 
   Eqable                    = Type
+  Eqable                    = String
+  Eqable                    = Int
   Eqable                    = TypeCon
   Eqable                    = DeclId
   Eqable                    = {Term ","}*

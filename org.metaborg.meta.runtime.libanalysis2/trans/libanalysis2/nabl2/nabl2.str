@@ -54,7 +54,10 @@ rules
 
   type-app = ?Var(_)
   type-app = ?TVar(_)
+  type-app = is-string
+  type-app = is-int
   type-app = !TList(<is-list>)
+  type-app = debug(!"Maybe forgot signature for ") ; fail
   
   type-of-constraints(|ty, msg):
     l* -> [CEqual(ty, TList(tv*), msg), c*]

@@ -27,7 +27,9 @@ rules // resolution internal
   // resolve :: Ref -> Partial [(Decl,[Label])]
   resolve(|g,ir*) =
     ?r
-  ; <G-scope> (g,r) // :: Scope
+  ; ( <G-scope> (g,r) // :: Scope
+   <+ <debug(!"ERROR: Cannot get scope for reference ");fail> r
+    )
   ; env_v(|g,[r|ir*],[]) // :: Partial [(Atom,Partial [(Decl,[Label])])]
   ; ( <lookup> (<atom> r, <fromP>) // :: Partial [(Decl,[Label])]
    <+ fmap(![])
@@ -35,19 +37,24 @@ rules // resolution internal
 
   // env_v(|Graph,[Ref],[Scope]) :: Scope -> Partial [(Atom,Partial [(Decl,[Label])])]
   env_v(|g,ir*,s*) =
-    <shadow> ( <env_l(|g,ir*,s*)>
+    with(dbg-res(|"env_v "))
+  ; <shadow> ( <env_l(|g,ir*,s*)>
              , <env_p(|g,ir*,s*)>
              )
+  ; with(dbg-res(pp-Env|"env_v "))
 
   // env_l(|Graph,[Ref],[Scope]) :: Scope -> Partial [(Atom,Partial [(Decl,[Label])])]
   env_l(|g,ir*,s*) =
-    <shadow> ( <env_d(|g,ir*,s*)>
+    with(dbg-res(|"env_l "))
+  ; <shadow> ( <env_d(|g,ir*,s*)>
              , <env_i(|g,ir*,s*)>
              )
+  ; with(dbg-res(pp-Env|"env_l "))
 
   // env_d(|Graph,[Ref],[Scope]) :: Scope -> Partial [(Atom,Partial [(Decl,[Label])])]
   env_d(|g,ir*,s*) =
-    ?s
+    with(dbg-res(|"env_d "))
+  ; ?s
   ; ( <elem> (s,s*)
     < []
     + <G-decls> (g,s) // :: [Decl]
@@ -55,10 +62,12 @@ rules // resolution internal
     ; mapv(map(!(<id>,[]));pureP) // :: [(Atom,Partial [(Decl,[Label])])]
     )
   ; pureP // :: Partial [(Atom,Partial [(Decl,[Label])])]
+  ; with(dbg-res(pp-Env|"env_d "))
 
   // env_i(|Graph,[Ref],[Scope]) :: Scope -> Partial [(Atom,Partial [(Decl,[Label])])]
   env_i(|g,ir*,s*) =
-    ?s
+    with(dbg-res(|"env_i "))
+  ; ?s
   ; ( <elem> (s,s*)
     < <pureP> []
     + <G-r-imports> (g,s) // :: [(Ref,Label)]
@@ -80,7 +89,9 @@ rules // resolution internal
                 ) // :: Partial [(Atom,Partial [(Decl,[Label])])]
           ) // :: Partial (Partial [(Atom,Partial [(Decl,[Label])])])
     ; join // :: Partial [(Atom,Partial [(Decl,[Label])])]
+    ; try(Partial(map((id,!Partial(<fromP>))))) // :: Partial [(Atom,Partial [(Decl,[Label])])]
     )
+  ; with(dbg-res(pp-Env|"env_i "))
 
   // resolve_i_r2s(|Graph,[Ref]) :: (Ref,Label) -> Partial [(Decl,Label)]
   resolve_i_r2s(|g,ir*) =
@@ -96,7 +107,8 @@ rules // resolution internal
 
   // env_p(|Graph,[Ref],[Scope]) :: Scope -> Partial [(Atom,Partial [(Decl,[Label])])]
   env_p(|g,ir*,s*) =
-    ?s
+    with(dbg-res(|"env_p "))
+  ; ?s
   ; ( <elem> (s,s*)
     < <pureP> []
     + ( <G-parent> (g,s)
@@ -104,6 +116,7 @@ rules // resolution internal
       + <pureP> []
       )
     )
+  ; with(dbg-res(pp-Env|"env_p "))
 
   // shadow :: (Partial [(Atom,Partial [(Decl,[Label])])], Partial [(Atom,Partial [(Decl,[Label])])]) -> Partial [(Atom,Partial [(Decl,[Label])])]
   shadow =
@@ -118,3 +131,7 @@ rules
   pp-Resolution = map((pp-Analysis-string,fmap(map((pp-Analysis-string,map(pp-Analysis-string))))))
 
   pp-Env = fmap(map((pp-Analysis-string,fmap(map((pp-Analysis-string,map(pp-Analysis-string)))))))
+
+  dbg-res(s|n) = id // s ; debug(!n)
+  dbg-res(|n) = dbg-res(id|n)
+  dbg-res(s) = dbg-res(s|"")
