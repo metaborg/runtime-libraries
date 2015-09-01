@@ -4,7 +4,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 >
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>org.metaborg.meta.runtime.libanalysis2.eclipse</artifactId>
+  <artifactId>org.metaborg.meta.lib.analysis.eclipse</artifactId>
   <packaging>eclipse-plugin</packaging>
 
   <parent>
@@ -15,8 +15,9 @@
   </parent>
 
   <properties>
-    <lang.unpack.artifactId>org.metaborg.meta.runtime.libanalysis2</lang.unpack.artifactId>
+    <lang.unpack.artifactId>org.metaborg.meta.lib.analysis</lang.unpack.artifactId>
     <lang.baseline.unpack.skip>false</lang.baseline.unpack.skip>
+    <lang.baseline.unpack.artifactId>org.spoofax.meta.runtime.libraries</lang.baseline.unpack.artifactId>
   </properties>
 
   <dependencies>

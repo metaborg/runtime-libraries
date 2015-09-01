@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: runtime-libraries language Eclipse plugin
-Bundle-SymbolicName: org.spoofax.meta.runtime.libraries.eclipse;singleton:=true
+Bundle-Name: libanalysis2 language Eclipse plugin
+Bundle-SymbolicName: org.metaborg.meta.lib.analysis2.eclipse;singleton:=true
 Bundle-Version: 1.5.0.qualifier
 Bundle-Vendor: metaborg.org
 Bundle-ActivationPolicy: lazy
