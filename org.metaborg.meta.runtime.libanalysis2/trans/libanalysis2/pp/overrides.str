@@ -8,6 +8,10 @@ imports
 
 rules
 
+  prettyprint-ATerm: t@c#(a*) -> [ H( [SOpt(HS(), "0")],
+                                     [S(c),S("["),b,S("]")] ) ]
+  where b := <pp-H-list(prettyprint-Term|",")> a*
+
   // allow printing of actual Ints as well
   prettyprint-Int: i -> [S(<int-to-string> i)]
   where is-int
@@ -29,6 +33,8 @@ rules
 
 rules
 
+  prettyprint-Term = prettyprint-String
+  prettyprint-Term = prettyprint-Int
   prettyprint-Term = prettyprint-DeclId
   prettyprint-Term = prettyprint-RefId
   prettyprint-Term = prettyprint-Atom
@@ -42,3 +48,4 @@ rules
   prettyprint-Term = prettyprint-TypeArg
   prettyprint-Term = prettyprint-TypeCon
   prettyprint-Term = prettyprint-List(prettyprint-Term)
+  prettyprint-Term = prettyprint-ATerm
