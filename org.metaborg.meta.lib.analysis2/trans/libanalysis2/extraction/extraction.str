@@ -2,8 +2,7 @@ module libanalysis2/extraction/extraction
 
 imports
   signatures/libanalysis2/-
-  libanalysis2/namebinding/-
-  
+
 signature
   constructors
     Cs : List(Cs) -> C

@@ -1,0 +1,38 @@
+module libanalysis2/unification/solver
+
+imports
+  libanalysis2/unification/-
+  libanalysis2/namebinding/-
+  libanalysis2/solver/-
+  libanalysis2/prelude/-
+  libanalysis2/pp
+  signatures/libanalysis2/-
+
+rules
+  
+  solve-constraint: (CEqual(t,t,pos),sol-wm) -> [(sol-wm,[])]
+
+  solve-constraint: (CEqual(t,v@Var(_),pos),sol-wm) -> [(sol-wm,[CEqual(v,t,pos)])]
+  where <not(is-var)> t
+
+  solve-constraint: (CEqual(v@Var(_),t,pos),sol-wm) -> [(sol-wm',[])]
+  with ( <var-occurs> (v,t)
+       < msg := $[[<write-to-string> v] occurs in [<write-to-string> t]]
+       ; <add-error(|(pos,msg))> sol-wm
+       + <sol-wm-apply-s> ([(v,t)],sol-wm)
+       ) => sol-wm'
+
+  solve-constraint: (CEqual(Sub(_),Sub(_),pos),sol-wm) -> [(sol-wm',[])]
+  with msg := $[Cannot unify subtitutions]
+     ; <add-error(|(pos,msg))> sol-wm => sol-wm'
+
+  solve-constraint: (CEqual(t1@c1#(_),t2@c2#(_),pos),sol-wm) -> [(sol-wm',[])]
+  where <not(eq)> (c1,c2)
+      ; <not(is-op)> t1
+      ; <not(is-op)> t2
+  with msg := $[Cannot unify [<write-to-string> t1] with [<write-to-string> t2]]
+     ; <add-error(|(pos,msg))> sol-wm => sol-wm' => sol-wm'
+
+  solve-constraint: (CEqual(t@c#(a1),c#(a2),pos),sol-wm) -> [(sol-wm,c*)]
+  where <not(is-op)> t
+  with c* := <zip(!CEqual(<Fst>,<Snd>,pos))> (a1,a2)

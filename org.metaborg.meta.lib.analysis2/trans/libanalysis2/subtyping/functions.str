@@ -1,11 +1,11 @@
-module libanalysis2/typechecking/subtypes
+module libanalysis2/subtyping/functions
 
 imports
-  signatures/libanalysis2/-
-  libanalysis2/substitution/-
-  libanalysis2/typechecking/-
   libanalysis2/prelude/-
   libanalysis2/pp
+  libanalysis2/subtyping/-
+  libanalysis2/unification/functions
+  signatures/libanalysis2/-
 
 signature
   sorts
@@ -16,6 +16,8 @@ signature
     : List(TypeCon,(List(Variance),List(SuperType))) -> SubtypeRelation
 
 rules
+
+  is-tvar = ?TVar(_)
 
   build-subtype-rel = fail
   subtype-variance  = fail
@@ -44,33 +46,19 @@ rules
   lookup-entries(|table):
     (tc, []) -> <hashtable-get(|tc)> table
       
-  // The first supertype must be the itself, any variables used as type arguments
-  // can be used also as arguments to super types
-  // all supertypes must be present in the list
-  /*
-  example-subtype-relation =
-    ![ (TInt(), ( [] , [ (TInt(),[]) ]))
-     , (TBool(), ( [] , [ (TBool(),[]) ]))
-     , (TFun(), ( [Contravariant(),Covariant()]
-                  , [ (TFun(),[Var("T"),Var("R")]) ]))
-     ]
-  */
-
   build-subtype-relation(|x*): (TDef(tc,ta*),TApp(tc,a*)) -> sr
-  where <is-ground> tc
   with (n,n) := (<length> ta*,<length> a*)
      ; <map(ta-variance)> ta* => v*
      ; <map(ta-type)> ta* => a*
      ; sr := ( v*, [ (tc, a*) ] )
 
   build-subtype-relation(|x*): (TDef(tc1,ta1*),TApp(tc2,a2*)) -> sr1
-  where <is-ground;not(eq)> (tc1,tc2)
-      ; <lookup> (tc2,x*) => (fa2*,sr2*)
+  where <lookup> (tc2,x*) => (fa2*,sr2*)
       ; <not(lookup)> (tc1,sr2*)
   with <map(ta-variance)> ta1* => v1*
      ; <map(ta-type)> ta1* => a1*
      ; <zip> (fa2*,a2*) => s*
-     ; sr1 := ( v1* , [ (tc1, a1*) | <S-apply> (s*,sr2*) ])
+     ; sr1 := ( v1* , [ (tc1, a1*) | <S-apply(is-tvar)> (s*,sr2*) ])
 
 rules
  
@@ -126,7 +114,7 @@ rules
         ) => (tc,a*,tc',a'*)
   with <lookup> (tc, x*) => (v*,sr*@[(tc,fa*)|_])
       ; <lookup> (tc',sr*) => fa'*
-      ; <zip;S-foldr(![],unify)> (fa'*,a'*) => s
+      ; <zip;S-foldr(is-tvar,![],unify)> (fa'*,a'*) => s
       ; <zip> (v*, <zip> (a*,fa'*)) => a'*
   where <map( ?(Invariant(),<id>) ; ( !(<Fst>,<lookup> (<Snd>, s)) < inv + Fst )
            <+ ?(Covariant(),<id>) ; ( !(<Fst>,<lookup> (<Snd>, s)) < cov + Fst )
@@ -144,7 +132,7 @@ rules
   where <lookup> (tc1,x*) => (_,sr1*@[(tc1,fa1*)|_])
       ; <lookup> (tc2,sr1*) => fa2*
       ; <zip> (fa1*,a1*) => s*
-  with <S-apply> (s*,fa2*) => a2*
+  with <S-apply(is-tvar)> (s*,fa2*) => a2*
 
   all-tcs = collect-all(?TApp(<id>,_))
 
@@ -155,5 +143,5 @@ rules
 
 rules
   
-  pp-Supertype = (pp-Analysis-string,map(pp-Analysis-string))
-  pp-SubtypeRelation = map((pp-Analysis-string,(map(pp-Analysis-string),map(pp-Supertype))))
+  pp-Supertype = (pp-TypeCon,map(pp-Type))
+  pp-SubtypeRelation = map((pp-TypeCon,(map(pp-TypeArg),map(pp-Supertype))))

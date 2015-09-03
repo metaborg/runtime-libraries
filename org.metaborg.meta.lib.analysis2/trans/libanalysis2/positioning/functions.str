@@ -1,4 +1,4 @@
-module libanalysis2/abstract-syntax/abstract-syntax
+module libanalysis2/positioning/functions
 
 imports
   runtime/editor/annotations
@@ -20,7 +20,6 @@ rules
     where(
       try(dr-end-scope(|"NewKey"))
     )
-    ;debug
 
   annotate-key: t -> t{<NewKey>}
   

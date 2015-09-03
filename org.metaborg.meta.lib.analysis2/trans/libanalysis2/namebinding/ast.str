@@ -4,7 +4,7 @@ imports
   runtime/editor/annotations
   runtime/editor/origins
 
-  libanalysis2/abstract-syntax/-
+  libanalysis2/positioning/functions
   libanalysis2/prelude/-
   signatures/libanalysis2/-
 

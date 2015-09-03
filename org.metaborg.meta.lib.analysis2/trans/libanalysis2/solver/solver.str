@@ -5,80 +5,17 @@ imports
   runtime/editor/annotations
   runtime/editor/origins
   runtime/task/messages
-  libanalysis2/abstract-syntax/-
-  libanalysis2/substitution/-
-  libanalysis2/namebinding/-
-  libanalysis2/typechecking/-
-  libanalysis2/solver/-
   libanalysis2/prelude/-
   libanalysis2/pp
-
-signature
-  sorts
-    Solution
- 
-  constructors
-    Sol : Graph
-        * List((RefId,DeclId))
-        * List((Pos,Type))
-        * List((Var,Type))
-        * SubtypeRelation
-        * List(Type,Type) -> Solution
+  libanalysis2/solver/-
+  libanalysis2/unification/functions
 
 rules
- 
-  new-subtype-relation = where(<debug;fail> "ERROR: Define new-subtype-relation")
- 
-  sol-new = !Sol(<G-new>,[],[],[],<new-subtype-relation>,[])
-
-  sol-g = ?Sol(<id>,_,_,_,_,_) 
-  sol-r = ?Sol(_,<id>,_,_,_,_) 
-  sol-p = ?Sol(_,_,<id>,_,_,_)
-  sol-s = ?Sol(_,_,_,<id>,_,_)
-  sol-x = ?Sol(_,_,_,_,<id>,_)
-  sol-lb = ?Sol(_,_,_,_,_,<id>)
+	
+  solve-fact = fail
   
-  sol-with-g: (g,Sol(_,r*,p*,s*,x*,lb*)) -> Sol(g,r*,p*,s*,x*,lb*)
-
-  sol-apply-s: (s',Sol(g,r*,p*,s*,x*,lb*))
-    -> Sol(g',r'*,p'*,s'*,x*,lb'*)
-    where g' := <S-apply> (s',g)
-        ; r'* := <S-apply;reduce-ops(|x*)> (s',r*)
-        ; p'* := <S-apply;reduce-ops(|x*)> (s',p*)
-        ; s'* := <S-compose;reduce-ops(|x*)> (s',s*)
-        ; lb'* := <S-apply;reduce-ops(|x*)> (s',lb*)
-
-  sol-set-p(v): (p,Sol(g,r*,p*,s*,x*,lb*))
-    -> Sol(g,r*,p'*,s*,x*,lb*)
-  with ty := <v>
-     ; p'* := <set(!ty)> (p,p*)
-
-  sol-set-x(|ty*): (ty,Sol(g,r*,p*,s*,x*,lb*))
-    -> Sol(g,r*,p*,s*,x'*,lb*)
-  with <set(!ty*)> (ty,x*) => x'*
-
-  sol-set-r(|r,d): Sol(g,r*,p*,s*,x*,lb*)
-    -> Sol(g,r'*,p*,s*,x*,lb*)
-  with <set(!d)> (r,r*) => r'*
-
-  sol-set-lb(|tv,ty): Sol(g,r*,p*,s*,x*,lb*)
-    -> Sol(g,r*,p*,s*,x*,lb'*)
-  with <set(!ty)> (tv,lb*) => lb'*
-
-  sol-with-lb(|lb*): Sol(g,r*,p*,s*,x*,_)
-    -> Sol(g,r*,p*,s*,x*,lb*)
-
-rules
-
-  sol-wm-apply-s(|pos): (s-wm,sol-wm) -> sol-wm''
-  with mplus(sol-apply-s) => sol-wm'
-     ; <fromWM;S-unsafe> s-wm => vt*
-     ; foldr(!sol-wm',sol-wm-apply-s-error(|pos)) => sol-wm''
-
-  sol-wm-apply-s-error(|pos): ((v,t),sol-wm) -> sol-wm'
-  with msg := $[Recursive type: [<pp-Analysis-string> v] = [<pp-Analysis-string> t]]
-     ; sol-wm' := <add-error(|(pos,msg))> sol-wm
-
+  solve-constraint = fail	
+	
 rules
 
   initial-solution = sol-new;pureWM
@@ -86,7 +23,7 @@ rules
   solve-constraints-phase1: c* -> s
   with
     s := <csolve( solve-specialise
-                , ( solve-namebinding-fact
+                , ( solve-fact
                  <+ solve-trivial-constraints
                  <+ solve-ignore
                   )
@@ -94,25 +31,26 @@ rules
 
   solve-constraints-phase2: c* -> s
   with
-    s := <csolve-repeat( solve-specialise
-                       , ( solve-namebinding-constraint
-                        <+ solve-subtype-fact
-                        <+ solve-position-constraint
-                        <+ solve-eqtype-constraint
-                        <+ solve-substitution-constraint
-                        <+ check-subtype-constraint
-                        <+ solve-trivial-constraints
-                        <+ solve-ignore
-                         )
-                       , postprocess-bounds
-                       )> c*
+    s := <csolve( solve-specialise
+                , ( solve-constraint
+                 <+ solve-trivial-constraints
+                 <+ solve-ignore
+                  )
+                )> c*
 
   solve-specialise: (sol-wm,c) -> c'
   with <fromWM;sol-s> sol-wm => s*
      ; <fromWM;sol-x> sol-wm => x*
-     ; <S-apply;reduce-ops(|x*)> (s*,c) => c'
+     ; <S-apply(is-var);reduce-ops(|x*)> (s*,c) => c'
 
 rules
-  
+ 
   solve-trivial-constraints: (CTrue(),sol-wm) -> [(sol-wm,[])]
   solve-trivial-constraints: (CAndStar(c*),sol-wm) -> [(sol-wm,c*)]
+
+rules
+ 
+  debug-solve(s): i@(c,sol-wm) -> o*
+    where s => o*
+    with <debug> $[solve [<pp-Constraint> c]]
+       ; <map(Snd;map(pp-Constraint);debug(!"--> "))> o*

@@ -1,9 +1,9 @@
 module libanalysis2/namebinding/scopegraph
 
 imports
-  signatures/libanalysis2/-
   libanalysis2/pp
   libanalysis2/prelude/-
+  signatures/libanalysis2/-
 
 signature
   sorts
@@ -38,10 +38,11 @@ rules
 
 rules
   
-  pp-Graph = G( map((pp-Analysis-string,pp-ScopeImpl))
-              , map((pp-Analysis-string,pp-Analysis-string)))
-  pp-ScopeImpl = S( pp-Analysis-string
-                  , map(pp-Analysis-string)
-                  , map(pp-Analysis-string)
-                  , map((pp-Analysis-string,pp-Analysis-string))
-                  , map((pp-Analysis-string,pp-Analysis-string)))
+  pp-Graph = G( map((pp-Scope,pp-ScopeImpl))
+              , map((pp-DeclId,pp-Scope)))
+
+  pp-ScopeImpl = S( pp-OptionScope
+                  , map(pp-DeclId)
+                  , map(pp-RefId)
+                  , map((pp-RefId,pp-Term))
+                  , map((pp-Scope,pp-Term)))
