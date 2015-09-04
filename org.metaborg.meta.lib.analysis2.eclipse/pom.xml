@@ -17,7 +17,6 @@
   <properties>
     <lang.unpack.artifactId>org.metaborg.meta.lib.analysis2</lang.unpack.artifactId>
     <lang.baseline.unpack.skip>false</lang.baseline.unpack.skip>
-    <lang.baseline.unpack.artifactId>org.metaborg.meta.runtime.libanalysis2</lang.baseline.unpack.artifactId>
   </properties>
 
   <dependencies>
