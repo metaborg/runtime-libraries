@@ -1,7 +1,7 @@
 module analysis
 
 imports
-	
+
 	libstratego-lib
 	libstratego-gpp
 	libstratego-aterm
@@ -11,17 +11,17 @@ imports
 	runtime/nabl/-
 	runtime/task/-
 	runtime/index/-
-	names
+	names/names
 	pp
 	outline
 	convert
 
 rules // Analysis
-	
+
 	editor-analyze = analyze-all(id, id, id|<language>, <project-path>)
 
 rules // Editor services
-	
+
 	// Resolves a reference when the user control-clicks or presses F3 in the editor.
 	editor-resolve:
 		(node, position, ast, path, project-path) -> definition
@@ -41,21 +41,21 @@ rules // Editor services
 			proposals := <analysis-propose-completions(|<language>, project-path)> ast
 
 rules // Debugging
-	
+
 	// Prints the abstract syntax ATerm of a selection.
 	debug-show-aterm:
 		(selected, position, ast, path, project-path) -> (filename, result)
 		with
 			filename := <guarantee-extension(|"aterm")> path;
 			result	 := selected
-			
+
 	// Prints the analyzed annotated abstract syntax ATerm of a selection.
 	debug-show-analyzed:
 		(selected, position, ast, path, project-path) -> (filename, result)
 		with
 			filename := <guarantee-extension(|"analyzed.aterm")> path;
 			result	 := ast
-			
+
 	debug-index-project =
 		analysis-debug-index-project(|<language>)
 	debug-index-partition =
@@ -67,7 +67,7 @@ rules // Debugging
 		analysis-debug-task-partition(|<language>)
 	debug-task-selection =
 		analysis-debug-task-selection(|<language>)
-		
+
 	debug-project =
 		analysis-debug-project(|<language>)
 	debug-partition =
