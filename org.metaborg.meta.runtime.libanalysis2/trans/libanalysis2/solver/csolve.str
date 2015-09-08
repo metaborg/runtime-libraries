@@ -6,31 +6,35 @@ rules
   // preprocess : (e,c) -> c
   // postprocess : (e,[c]) -> e
 
-  // csolve-repeat(preprocess,solve,postprocess) :: (e,[c]) -> [(e,[c])]
-  csolve-repeat(preprocess,solve,postprocess): (e,c*) -> res*
-  with csolve(preprocess,solve)
-     ; map( !(<postprocess>, <Snd>)
-          ; where(<eq> (e,<Fst>)) ; ![<id>]
-         <+ csolve-repeat(preprocess,solve,postprocess)
-          );concat => res*
+rules
+ 
+  // csolve :: (e,[c]) -> [(e,[c])]
+  csolve(preprocess,solve) =
+    ( !(<Fst>,<Snd>,[])
+    ; csolve-first(preprocess,solve)
+    ; map( !(<Fst>, <conc> (<Snd>,<Third>))
+         ; csolve(preprocess,solve)
+         )
+    ; concat
+   <+ ![<id>]
+    )
 
-  // csolve :: (e,[c]) -> [(e,[c]])]
-  csolve(preprocess,solve): (e,c*) -> res*
-  with <csolve-step(preprocess,solve)> (c*,e,[])
-     ; map( where(<eq> (<Snd>,[]) <+ <set-eq> (<Snd>,c*)) ; ![<id>]
-          <+ csolve(preprocess,solve)
-          );concat => res*
+rules
 
-  csolve-step(preprocess,solve): ([c|c*],e,c'*) -> res*
-  with
-    <preprocess> (e,c) => c'
-  ; <solve> (c',e)
-  ; map( !(c*, <Fst>, <conc> (<Snd>,c'*))
-       ; csolve-step(preprocess,solve)
-       );concat => res*
+  // csolve-first :: (e,[c],[c]) -> [(e,[c],[c])]
+  csolve-first(preprocess,solve): (e,[c|c*],c'*) -> ecc*
+    where <csolve-one(preprocess,solve)> (e,c) => ec*
+    with <map(!(<Fst>,<conc> (<Snd>,c*),c'*))> ec* => ecc*
 
-  csolve-step(preprocess,solve): ([],e,c') -> [(e, <reverse> c')]
+  csolve-first(preprocess,solve): (e,[c|c*],c'*) -> <csolve-first(preprocess,solve)> (e,c*,[c|c'*])
+
+rules
+  
+  // csolve-one :: (e,c) -> [(e,[c])]
+  csolve-one(preprocess,solve): (e,c) -> ec*
+    with <preprocess> (e,c) => c'
+    where <solve> (c',e) => ec*
+
+rules
 
   preprocess-default: (_,c) -> c
-
-  solve-ignore: (c,e) -> [(e,[c])]

@@ -25,7 +25,6 @@ rules
     s := <csolve( solve-specialise
                 , ( solve-fact
                  <+ solve-trivial-constraints
-                 <+ solve-ignore
                   )
                 )> c*
 
@@ -34,7 +33,6 @@ rules
     s := <csolve( solve-specialise
                 , ( solve-constraint
                  <+ solve-trivial-constraints
-                 <+ solve-ignore
                   )
                 )> c*
 
