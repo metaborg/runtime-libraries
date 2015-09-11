@@ -69,15 +69,19 @@ rules
   
   new-var = !Var(<NewVar>)
   
-  get-implicit-decl-position(|term):
+  get-implicit-decl-position(|term) = id
+  /*
     Pos(_, f, _, _, _, _) -> Pos($[[s][<NewImplicit>]], f, -1, -1, -1, -1)
     with
       s := <term-to-string> term
+  */
   
-  get-implicit-ref-position(|term):
+  get-implicit-ref-position(|term) = id
+  /*
     Pos(k, f, _, _, _, _) -> Pos($[[s][k]], f, -1, -1, -1, -1)
     with
       s := <term-to-string> term
+  */
   
   term-to-string = is-string <+ get-constructor <+ int-to-string
   

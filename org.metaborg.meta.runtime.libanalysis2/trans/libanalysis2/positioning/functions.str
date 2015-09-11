@@ -29,8 +29,8 @@ rules
   
   get-position: DeclId(_, _, p) -> p
   
-  get-position: t{k} -> Pos(k,f,l,c,s,e)
-  with <is-int> k <+ debug(!"ERROR: Cannot get key for ") ; fail
+  get-position: t{a*} -> Pos(k,f,l,c,s,e)
+  where <getfirst(is-int)> a* => k
   with (origin-location-offset <+ debug(!"WARNING: Cannot get origin for ") ; !("",-1,-1,-1,-1)) => (f,l,c,s,e)
 
   position-to-origin:
