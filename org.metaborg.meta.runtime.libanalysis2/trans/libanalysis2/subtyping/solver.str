@@ -31,7 +31,8 @@ rules
   solve-constraint: (CSubType(ty1@TApp(_,_),ty2@TApp(_,_),pos),sol-wm) -> [res]
   where <is-ground> (ty1,ty2)
   with <fromWM;sol-x> sol-wm => x*
-     ; ( <is-subtype-traverse(!CEqual(<Fst>,<Snd>,pos)
+  where <all-tcs;map(<lookup> (<id>, x*))> (ty1,ty2)
+  with ( <is-subtype-traverse(!CEqual(<Fst>,<Snd>,pos)
                              ,!CSubType(<Fst>,<Snd>,pos)
                              ,!CSubType(<Snd>,<Fst>,pos)
                              ,id|x*);Snd> (ty1,ty2) => c*

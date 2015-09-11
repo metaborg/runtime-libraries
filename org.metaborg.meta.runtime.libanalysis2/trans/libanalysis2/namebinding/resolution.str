@@ -80,9 +80,9 @@ rules // resolution internal
                     , <G-s-imports>  (g,s) // :: [(Scope,Label)]
                     ) // :: [(Scope,Label)]
           ; filter(not(<elem> (<Fst>,s*))) // :: [(Scope,Label)]
-          ; map( ?(Scope(_),_)
-               < env_i_l(|g,ir*,[s|s*]) // :: Partial [(Atom,Partial [(Decl,[Label])])]
-               + !Partial([]) // :: Partial [(Atom,Partial [(Decl,[Label])])]
+          ; map( ?(Var(_),_)
+               < !Partial([]) // :: Partial [(Atom,Partial [(Decl,[Label])])]
+               + env_i_l(|g,ir*,[s|s*]) // :: Partial [(Atom,Partial [(Decl,[Label])])]
                ) // :: [Partial [(Atom,Partial [(Decl,[Label])])]]
           ; sequenceP // :: Partial [[(Atom,Partial [(Decl,[Label])])]]
           ; fmap( foldr(![],merge(union,mplus(union))) // :: [(Atom,Partial [(Decl,[Label])])]

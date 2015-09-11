@@ -103,5 +103,5 @@ rules
   , ("notes", <map((pp-Term,id))> n*)
   ]
  
-  irrelevant-constraint = fail
-  irrelevant-pos = fail
+  irrelevant-constraint = ?CTypeOf(<irrelevant-pos>,_,_)
+  irrelevant-pos = ?Pos(_,_,_,_,_,_)

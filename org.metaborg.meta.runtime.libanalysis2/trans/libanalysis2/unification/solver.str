@@ -26,13 +26,14 @@ rules
   with msg := $[Cannot unify subtitutions]
      ; <add-error(|(pos,msg))> sol-wm => sol-wm'
 
-  solve-constraint: (CEqual(t1@c1#(_),t2@c2#(_),pos),sol-wm) -> [(sol-wm',[])]
-  where <not(eq)> (c1,c2)
-      ; <not(is-op)> t1
+  solve-constraint: (CEqual(t1@c1#(a1),t2@c2#(a2),pos),sol-wm) -> [(sol-wm',[])]
+  where <not(is-op)> t1
       ; <not(is-op)> t2
+      ; ( <not(eq)> (c1,c2) <+ <(length,length);not(eq)> (a1,a2) )
   with msg := $[Cannot unify [<write-to-string> t1] with [<write-to-string> t2]]
      ; <add-error(|(pos,msg))> sol-wm => sol-wm' => sol-wm'
 
   solve-constraint: (CEqual(t@c#(a1),c#(a2),pos),sol-wm) -> [(sol-wm,c*)]
   where <not(is-op)> t
+      ; <(length,length);eq> (a1,a2)
   with c* := <zip(!CEqual(<Fst>,<Snd>,pos))> (a1,a2)
