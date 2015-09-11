@@ -10,30 +10,30 @@ imports
 
 rules
   
-  solve-constraint: (CEqual(t,t,pos),sol-wm) -> [(sol-wm,[])]
+  solve-constraint: (CEqual(t,t,errinfo),sol-wm) -> [(sol-wm,[])]
 
-  solve-constraint: (CEqual(t,v@Var(_),pos),sol-wm) -> [(sol-wm,[CEqual(v,t,pos)])]
+  solve-constraint: (CEqual(t,v@Var(_),errinfo),sol-wm) -> [(sol-wm,[CEqual(v,t,errinfo)])]
   where <not(is-var)> t
 
-  solve-constraint: (CEqual(v@Var(_),t,pos),sol-wm) -> [(sol-wm',[])]
+  solve-constraint: (CEqual(v@Var(_),t,errinfo),sol-wm) -> [(sol-wm',[])]
   with ( <var-occurs> (v,t)
        < msg := $[[<write-to-string> v] occurs in [<write-to-string> t]]
-       ; <add-error(|(pos,msg))> sol-wm
+       ; <add-error(|<mkerror(|msg)> errinfo)> sol-wm
        + <sol-wm-apply-s> ([(v,t)],sol-wm)
        ) => sol-wm'
 
-  solve-constraint: (CEqual(Sub(_),Sub(_),pos),sol-wm) -> [(sol-wm',[])]
+  solve-constraint: (CEqual(Sub(_),Sub(_),errinfo),sol-wm) -> [(sol-wm',[])]
   with msg := $[Cannot unify subtitutions]
-     ; <add-error(|(pos,msg))> sol-wm => sol-wm'
+     ; <add-error(|<mkerror(|msg)> errinfo)> sol-wm => sol-wm'
 
-  solve-constraint: (CEqual(t1@c1#(a1),t2@c2#(a2),pos),sol-wm) -> [(sol-wm',[])]
+  solve-constraint: (CEqual(t1@c1#(a1),t2@c2#(a2),errinfo),sol-wm) -> [(sol-wm',[])]
   where <not(is-op)> t1
       ; <not(is-op)> t2
       ; ( <not(eq)> (c1,c2) <+ <(length,length);not(eq)> (a1,a2) )
   with msg := $[Cannot unify [<write-to-string> t1] with [<write-to-string> t2]]
-     ; <add-error(|(pos,msg))> sol-wm => sol-wm' => sol-wm'
+     ; <add-error(|<mkerror(|msg)> errinfo)> sol-wm => sol-wm' => sol-wm'
 
-  solve-constraint: (CEqual(t@c#(a1),c#(a2),pos),sol-wm) -> [(sol-wm,c*)]
+  solve-constraint: (CEqual(t@c#(a1),c#(a2),errinfo),sol-wm) -> [(sol-wm,c*)]
   where <not(is-op)> t
       ; <(length,length);eq> (a1,a2)
-  with c* := <zip(!CEqual(<Fst>,<Snd>,pos))> (a1,a2)
+  with c* := <zip(!CEqual(<Fst>,<Snd>,errinfo))> (a1,a2)

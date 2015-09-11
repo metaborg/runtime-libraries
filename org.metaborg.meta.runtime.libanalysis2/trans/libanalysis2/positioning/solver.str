@@ -11,11 +11,11 @@ imports
  
 rules
   
-  solve-constraint: (f@CTypeOf(p,ty,pos),sol-wm) -> [res]
+  solve-constraint: (f@CTypeOf(p,ty,errinfo),sol-wm) -> [res]
   where <is-ground> p
   with <fromWM;sol-p> sol-wm => p*
      ; ( <lookup> (p, p*) => ty'
-       < !(sol-wm, [CEqual(ty, ty', pos)])
+       < !(sol-wm, [CEqual(ty, ty', errinfo)])
        + !(<fmap(<sol-set-p(!ty)> (p,<id>))> sol-wm, [])
        ) => res
 
@@ -29,5 +29,5 @@ rules
 
 rules
   
-  unsolved-error: CTypeOf(p,ty,pos) -> (pos,msg)
+  unsolved-error: CTypeOf(p,ty,errinfo) -> <mkerror(|msg)> errinfo
   with msg := $[Could not unify type of [<pp-Pos> p] with [<pp-Term> ty]]

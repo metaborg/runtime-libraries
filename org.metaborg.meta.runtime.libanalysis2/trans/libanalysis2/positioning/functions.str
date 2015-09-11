@@ -39,6 +39,8 @@ rules
   position-to-key:
     Pos(k,_,_,_,_,_) -> k
 
+  position-fix = where(position-to-origin => o) ; try(origin-location-offset-set(|o))
+
 rules
  
   apply-annotations(s|aa*): ast -> ast'

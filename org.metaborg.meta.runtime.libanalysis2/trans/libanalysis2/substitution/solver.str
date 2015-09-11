@@ -13,7 +13,7 @@ rules
 
   get-Ts: TList(t*) -> t*
 
-  solve-constraint: (c@CMkSub(s,d*,r*,pos),sol-wm) -> [(sol-wm',c*)]
+  solve-constraint: (c@CMkSub(s,d*,r*,errinfo),sol-wm) -> [(sol-wm',c*)]
   where <is-var> s
       ; <not(is-var)> d*
       ; <not(is-var)> r*
@@ -21,18 +21,18 @@ rules
      ; rt* := <get-Ts> r*
      ; ( <(length,length);eq> (dt*,rt*)
        < s' := Sub(<zip> (dt*, rt*))
-       ; !(sol-wm, [CEqual(s,s',pos)])
+       ; !(sol-wm, [CEqual(s,s',errinfo)])
        + msg := $[Different number of parameters [<write-to-string> rt*] and [<write-to-string> dt*]]
-       ; !(<add-error(|(pos,msg))> sol-wm, [])
+       ; !(<add-error(|<mkerror(|msg)> errinfo)> sol-wm, [])
        ) => (sol-wm',c*)
 
-  solve-constraint: (c@CComposeSub(s,s*,pos),sol-wm) -> [(sol-wm,c*)]
+  solve-constraint: (c@CComposeSub(s,s*,errinfo),sol-wm) -> [(sol-wm,c*)]
   where <is-var> s
       ; <not(is-var);map(not(is-var))> s*
   with s' := <map(get-S);S-compose(is-tvar)> s*
-     ; c* := [CEqual(s,s',pos)]
+     ; c* := [CEqual(s,s',errinfo)]
 
-  solve-constraint: (c@CApplySub(ty,s,ty',pos),sol-wm) -> [(sol-wm,c*)]
+  solve-constraint: (c@CApplySub(ty,s,ty',errinfo),sol-wm) -> [(sol-wm,c*)]
   where <not(is-var)> s
   with ty'' := <S-apply(is-tvar)> (<get-S> s,ty')
-     ; c* := [CEqual(ty,ty'',pos)]
+     ; c* := [CEqual(ty,ty'',errinfo)]

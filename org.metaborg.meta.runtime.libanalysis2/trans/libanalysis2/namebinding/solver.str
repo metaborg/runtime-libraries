@@ -42,42 +42,42 @@ rules
 
 rules
 
-  solve-constraint: (CResolves(r,l,d,pos),sol-wm) -> [(sol-wm,c*)]
+  solve-constraint: (CResolves(r,l,d,errinfo),sol-wm) -> [(sol-wm,c*)]
   where <fromWM;sol-r> sol-wm => r*
       ; <lookup> (r,r*) => (d',l')
-  with c* := [ CEqual(d,d',pos),
-               CEqual(l,l',pos)
+  with c* := [ CEqual(d,d',errinfo),
+               CEqual(l,l',errinfo)
              ]
 
-  solve-constraint: (CResolves(r,l,d,pos),sol-wm) -> res*
+  solve-constraint: (CResolves(r,l,d,errinfo),sol-wm) -> res*
   where <fromWM;sol-r> sol-wm => r*
       ; <not(lookup)> (r,r*)
       ; <fromWM;sol-g> sol-wm => g
       ; <resolve(|g)> r => Total(dl*@[_|_])
-  with <map(solve-namebinding-constraint-step(|r,l,d,pos,sol-wm))> dl* => res*
+  with <map(solve-namebinding-constraint-step(|r,l,d,errinfo,sol-wm))> dl* => res*
 
-  solve-namebinding-constraint-step(|r,l,d,pos,sol-wm): (d',l') -> (sol-wm',c*)
+  solve-namebinding-constraint-step(|r,l,d,errinfo,sol-wm): (d',l') -> (sol-wm',c*)
   with <fmap(sol-set-r(|r,(d',l')))> sol-wm => sol-wm'
-  with c* := [ CEqual(d,d',pos)
-             , CEqual(l,l',pos)
+  with c* := [ CEqual(d,d',errinfo)
+             , CEqual(l,l',errinfo)
              ]
  
-  solve-constraint: (CAssoc(d,s,pos),sol-wm) -> [(sol-wm,c*)]
+  solve-constraint: (CAssoc(d,s,errinfo),sol-wm) -> [(sol-wm,c*)]
   where <is-ground> d
       ; <fromWM;sol-g> sol-wm => g
       ; <G-assoc> (g,d) => s'
-  with c* := [ CEqual(s,s',pos) ]
+  with c* := [ CEqual(s,s',errinfo) ]
  
-  solve-constraint: (CDistinct(s,pos),sol-wm) -> [(sol-wm',[])]
+  solve-constraint: (CDistinct(s,errinfo),sol-wm) -> [(sol-wm',[])]
   where <is-ground> s
       ; <sol-g> sol-wm => g
       ; <G-decls;map(atom)> (g,s) => d*
   with ( <dups> d* => d'*
-       < <add-error(|(pos,$[Duplicate declarations [<write-to-string> d'*]]))> sol-wm
+       < <add-error(|<mkerror(|$[Duplicate declarations [<write-to-string> d'*]])> errinfo)> sol-wm
        + !sol-wm
        ) => sol-wm'
 
-  solve-constraint: (CInit(s,pos),sol-wm) -> [(sol-wm',[])]
+  solve-constraint: (CInit(s,errinfo),sol-wm) -> [(sol-wm',[])]
   where <is-ground> s
       ; <sol-g> sol-wm => g
       ; <G-refs;map(atom)> (g,s) => r*
@@ -85,10 +85,10 @@ rules
   with <isect> (r*,d*) => i*
      ; ( ?[]
        < !sol-wm
-       + <add-error(|(pos,$[Mismatch [<write-to-string> i*]]))> sol-wm
+       + <add-error(|<mkerror(|$[Mismatch [<write-to-string> i*]])> errinfo)> sol-wm
        ) => sol-wm'
 
 rules
  
-  unsolved-error: CResolves(r,l,d,pos) -> (pos,$[Could not resolve [<pp-RefId> r] to [<pp-DeclId> d]])
-  unsolved-error: CAssoc(d,s,pos) -> (pos,$[Could not find associated scope [<pp-Scope> s] of [<pp-DeclId> d]])
+  unsolved-error: CResolves(r,l,d,errinfo) -> <mkerror(|$[Could not resolve [<pp-RefId> r] to [<pp-DeclId> d]])> errinfo
+  unsolved-error: CAssoc(d,s,errinfo) -> <mkerror(|$[Could not find associated scope [<pp-Scope> s] of [<pp-DeclId> d]])> errinfo

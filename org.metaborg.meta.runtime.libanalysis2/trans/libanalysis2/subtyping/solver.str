@@ -9,50 +9,50 @@ imports
 
 rules
  
-  solve-constraint: (f@FSubType(tyd@TDef(tc,_),ty,pos),sol-wm) -> [(sol-wm',[])]
+  solve-constraint: (f@FSubType(tyd@TDef(tc,_),ty,errinfo),sol-wm) -> [(sol-wm',[])]
   where <is-ground> (tyd,ty)
       ; <fromWM;sol-x> sol-wm => x*
       ; <build-subtype-relation(|x*)> (tyd,ty) => sr
   with ( <lookup> (tc, x*)
-       < <add-error(|(pos,$[Duplicate fact [<pp-Constraint> f]]))> sol-wm
+       < <add-error(|<mkerror(|$[Duplicate fact [<pp-Constraint> f]])> errinfo)> sol-wm
        + <fmap(<sol-set-x(|sr)> (tc,<id>))> sol-wm
        ) => sol-wm'
 
 rules
 
-  solve-constraint: (CSubType(TList(ty1*),TList(ty2*),pos),sol-wm) -> [res]
+  solve-constraint: (CSubType(TList(ty1*),TList(ty2*),errinfo),sol-wm) -> [res]
   where <is-list> ty1*
       ; <is-list> ty2*
   with ( <(length,length);eq> (ty1*,ty2*)
-       < !(sol-wm, <zip;map(!CSubType(<Fst>,<Snd>,pos))> (ty1*,ty2*))
-       + !(<add-error(|(pos,$[[<pp-List(prettyprint-Type)> ty1*] has different length from [<pp-List(prettyprint-Type)> ty2*]]))> sol-wm, [])
+       < !(sol-wm, <zip;map(!CSubType(<Fst>,<Snd>,errinfo))> (ty1*,ty2*))
+       + !(<add-error(|<mkerror(|$[[<pp-List(prettyprint-Type)> ty1*] has different length from [<pp-List(prettyprint-Type)> ty2*]])> errinfo)> sol-wm, [])
        ) => res
 
-  solve-constraint: (CSubType(ty1@TApp(_,_),ty2@TApp(_,_),pos),sol-wm) -> [res]
+  solve-constraint: (CSubType(ty1@TApp(_,_),ty2@TApp(_,_),errinfo),sol-wm) -> [res]
   where <is-ground> (ty1,ty2)
   with <fromWM;sol-x> sol-wm => x*
   where <all-tcs;map(<lookup> (<id>, x*))> (ty1,ty2)
-  with ( <is-subtype-traverse(!CEqual(<Fst>,<Snd>,pos)
-                             ,!CSubType(<Fst>,<Snd>,pos)
-                             ,!CSubType(<Snd>,<Fst>,pos)
+  with ( <is-subtype-traverse(!CEqual(<Fst>,<Snd>,errinfo)
+                             ,!CSubType(<Fst>,<Snd>,errinfo)
+                             ,!CSubType(<Snd>,<Fst>,errinfo)
                              ,id|x*);Snd> (ty1,ty2) => c*
        < !(sol-wm,c*)
-       + !(<add-error(|(pos,$[[<pp-Type> ty1] is not a subtype of [<pp-Type> ty2]]))> sol-wm, [])
+       + !(<add-error(|<mkerror(|$[[<pp-Type> ty1] is not a subtype of [<pp-Type> ty2]])> errinfo)> sol-wm, [])
        ) => res
 
-  solve-constraint: (CLubType(ty,ty1@TApp(tc1,_),ty2@TApp(tc2,_),pos),sol-wm) -> [res]
+  solve-constraint: (CLubType(ty,ty1@TApp(tc1,_),ty2@TApp(tc2,_),errinfo),sol-wm) -> [res]
   where <is-ground> (ty1,ty2)
   with <fromWM;sol-x> sol-wm => x*
   where <all-tcs;map(<lookup> (<id>, x*))> (ty1,ty2)
   with ( <lub(|x*)> (ty1,ty2) => ty'
-       < !(sol-wm,[CEqual(ty,ty',pos)])
-       + !(<add-error(|(pos,$[Types [<pp-Type> ty1] and [<pp-Type> ty2] have no least upper bound.]))> sol-wm, [])
+       < !(sol-wm,[CEqual(ty,ty',errinfo)])
+       + !(<add-error(|<mkerror(|$[Types [<pp-Type> ty1] and [<pp-Type> ty2] have no least upper bound.])> errinfo)> sol-wm, [])
        ) => res
 
 rules
 
-  unsolved-error: FSubType(ty1,ty2,pos) -> (pos,msg)
+  unsolved-error: FSubType(ty1,ty2,errinfo) -> <mkerror(|msg)> errinfo
   with msg := $[Could not set [<pp-TypeDef> ty1] subtype of [<pp-Type> ty2]]
 
-  unsolved-error: CSubType(ty1,ty2,pos) -> (pos,msg)
+  unsolved-error: CSubType(ty1,ty2,errinfo) -> <mkerror(|msg)> errinfo
   with msg := $[Could not determine if [<pp-Type> ty1] subtype of [<pp-Type> ty2]]

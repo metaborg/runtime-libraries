@@ -29,6 +29,8 @@ context-free syntax
 
   Atom.Atom                 = <atom(<Namespace>,<String>)>
 
+  ErrorInfo                 = Pos
+
 context-free syntax
 
   Type.TApp                 = <<TypeCon>[<{Type ","}*>]>
@@ -49,11 +51,11 @@ context-free syntax // unification
 
   Constraint.CTrue          = <T>
   Constraint.CAndStar       = <<{Constraint "/\\"}*>> {longest-match}
-  Constraint.CEqual        = [[Term] == [Term] [Pos]]
+  Constraint.CEqual        = [[Term] == [Term] [ErrorInfo]]
 
 context-free syntax // types
 
-  Constraint.CTypeOf        = <<Pos> : <Type> <Pos>>
+  Constraint.CTypeOf        = <<Pos> : <Type> <ErrorInfo>>
 
 context-free syntax // name resolution
 
@@ -64,23 +66,23 @@ context-free syntax // name resolution
   Constraint.FParent        = <parent(<Scope>) is <OptionScope>>
   Constraint.FAssoc         = <<DeclId> with <Scope>>
 
-  Constraint.CResolves      = [[RefId] |-[Term]-> [DeclId] [Pos]]
-  Constraint.CAssoc         = [[DeclId] ~~> [Scope] [Pos]]
-  Constraint.CDistinct      = <distinct <Scope> <Pos>>
-  Constraint.CInit          = <init <Scope> <Pos>>
+  Constraint.CResolves      = [[RefId] |-[Term]-> [DeclId] [ErrorInfo]]
+  Constraint.CAssoc         = [[DeclId] ~~> [Scope] [ErrorInfo]]
+  Constraint.CDistinct      = <distinct <Scope> <ErrorInfo>>
+  Constraint.CInit          = <init <Scope> <ErrorInfo>>
 
 context-free syntax // subtyping
 
-  Constraint.FSubType       = [[TypeDef] <: [Type] [Pos]]
+  Constraint.FSubType       = [[TypeDef] <: [Type] [ErrorInfo]]
 
-  Constraint.CLubType       = [[Type] == lub([Type],[Type]) [Pos]]
-  Constraint.CSubType       = [[Type] <= [Type] [Pos]]
+  Constraint.CLubType       = [[Type] == lub([Type],[Type]) [ErrorInfo]]
+  Constraint.CSubType       = [[Type] <= [Type] [ErrorInfo]]
 
 context-free syntax // substitutions
 
-  Constraint.CMkSub         = [[Substitution] == [Type] |-->* [Type] [Pos]]
-  Constraint.CComposeSub    = <<Substitution> == <{Substitution " . "}+> <Pos>>
-  Constraint.CApplySub      = <<Type> == <Substitution>.<Type> <Pos>>
+  Constraint.CMkSub         = [[Substitution] == [Type] |-->* [Type] [ErrorInfo]]
+  Constraint.CComposeSub    = <<Substitution> == <{Substitution " . "}+> <ErrorInfo>>
+  Constraint.CApplySub      = <<Type> == <Substitution>.<Type> <ErrorInfo>>
 
   Mapping                   = [[Type] |--> [Type]]
 

@@ -2,6 +2,7 @@ module libanalysis2/solver/varops
 
 imports
   src-gen/signatures/libanalysis2/-
+  libanalysis2/positioning/functions
 
 rules
   
@@ -14,3 +15,5 @@ rules
   reduce-ops(|x*) = innermost(reduce-op(|x*))
 
   is-ground = where(collect-all(is-var <+ is-op) => [])
+
+  mkerror(|defaultmsg) = !(<try(position-fix)>,defaultmsg)
