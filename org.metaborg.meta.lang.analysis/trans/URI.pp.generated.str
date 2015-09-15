@@ -2,6 +2,8 @@ module URI.pp.generated
 
 imports Analysis
 imports runtime/tmpl/pp
+imports Common.pp.generated
+imports Term.pp.generated
 
 imports libstratego-gpp
 
