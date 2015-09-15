@@ -1,5 +1,7 @@
 module Common.pp.generated
 
+imports libstratego-gpp
+
 strategies
   prettyprint-ID =
     ![S(<is-string>)]

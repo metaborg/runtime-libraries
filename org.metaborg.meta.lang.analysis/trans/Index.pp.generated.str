@@ -1,5 +1,10 @@
 module Index.pp.generated
 
+imports runtime/tmpl/pp
+imports Analysis
+
+imports libstratego-gpp
+
 strategies
   prettyprint-Section :
     Index(a, b) -> [ H(

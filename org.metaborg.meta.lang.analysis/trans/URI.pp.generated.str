@@ -1,5 +1,10 @@
 module URI.pp.generated
 
+imports Analysis
+imports runtime/tmpl/pp
+
+imports libstratego-gpp
+
 strategies
   prettyprint-URI :
     a -> [ H(

@@ -1,5 +1,12 @@
 module Analysis.pp.generated
 
+imports Analysis
+imports runtime/tmpl/pp
+imports Index.pp.generated
+imports Task.pp.generated
+
+imports libstratego-gpp
+
 strategies
   prettyprint-Start :
     Sections(a) -> [ H(

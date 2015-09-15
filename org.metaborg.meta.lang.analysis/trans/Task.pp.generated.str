@@ -1,5 +1,12 @@
 module Task.pp.generated
 
+imports Analysis
+imports Common.pp.generated
+imports URI.pp.generated
+imports runtime/tmpl/pp
+
+imports libstratego-gpp
+
 strategies
   prettyprint-Section :
     Tasks(a) -> [ H(

@@ -1,5 +1,9 @@
 module Instruction.pp.generated
 
+imports Analysis
+imports libstratego-gpp
+imports Task.pp.generated
+
 strategies
   prettyprint-MsgType :
     Note() -> [ H(
