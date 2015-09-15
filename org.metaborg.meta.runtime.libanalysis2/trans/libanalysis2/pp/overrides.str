@@ -28,8 +28,8 @@ rules
       [ H( [SOpt(HS(), "0")],
            [ key', S("@("), line', S(","), column', S(")") ] ) ]
     with key'    :=  <pp-one-Z(prettyprint-Int)> key
-    with line'   := <pp-one-Z(prettyprint-Int)> line
-    with column' := <pp-one-Z(prettyprint-Int)> column
+    with line'   := <try(string-to-int);int-inc;pp-one-Z(prettyprint-Int)> line
+    with column' := <try(string-to-int);int-inc;pp-one-Z(prettyprint-Int)> column
 
 rules
 

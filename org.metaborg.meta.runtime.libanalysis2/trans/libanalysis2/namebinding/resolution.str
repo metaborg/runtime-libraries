@@ -56,7 +56,7 @@ rules // resolution internal
     with(dbg-res(|"env_d "))
   ; ?s
   ; ( <elem> (s,s*)
-    < []
+    < ![]
     + <G-decls> (g,s) // :: [Decl]
     ; group(atom) // :: [(Atom,[Decl])]
     ; mapv(map(!(<id>,[]));pureP) // :: [(Atom,Partial [(Decl,[Label])])]
@@ -132,6 +132,6 @@ rules
 
   pp-Env = fmap(map((pp-Atom,fmap(map((pp-DeclId,map(pp-Term)))))))
 
-  dbg-res(s|n) = id // s ; debug(!n)
+  dbg-res(s|n) = id//s;debug(!n)
   dbg-res(|n) = dbg-res(id|n)
   dbg-res(s) = dbg-res(s|"")

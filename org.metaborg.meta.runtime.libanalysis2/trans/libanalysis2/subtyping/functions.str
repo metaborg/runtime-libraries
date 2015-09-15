@@ -47,8 +47,8 @@ rules
     (tc, []) -> <hashtable-get(|tc)> table
       
   build-subtype-relation(|x*): (TDef(tc,ta*),TApp(tc,a*)) -> sr
-  with (n,n) := (<length> ta*,<length> a*)
-     ; <map(ta-variance)> ta* => v*
+  where <(length,length);eq> (ta*,a*)
+  with <map(ta-variance)> ta* => v*
      ; <map(ta-type)> ta* => a*
      ; sr := ( v*, [ (tc, a*) ] )
 
