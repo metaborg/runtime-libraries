@@ -5,12 +5,12 @@ imports
 	libstratego-lib
 	libstratego-gpp
 	libstratego-aterm
-	include/Analysis
-	lib/editor-common.generated
-	lib/runtime/analysis/-
-	lib/runtime/nabl/-
-	lib/runtime/task/-
-	lib/runtime/index/-
+	Analysis
+	editor-common.generated
+	runtime/analysis/-
+	runtime/nabl/-
+	runtime/task/-
+	runtime/index/-
 	names
 	pp
 	outline

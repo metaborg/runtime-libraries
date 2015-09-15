@@ -1,10 +1,10 @@
-module editor/Analysis-Outliner
+module Analysis-Outliner
 
 imports
-  include/Analysis
-  lib/runtime/editor/outline-library
-  lib/runtime/editor/origins
-  editor/Analysis-Outliner.generated
+  Analysis
+  runtime/editor/outline-library
+  runtime/editor/origins
+  Analysis-Outliner.generated
 
 rules
   

@@ -3,8 +3,8 @@ module pp
 imports
 	
 	libstratego-gpp
-	include/Analysis-parenthesize
-	lib/runtime/tmpl/pp
+	Analysis-parenthesize
+	runtime/tmpl/pp
 	Analysis.pp.generated
 	Common.pp.generated
 	Index.pp.generated

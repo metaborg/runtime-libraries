@@ -14,8 +14,7 @@ language General properties
   extensions    : task, index, analysis
   table         : include/Analysis.tbl
   start symbols : Start
-  
-  provider : include/analysis.ctree                                                                
+                                                               
   provider : include/analysis-java.jar                                                             
                                                                                                    
   observer : editor-analyze (multifile)                                                              

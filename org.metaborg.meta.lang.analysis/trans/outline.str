@@ -2,8 +2,8 @@ module outline
 
 imports
 	
-	include/Analysis
-	lib/runtime/editor/outline-library
+	Analysis
+	runtime/editor/outline-library
 
 strategies
 	
