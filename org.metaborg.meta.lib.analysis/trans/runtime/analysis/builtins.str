@@ -7,15 +7,14 @@ imports
 	
 rules
 
-	analysis-analyze-builtin-partitions(collector|language, project-path) =
-		analysis-get-builtin-partitions; map(analysis-analyze-builtin-partition(collector|language, project-path))	
+	analysis-analyze-builtin-sources(collector|language) =
+		analysis-get-builtin-sources; map(analysis-analyze-builtin-sources(collector|language))	
 
-	analysis-get-builtin-partitions =
-		analysis-builtin-partitions <+ ![]
+	analysis-get-builtin-sources =
+		analysis-builtin-sources <+ ![]
 
-	analysis-analyze-builtin-partition(collector|language, project-path):
-		(path, ast) -> analyzed-ast
+	analysis-analyze-builtin-sources(collector|language):
+		(source, ast) -> analyzed-ast
 		with
-			partition := <analysis-partition(|project-path)> path
-	  ; Result([FileResult(_, _, _, _, analyzed-ast, _, _, _)], _, _, _) := 
-	    	<analyze-all-no-builtins(id, collector, id, id|language, project-path)> [File(partition, ast, -1.0)]
+	    Result([FileResult(_, _, analyzed-ast, _, _, _)], _, _, _, _) := 
+	    	<analyze-all-no-builtins(id, collector, id, id|language)> [File(source, ast, -1.0)]

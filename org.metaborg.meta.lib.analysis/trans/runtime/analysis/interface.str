@@ -3,11 +3,6 @@ module runtime/analysis/interface
 rules
 
   editor-analyze = fail
-
-  analysis-interface = fail
-  
-	analysis-pre-trans = fail
-	analysis-post-trans(|ctx) = fail
 	
-	analysis-builtin-partitions = fail
+	analysis-builtin-sources = fail
 	

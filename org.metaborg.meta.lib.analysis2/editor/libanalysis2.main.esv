@@ -5,20 +5,10 @@ imports
   libanalysis2.generated
 
 language General properties
-  
-  name              : libanalysis2
-  extends           : Root
-  
-  description       : "Constraint based Analysis"
-  url               : http://metaborg.org/spoofax
 
-  extensions        : analysis2
-  table             : include/libanalysis2.tbl
-  start symbols     : NotImplemented
+  name              : libanalysis2
 
   SDF includes            : include/libanalysis2.def
   TemplateLang includes   : syntax
   ds includes             : src-gen/ds-signatures
   Stratego-Sugar includes : trans, .
-
-  provider          : include/libanalysis2.ctree

@@ -18,7 +18,7 @@ imports
 
 rules // Analysis
 
-	editor-analyze = analyze-all(id, id, id|<language>, <project-path>)
+	editor-analyze = analyze-all(id, id, id|<language>)
 
 rules // Editor services
 
