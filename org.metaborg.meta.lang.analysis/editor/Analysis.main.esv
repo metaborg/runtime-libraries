@@ -1,6 +1,6 @@
 module Analysis.main
 
-imports Analysis.generated Analysis-Menus Analysis-Completions Analysis-References Analysis-Syntax
+imports Analysis.generated Analysis-Colorer Analysis-Menus Analysis-Completions Analysis-References Analysis-Syntax
 
 language General properties
 
