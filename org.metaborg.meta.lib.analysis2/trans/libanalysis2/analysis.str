@@ -14,12 +14,14 @@ imports
 
 rules
 
-  analyse: desugared-ast -> ( (analysed-ast, errors*, warnings*, notes*)
-                            , [ ("constraints",c*)
-                              , ("scopegraph",g)
-                              , ("resolution",pr*)
-                              , ("solutions", sol*)
-                              ])
+
+  do-analysis: desugared-ast -> ( (analysed-ast, errors*, warnings*, notes*)
+                                , [ ("constraints",c*)
+                                  , ("scopegraph",g)
+                                  , ("resolution",pr*)
+                                  , ("solutions", sol*)
+                                  ])
+  where not(is-list)
   with
     where(<debug> ">>> Starting analysis <<<")
   ; where(<debug> ">>> Extracting constraints <<<")
