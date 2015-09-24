@@ -11,4 +11,4 @@ language General properties
   SDF includes            : include/libanalysis2.def
   TemplateLang includes   : syntax
   ds includes             : src-gen/ds-signatures
-  Stratego-Sugar includes : trans, .
+  Stratego-Sugar includes : trans, src-gen, .
