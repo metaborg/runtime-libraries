@@ -78,12 +78,12 @@ rules
   , ("scopegraph",g)
   , ("resolution",r)
   , ("solutions", sol*)
-  ] -> [
+  ] -> Some([
     ("constraints",<filter(not(irrelevant-constraint));map(pp-Constraint)> c*)
   , ("scopegraph", <pp-Graph> g)
   , ("resolution", <pp-Resolution> r)
   , ("solutions", <map(pp-analysis-solution)> sol*)
-  ]
+  ])
 
   pp-analysis-solution: [
     ("final-scopegraph", g)
