@@ -170,7 +170,7 @@ rules // Common
       note*    := <filter(?Note(_, _, _); analysis-message-to-tuple; pp-message)> message*
 
   analysis-message-to-tuple:
-    message -> (<origin-location-offset-set(|origin)> term, msg)
+    message -> (<try(origin-location-offset-set(|origin))> term, msg)
     with
       origin := <task-message-origin> message;
       term   := <task-message-term> message;
