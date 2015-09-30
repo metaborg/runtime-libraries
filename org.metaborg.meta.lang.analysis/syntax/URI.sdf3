@@ -5,11 +5,11 @@ imports
 	Common
 	Term
 
-templates
+context-free syntax
 
-	URI = <<Segment*; separator=" / ">>
+	URI.URI = </ <{Segment " / "}*>>
 	
 	Segment.Id   = <<ID>:<Term>>
-	Segment.Id   = <<ID>:<Term>#<ID>>
-	Segment.Anon = <anon <ID>>
-	Segment.Subsq = <subsq <ID>>
+	Segment.Id   = <<ID>:<Term>#<INT>>
+	Segment.Anon = <anon <INT>>
+	Segment.Subsq = <subsq <INT>>

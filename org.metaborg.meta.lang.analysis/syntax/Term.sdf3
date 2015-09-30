@@ -4,14 +4,13 @@ imports
 
 	Common
 
-templates
+context-free syntax
 
-	Term.Tupl = <(<Terms>)>
-	Term.Appl = <<ID>(<Terms>)>
-	Term.List = <[<Terms>]>
+	Term.Tupl = <(<{Term ", "}*>)>
+	Term.Appl = <<ID>(<{Term ", "}*>)>
+	Term.List = <[<{Term ", "}*>]>
 	Term.Str  = <<STRING>>
 	Term.Int  = <<INT>>
 	Term.Real = <<FLOAT>>
-	Term.Anno = <<Term>{<Terms>}>
+	Term.Anno = <<Term>{<{Term ", "}*>}>
 	
-	Terms = <<Term*; separator=", ">>

@@ -5,14 +5,8 @@ imports
 	libstratego-gpp
 	include/Analysis-parenthesize
 	lib/runtime/tmpl/pp
-	Analysis.pp.generated
-	Common.pp.generated
-	Index.pp.generated
-	Instruction.pp.generated
-	Task.pp.generated
-	Term.pp.generated
-	URI.pp.generated
-	
+	src-gen/pp/-
+		
 strategies
 	
   prettyprint-analysis-ast =

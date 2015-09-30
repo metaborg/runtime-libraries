@@ -15,6 +15,6 @@ context-free start-symbols
 
   Start
 
-templates
+context-free syntax
 
-	Start.Sections = <<Section*; separator="\n\n">>
+	Start.Sections = {Section "\n\n"}*

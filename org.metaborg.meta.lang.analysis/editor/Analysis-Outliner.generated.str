@@ -7,4 +7,5 @@ imports
 
 rules
   
+  to-outline-label = ?Appl(<id>, _)
   to-outline-label = ?Index(<id>, _)

@@ -4,13 +4,13 @@ imports
 
 	Term
 
-templates
+context-free syntax
 
 	Section.Index =
-<index <Term>
-
-	<Entry*; separator="\n">
->
+		<index <Term>
+		
+			<{Entry "\n"}*>
+		>
 
 	Entry.Def    = <def <Term>>
 	Entry.Use    = <use <Term>>
