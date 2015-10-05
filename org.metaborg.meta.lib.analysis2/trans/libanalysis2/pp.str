@@ -28,5 +28,8 @@ rules
   pp-TypeDef              = pp-Analysis(prettyprint-TypeDef)
   pp-TypeArg              = pp-Analysis(prettyprint-TypeArg)
   pp-TypeCon              = pp-Analysis(prettyprint-TypeCon)
+  pp-Message              = pp-Analysis(prettyprint-Message)
+  pp-MessageContent       = pp-Analysis(prettyprint-MessageContent)
+  pp-Substitution         = pp-Analysis(prettyprint-Substitution)
   pp-Term                 = pp-Analysis(prettyprint-Term)
   pp-List(pp)             = pp-Analysis(prettyprint-List(pp))

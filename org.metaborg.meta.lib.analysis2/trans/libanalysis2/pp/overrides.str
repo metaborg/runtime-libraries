@@ -5,6 +5,7 @@ imports
   runtime/tmpl/pp
   signatures/libanalysis2/-
   pp/libanalysis2/-
+  editor-common.generated
 
 rules
 
@@ -25,11 +26,17 @@ rules
   // print origins more compactly
   prettyprint-Pos:
     Pos(key, file, line, column, begin, end) ->
-      [ H( [SOpt(HS(), "0")],
-           [ key', S("@("), line', S(","), column', S(")") ] ) ]
-    with key'    :=  <pp-one-Z(prettyprint-Int)> key
-    with line'   := <pp-one-Z(prettyprint-Int)> line
-    with column' := <pp-one-Z(prettyprint-Int)> column
+      [ H( [SOpt(HS(), "0")]
+         , [ key', S("@("), line', S(","), column', S(")") ] ) ]
+    with key'    := <pp-one-Z(prettyprint-Int)> key
+    with line'   := <inc;pp-one-Z(prettyprint-Int)> line
+    with column' := <inc;pp-one-Z(prettyprint-Int)> column
+
+  prettyprint-TermPos:
+    t -> [ H( [SOpt(HS(), "0")]
+            , [ S("@("), S(line'), S(","), S(column'), S(")") ] ) ]
+    with line'   := <(origin-line;inc<+!-1);int-to-string> t
+    with column' := <(origin-column;inc<+-1);int-to-string> t
 
 rules
 
@@ -47,5 +54,8 @@ rules
   prettyprint-Term = prettyprint-TypeDef
   prettyprint-Term = prettyprint-TypeArg
   prettyprint-Term = prettyprint-TypeCon
+  prettyprint-Term = prettyprint-Message
+  prettyprint-Term = prettyprint-MessageKind
+  // catch all cases
   prettyprint-Term = prettyprint-List(prettyprint-Term)
   prettyprint-Term = prettyprint-ATerm

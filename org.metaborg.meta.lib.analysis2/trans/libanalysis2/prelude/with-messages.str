@@ -68,3 +68,5 @@ rules
   wm-notes: WithMessages(_,_,_,n*) -> n*
   add-note(|tm): WithMessages(x,e*,w*,n*) -> WithMessages(x,e*,w*,[tm|n*])
   add-notes(|tm*): WithMessages(x,e*,w*,n*) -> WithMessages(x,e*,w*,[tm*,n*])
+
+  wm-nub: WithMessages(x,e*,w*,n*) -> WithMessages(x, <nub> e*, <nub> w*, <nub> n*)

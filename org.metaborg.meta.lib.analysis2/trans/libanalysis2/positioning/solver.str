@@ -10,12 +10,12 @@ imports
   libanalysis2/pp
  
 rules
-  
-  solve-constraint: (f@CTypeOf(p,ty,pos),sol-wm) -> [res]
+ 
+  solve-constraint: (f@CTypeOf(p,ty,msginfo),sol-wm) -> [res]
   where <is-ground> p
   with <fromWM;sol-p> sol-wm => p*
      ; ( <lookup> (p, p*) => ty'
-       < !(sol-wm, [CEqual(ty, ty', pos)])
+       < !(sol-wm, [CEqual(ty, ty', msginfo)])
        + !(<fmap(<sol-set-p(!ty)> (p,<id>))> sol-wm, [])
        ) => res
 
@@ -28,6 +28,6 @@ rules
   reduce-op(|x*): POfRef(RefId(_, _, <id>)) -> <id>
 
 rules
-  
-  unsolved-error: CTypeOf(p,ty,pos) -> (pos,msg)
-  with msg := $[Could not unify type of [<pp-Pos> p] with [<pp-Term> ty]]
+ 
+  unsolved-message: CTypeOf(p,ty,msginfo) -> <default-message(|msg)> msginfo
+  with msg := $[Could not assign type [<pp-Term> ty] to [<pp-Pos> p]]
