@@ -1,7 +1,9 @@
 module libanalysis2/analysis
 
 imports
+
   signatures/libanalysis2/-
+  runtime/analysis/core
   libanalysis2/extraction/-
   libanalysis2/positioning/-
   libanalysis2/unification/-
@@ -12,18 +14,43 @@ imports
   libanalysis2/prelude/-
   libanalysis2/pp
 
+rules // analysis
+
+  analyze(pre):
+    file* -> Result(file-result*, [], [], debug-result, time-result)
+  where is-list
+  with file-result* := <map(analyze-one(pre))> file*
+     ; debug-result := DebugResult(CollectDebugResult(-1, -1, -1, -1, -1), [], [], [])
+     ; time-result := TimeResult(-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0)
+
+  analyze-one(pre):
+    File(source,source-ast,i) ->
+      FileResult(source,source-ast,analyzed-ast,error*,warning*,note*)
+  with (analyzed-ast,error*,warning*,note*) :=
+         <do-analysis(pre);get-editor-analysis> (source,source-ast)
+
+  analyze(pre): (source-ast,path,project-path) -> result
+  where not(is-list)
+  with result := <do-analysis(pre);get-editor-analysis> ($[[project-path]/[path]],source-ast)
+
+  debug-analyze(pre): (source-ast,path,project-path) -> result
+  where not(is-list)
+  with result := <do-analysis(pre);get-debug-analysis> ($[[project-path]/[path]],source-ast)
+
 rules
 
-
-  do-analysis: desugared-ast -> ( (analysed-ast, errors*, warnings*, notes*)
-                                , [ ("constraints",c*)
-                                  , ("scopegraph",g)
-                                  , ("resolution",pr*)
-                                  , ("solutions", sol*)
-                                  ])
-  where not(is-list)
+  do-analysis(pre):
+    (source,source-ast) ->
+      ( (analysed-ast, error*, warning*, note*)
+        , [ ("constraints",c*)
+          , ("scopegraph",g)
+          , ("resolution",pr*)
+          , ("solutions", sol*)
+          ])
   with
-    where(<debug> ">>> Starting analysis <<<")
+    where(<debug> $[>>>>>> Analyzing [source] <<<<<<])
+  ; where(<debug> ">>> Running preprocessing <<<")
+  ; desugared-ast := <pre> source-ast
   ; where(<debug> ">>> Extracting constraints <<<")
   ; (annotated-ast,c*) := <extract-constraints> desugared-ast
   ; sol-i := <initial-solution>
@@ -56,16 +83,16 @@ rules
     ; where(<debug> ">>> Applying types <<<")
     ; typed-ast := <apply-types(|p*)> resolved-ast
     ; analysed-ast := typed-ast
-    ; errors* := <wm-errors;mapv(xmlencode)> sol-wm
-    ; warnings* := <wm-warnings;mapv(xmlencode)> sol-wm
-    ; notes* := [n,<wm-notes;mapv(xmlencode)> sol-wm]
+    ; error* := <wm-errors;mapv(xmlencode)> sol-wm
+    ; warning* := <wm-warnings;mapv(xmlencode)> sol-wm
+    ; note* := [n|<wm-notes;mapv(xmlencode)> sol-wm]
     + where(<debug> ">>> No solution found <<<")
     ; analysed-ast := <apply-resolution(|<mapv(Fst)> r*)> annotated-ast
-    ; errors* := [(None(),"Error during analysis")]
-    ; warnings* := []
-    ; notes* := [n]
+    ; error* := [(None(),"Error during analysis")]
+    ; warning* := []
+    ; note* := [n]
     )
-  ; where(<debug> ">>> Analysis finished <<<")
+  ; where(<debug> $[>>>>>> Analysis of [source] finished <<<<<<])
 
   get-editor-analysis = Fst
 
@@ -73,7 +100,7 @@ rules
 
 rules
 
-  pp-analysis: [
+  pp-debug-analysis: [
     ("constraints",c*)
   , ("scopegraph",g)
   , ("resolution",r)
@@ -82,10 +109,10 @@ rules
     ("constraints",<filter(not(irrelevant-constraint));map(pp-Constraint)> c*)
   , ("scopegraph", <pp-Graph> g)
   , ("resolution", <pp-Resolution> r)
-  , ("solutions", <map(pp-analysis-solution)> sol*)
+  , ("solutions", <map(pp-debug-analysis-solution)> sol*)
   ])
 
-  pp-analysis-solution: [
+  pp-debug-analysis-solution: [
     ("final-scopegraph", g)
   , ("resolution", r*)
   , ("sub-types", x*)
