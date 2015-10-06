@@ -51,11 +51,11 @@ context-free syntax // base
   MessageKind.Warning       = <warning>
   MessageKind.Note          = <note>
 
-  MessageContent            = String
-  MessageContent            = {Term ""}*
   MessageContent.None       = <default>
+  MessageContent            = {Term ""}*
+  MessageContent            = Term
 
-  Message.Message           = <<MessageKind>=<MessageContent><TermPos>>
+  Message.Message           = <<MessageKind>=[<MessageContent>]<TermPos>>
 
   Constraint.CTrue          = <T>
   Constraint.CAndStar       = <<{Constraint "/\\"}*>> {longest-match}

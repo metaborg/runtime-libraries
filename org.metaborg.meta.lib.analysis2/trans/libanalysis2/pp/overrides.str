@@ -36,7 +36,7 @@ rules
     t -> [ H( [SOpt(HS(), "0")]
             , [ S("@("), S(line'), S(","), S(column'), S(")") ] ) ]
     with line'   := <(origin-line;inc<+!-1);int-to-string> t
-    with column' := <(origin-column;inc<+-1);int-to-string> t
+    with column' := <(origin-column;inc<+!-1);int-to-string> t
 
 rules
 
