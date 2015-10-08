@@ -1,6 +1,6 @@
 module libanalysis2.main
 
-language General properties
+language
 
   name                    : libanalysis2
 

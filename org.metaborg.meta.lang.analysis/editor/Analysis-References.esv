@@ -1,7 +1,5 @@
 module Analysis-References
 
-imports Analysis-References.generated
-
 references
 
   reference _ : editor-resolve
