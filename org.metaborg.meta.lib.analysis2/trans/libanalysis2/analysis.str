@@ -2,6 +2,7 @@ module libanalysis2/analysis
 
 imports
 
+  libstratego-sglr
   signatures/libanalysis2/-
   runtime/analysis/core
   libanalysis2/extraction/-
@@ -49,19 +50,40 @@ rules
           ])
   with
     where(<debug> $[>>>>>> Analyzing [source] <<<<<<])
+  ; t0-analysis := <current-time>
+  ; amb-warnings* := <collect-all(?amb(_));map(!(<id>,"Source fragment is ambiguous"))> source-ast
+
   ; where(<debug> ">>> Running preprocessing <<<")
+  ; t0-preprocess := <current-time>
   ; desugared-ast := <pre> source-ast
+  ; <report-time> t0-preprocess
+
   ; where(<debug> ">>> Extracting constraints <<<")
+  ; t0-extract := <current-time>
   ; (annotated-ast,c*) := <extract-constraints> desugared-ast
-  ; sol-i := <initial-solution>
+  ; sol-i := <initial-solution;add-warnings(|amb-warnings*)>
+  ; <report-time> t0-extract
+
+  ; where(<debug> ">>> Sorting constraints <<<")
+  ; t0-sort := <current-time>
+  ; c0* := <sort-constraints> c*
+  ; <report-time> t0-sort
+
   ; where(<debug> ">>> Solving facts <<<")
-  ; [(sol-wm1,c1*)] := <solve-constraints-phase1> (sol-i,c*)
+  ; t0-solve1 := <current-time>
+  ; [(sol-wm1,c1*)] := <solve-constraints-phase1> (sol-i,c0*)
   ; g := <fromWM;sol-g> sol-wm1
   ; pr* := <resolve-all> g
   ; r* := <filterv(fromP;Hd)> pr*
+  ; <report-time> t0-solve1
+
   ; where(<debug> ">>> Solving constraints <<<")
+  ; t0-solve2 := <current-time>
   ; <solve-constraints-phase2;map(postprocess-errors)> (sol-wm1,c1*) => sol-wm*
+  ; <report-time> t0-solve2
+
   ; where(<debug> ">>> Processing solutions <<<")
+  ; t0-postprocess := <current-time>
   ; sol* := <map( ![ ("final-scopegraph", <fromWM;sol-g>)
                    , ("resolution", <fromWM;sol-r>)
                    , ("sub-types", <fromWM;sol-x>)
@@ -92,11 +114,21 @@ rules
     ; warning* := []
     ; note* := [n]
     )
+  ; <report-time> t0-postprocess
+
   ; where(<debug> $[>>>>>> Analysis of [source] finished <<<<<<])
+  ; <report-time> t0-analysis
 
   get-editor-analysis = Fst
 
   get-debug-analysis = Snd
+
+rules
+
+  current-time = id
+
+  report-time: t0 -> <id>
+  // where <debug> $[>>> Finished in [<subt;int-to-string> (<current-time>,t0)] seconds]
 
 rules
 

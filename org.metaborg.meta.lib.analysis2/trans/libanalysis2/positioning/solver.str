@@ -21,6 +21,10 @@ rules
 
 rules
 
+  constraint-priority: CTypeOf(_,_,_) -> 1
+
+rules
+
   is-op: POfDecl(_) -> <id>
   is-op: POfRef(_) -> <id>
 

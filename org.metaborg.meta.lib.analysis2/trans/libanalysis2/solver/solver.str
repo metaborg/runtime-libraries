@@ -16,6 +16,8 @@ rules
   
   solve-constraint = fail	
 	
+  constraint-priority = fail	
+	
 rules
 
   initial-solution = sol-new;pureWM
@@ -25,7 +27,6 @@ rules
     s := <csolve( solve-specialise
                 , ( solve-fact
                  <+ solve-trivial-constraints
-                 <+ solve-ignore
                   )
                 )> c*
 
@@ -34,7 +35,6 @@ rules
     s := <csolve( solve-specialise
                 , ( solve-constraint
                  <+ solve-trivial-constraints
-                 <+ solve-ignore
                   )
                 )> c*
 
@@ -47,6 +47,12 @@ rules
  
   solve-trivial-constraints: (CTrue(),sol-wm) -> [(sol-wm,[])]
   solve-trivial-constraints: (CAndStar(c*),sol-wm) -> [(sol-wm,c*)]
+
+rules
+
+  sort-constraints = qsort((constraint-priority,constraint-priority);lt)
+
+  constraint-priority-or-default = constraint-priority <+ 99
 
 rules
  

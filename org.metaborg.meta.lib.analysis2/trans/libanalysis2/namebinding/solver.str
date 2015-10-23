@@ -10,39 +10,50 @@ imports
 
 rules
  
-  solve-fact: (FDecl(d,s),sol-wm) -> [(sol-wm',[])]
-  with <fromWM;sol-g> sol-wm => g
-     ; <G-with-decl> (g,s,d) => g'
-     ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
-
-  solve-fact: (FRef(r,s),sol-wm) -> [(sol-wm',[])]
-  with <fromWM;sol-g> sol-wm => g
-     ; <G-with-ref> (g,s,r) => g'
-     ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
-
-  solve-fact: (FImportR(r,l,s),sol-wm) -> [(sol-wm',[])]
-  with <fromWM;sol-g> sol-wm => g
-     ; <G-with-r-import> (g,s,(r,l)) => g'
-     ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
-
-  solve-fact: (FImportS(s',l,s),sol-wm) -> [(sol-wm',[])]
-  with <fromWM;sol-g> sol-wm => g
-     ; <G-with-s-import> (g,s,(s',l)) => g'
-     ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
-
-  solve-fact: (FParent(s,p),sol-wm)   -> [(sol-wm',[])]
+  solve-fact = solve-namebinding-fact 
+ 
+  solve-namebinding-fact: (FParent(s,p),sol-wm)   -> [(sol-wm',[])]
   with <fromWM;sol-g> sol-wm => g
      ; <G-with-parent> (g,s,p) => g'
      ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
 
-  solve-fact: (FAssoc(d,s),sol-wm)    -> [(sol-wm',[])]
+  solve-namebinding-fact: (FDecl(d,s),sol-wm) -> [(sol-wm',[])]
+  with <fromWM;sol-g> sol-wm => g
+     ; <G-with-decl> (g,s,d) => g'
+     ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
+
+  solve-namebinding-fact: (FRef(r,s),sol-wm) -> [(sol-wm',[])]
+  with <fromWM;sol-g> sol-wm => g
+     ; <G-with-ref> (g,s,r) => g'
+     ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
+
+  solve-namebinding-fact: (FImportR(r,l,s),sol-wm) -> [(sol-wm',[])]
+  with <fromWM;sol-g> sol-wm => g
+     ; <G-with-r-import> (g,s,(r,l)) => g'
+     ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
+
+  solve-namebinding-fact: (FImportS(s',l,s),sol-wm) -> [(sol-wm',[])]
+  with <fromWM;sol-g> sol-wm => g
+     ; <G-with-s-import> (g,s,(s',l)) => g'
+     ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
+
+  solve-namebinding-fact: (FAssoc(d,s),sol-wm)    -> [(sol-wm',[])]
   with <fromWM;sol-g> sol-wm => g
      ; <G-with-assoc> (g,d,s) => g'
      ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
 
+  constraint-priority: FParent(_,_) -> 3
+  constraint-priority: FDecl(_,_) -> 3
+  constraint-priority: FRef(_,_) -> 3
+  constraint-priority: FImportR(_,_,_) -> 3
+  constraint-priority: FImportS(_,_,_) -> 3
+  constraint-priority: FAssoc(_,_) -> 3
+
 rules
 
-  solve-constraint: (CResolves(r,l,d,msginfo),sol-wm) -> [(sol-wm,c*)]
+  solve-constraint = solve-namebinding-constraint
+
+  solve-namebinding-constraint: (CResolves(r,l,d,msginfo),sol-wm) -> [(sol-wm,c*)]
   where <fromWM;sol-r> sol-wm => r*
       ; <lookup> (r,r*) => (d',l')
   with msg := ["Unable to resolve ",r," to ",d]
@@ -51,7 +62,7 @@ rules
                CEqual(l,l',msginfo')
              ]
 
-  solve-constraint: (CResolves(r,l,d,msginfo),sol-wm) -> res*
+  solve-namebinding-constraint: (CResolves(r,l,d,msginfo),sol-wm) -> res*
   where <fromWM;sol-r> sol-wm => r*
       ; <not(lookup)> (r,r*)
       ; <fromWM;sol-g> sol-wm => g
@@ -66,14 +77,14 @@ rules
              , CEqual(l,l',msginfo)
              ]
  
-  solve-constraint: (CAssoc(d,s,msginfo),sol-wm) -> [(sol-wm,c*)]
+  solve-namebinding-constraint: (CAssoc(d,s,msginfo),sol-wm) -> [(sol-wm,c*)]
   where <is-ground> d
       ; <fromWM;sol-g> sol-wm => g
       ; <G-assoc> (g,d) => s'
   with msg := ["Cannot find scope ",s," associated with ",d]
      ; c* := [ CEqual(s,s',<default-message(|msg)> msginfo) ]
  
-  solve-constraint: (CDistinct(s,msginfo),sol-wm) -> [(sol-wm',[])]
+  solve-namebinding-constraint: (CDistinct(s,msginfo),sol-wm) -> [(sol-wm',[])]
   where <is-ground> s
       ; <sol-g> sol-wm => g
       ; <G-decls;map(atom)> (g,s) => d*
@@ -83,7 +94,7 @@ rules
        + !sol-wm
        ) => sol-wm'
 
-  solve-constraint: (CInit(s,msginfo),sol-wm) -> [(sol-wm',[])]
+  solve-namebinding-constraint: (CInit(s,msginfo),sol-wm) -> [(sol-wm',[])]
   where <is-ground> s
       ; <sol-g> sol-wm => g
       ; <G-refs;map(atom)> (g,s) => r*
@@ -94,6 +105,13 @@ rules
        + msg := ["Mismatch ",i*]
        ; <add-message(|msginfo,msg)> sol-wm
        ) => sol-wm'
+
+rules
+
+  constraint-priority: CAssoc(_,_,_) -> 4
+  constraint-priority: CResolves(_,_,_,_) -> 4
+  constraint-priority: CDistinct(_,_) -> 4
+  constraint-priority: CInit(_,_) -> 4
 
 rules
  

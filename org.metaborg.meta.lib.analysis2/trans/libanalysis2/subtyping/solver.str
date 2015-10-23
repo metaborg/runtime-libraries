@@ -57,6 +57,12 @@ rules
 
 rules
 
+  constraint-priority: FSubType(_,_,_) -> 5
+  constraint-priority: CSubType(_,_,_) -> 6
+  constraint-priority: CLubType(_,_,_,_) -> 6
+
+rules
+
   unsolved-message: FSubType(ty1,ty2,msginfo) -> <default-message(|msg)> msginfo
   with msg := ["Could not set ",ty1," subtype of ",ty2]
 

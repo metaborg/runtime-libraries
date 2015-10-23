@@ -2,6 +2,7 @@ module libanalysis2/nabl2/nabl2
 
 imports
   
+  libstratego-sglr
   runtime/editor/origins
   runtime/editor/annotations
   signatures/libanalysis2/-
@@ -48,7 +49,9 @@ rules
   
   nabl2-traverse-children(|facts, constraints, scopes, position) =
     with(
-    	get-arguments;
+      ?amb(_)
+    < where(<debug> "WARNING: Ignoring ambigous fragment.") 
+    + get-arguments;
     	map(nabl2-traverse(|facts, constraints, scopes, position))
     )
 

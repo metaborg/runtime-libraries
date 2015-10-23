@@ -44,6 +44,10 @@ rules
 
 rules
 
+  constraint-priority: CEqual(_,_,_) -> 0
+
+rules
+
   default-unify-error(|t1,t2) = !["Cannot not unify ",t1," with ",t2]
 
   unsolved-message: CEqual(t1,t2,msginfo) -> <default-message(|msg)> msginfo

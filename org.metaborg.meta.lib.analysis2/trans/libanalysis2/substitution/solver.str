@@ -39,3 +39,9 @@ rules
   where <not(is-var)> s
   with ty'' := <S-apply(is-tvar)> (<get-S> s,ty')
      ; c* := [CEqual(ty,ty'',msginfo)]
+
+rules
+
+  constraint-priority: CMkSub(_,_,_,_) -> 1
+  constraint-priority: CComposeSub(_,_,_) -> 1
+  constraint-priority: CApplySub(_,_,_,_) -> 1
