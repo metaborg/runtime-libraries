@@ -1,9 +1,0 @@
-module Analysis-Completions
-
-imports
-
-	completions/Analysis-esv
-
-completions
-
-  completion proposer : editor-complete

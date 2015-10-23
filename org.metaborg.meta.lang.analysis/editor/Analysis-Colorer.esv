@@ -1,3 +1,5 @@
 module Analysis-Colorer
 
-imports Analysis-Colorer.generated
+imports 
+
+  editor/Colorer.generated

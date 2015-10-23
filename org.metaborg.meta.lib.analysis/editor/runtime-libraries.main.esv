@@ -1,11 +1,7 @@
-module Analysis.main
+module runtime-libraries.main
 
-imports
+language
 
-  runtime-libraries.generated
-
-language General properties
-
-  name              : runtime-libraries
+  name : runtime-libraries
 
   Stratego-Sugar includes : trans

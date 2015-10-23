@@ -1,5 +1,8 @@
 module Analysis-Syntax
 
-imports
+language
 
-  Analysis-Syntax.generated
+  line comment  : "//"
+  block comment : "/*" * "*/"
+
+  fences        : [ ] ( ) { }
