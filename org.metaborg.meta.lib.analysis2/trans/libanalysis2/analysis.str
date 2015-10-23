@@ -51,7 +51,6 @@ rules
   with
     where(<debug> $[>>>>>> Analyzing [source] <<<<<<])
   ; t0-analysis := <current-time>
-  ; amb-warnings* := <collect-all(?amb(_));map(!(<id>,"Source fragment is ambiguous"))> source-ast
 
   ; where(<debug> ">>> Running preprocessing <<<")
   ; t0-preprocess := <current-time>
@@ -61,7 +60,7 @@ rules
   ; where(<debug> ">>> Extracting constraints <<<")
   ; t0-extract := <current-time>
   ; (annotated-ast,c*) := <extract-constraints> desugared-ast
-  ; sol-i := <initial-solution;add-warnings(|amb-warnings*)>
+  ; sol-i := <initial-solution>
   ; <report-time> t0-extract
 
   ; where(<debug> ">>> Sorting constraints <<<")
