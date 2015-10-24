@@ -72,6 +72,8 @@ rules
   fromP: Total(x) -> x
   fromP: Partial(x) -> x
 
+  fromTotal: Total(x) -> x
+
   filterToP(s) = !Total(<map(s)>) <+ !Partial(<filter(s)>)
 
 rules

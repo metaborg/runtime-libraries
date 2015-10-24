@@ -66,7 +66,7 @@ rules
   where <fromWM;sol-r> sol-wm => r*
       ; <not(lookup)> (r,r*)
       ; <fromWM;sol-g> sol-wm => g
-      ; <resolve(|g)> r => Total(dl*@[_|_])
+      ; <resolve(|g)> r => dl*@[_|_]
   with msg := ["Unable to resolve ",r," to ",d]
      ; msginfo' := <default-message(|msg)> msginfo
      ; <map(solve-namebinding-constraint-step(|r,l,d,msginfo',sol-wm))> dl* => res*

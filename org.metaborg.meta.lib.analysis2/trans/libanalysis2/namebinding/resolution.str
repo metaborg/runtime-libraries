@@ -13,14 +13,14 @@ signature
 
 rules
 
-  // resolve-all :: Graph -> [(Ref,Partial [(Decl,[Label])])]
+  // resolve-all :: Graph -> [(Ref,[(Decl,[Label])])]
   resolve-all =
     ?g
   ; G-refs
-  ; map(!(<id>,<resolve(|g)>))
+  ; filter(!(<id>,<resolve(|g)>))
 
-  // resolve(|Graph) :: Ref -> Partial [(Decl,[Label])]
-  resolve(|g) = resolve(|g,[])
+  // resolve(|Graph) :: Ref -|-> [(Decl,[Label])]
+  resolve(|g) = resolve(|g,[]) ; fromTotal
 
 rules // resolution internal
 

@@ -73,7 +73,7 @@ rules
   ; [(sol-wm1,c1*)] := <solve-constraints-phase1> (sol-i,c0*)
   ; g := <fromWM;sol-g> sol-wm1
   ; pr* := <resolve-all> g
-  ; r* := <filterv(fromP;Hd)> pr*
+  ; r* := <filterv(?[<id>])> pr*
   ; <report-time> t0-solve1
 
   ; where(<debug> ">>> Solving constraints <<<")
