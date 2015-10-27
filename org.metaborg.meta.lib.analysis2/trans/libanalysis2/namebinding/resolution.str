@@ -9,7 +9,6 @@ imports
 signature
   // types
   //   Atom = (Ns,String)
-  //   Resolution = Partial [(Atom,Partial [(Decl,[Label])])]
 
 rules
 
@@ -128,7 +127,7 @@ rules // resolution internal
 
 rules
  
-  pp-Resolution = map((pp-RefId,fmap(map((pp-DeclId,map(pp-Term))))))
+  pp-Resolution = map((pp-RefId,map((pp-DeclId,map(pp-Term)))))
 
   pp-Env = fmap(map((pp-Atom,fmap(map((pp-DeclId,map(pp-Term)))))))
 

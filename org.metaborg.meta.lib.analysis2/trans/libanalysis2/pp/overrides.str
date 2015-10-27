@@ -10,7 +10,7 @@ imports
 rules
 
   prettyprint-ATerm: t@c#(a*) -> [ H( [SOpt(HS(), "0")],
-                                     [S(c),S("["),b,S("]")] ) ]
+                                     [S(c),S("("),b,S(")")] ) ]
   where b := <pp-H-list(prettyprint-Term|",")> a*
 
   // allow printing of actual Ints as well
