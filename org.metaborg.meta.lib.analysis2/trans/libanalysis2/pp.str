@@ -11,7 +11,7 @@ imports
 rules
 
   pp-Analysis(pp) =
-    parenthesize-libanalysis2
+      parenthesize-libanalysis2
     ; (pp <+ debug(!"WARNING: Could not pp ") ; prettyprint-Term)
     ; !V([], <id>)
     ; box2text-string(|120)
@@ -32,4 +32,48 @@ rules
   pp-MessageContent       = pp-Analysis(prettyprint-MessageContent)
   pp-Substitution         = pp-Analysis(prettyprint-Substitution)
   pp-Term                 = pp-Analysis(prettyprint-Term)
-  pp-List(pp)             = pp-Analysis(prettyprint-List(pp))
+  pp-List(pp)             = pp-Analysis(prettyprint-list(pp))
+
+rules
+
+  irrelevant-constraint = fail
+  irrelevant-pos = fail
+
+  pp-analysis = qsort((pp-order,pp-order);lt) ; debug(!0) ; pp-Analysis(prettyprint-analysis;debug(!88)) ; debug(!99)
+
+  pp-order: (key,_) -> <get-index <+ !99> (key,[ "constraints"
+                                               , "initial-scopegraph"
+                                               , "initial-resolution"
+                                               , "scopegraph"
+                                               , "resolution"
+                                               , "position-types"
+                                               , "substitution"
+                                               , "subtyping-relation"
+                                               , "errors"
+                                               , "warnings"
+                                               , "notes"
+                                               ])
+
+  prettyprint-analysis: t -> [t']
+    with t' := <pp-V-list(prettyprint-analysis-entry|"1")> t
+
+  prettyprint-analysis-entry: e@(key,_) -> [ H([SOpt(HS(),"0")], [S(key),S(" := ")]) , e' ]
+    with e' := <pp-indent(|"2")> [<pp-analysis-component> e]
+
+  prettyprint-alternative-solution: e@(idx,s) -> [ H([SOpt(HS(),"0")], [S("["),S(<int-to-string> idx),S("] := "),s']) ]
+    with s' := <pp-one-Z(prettyprint-analysis)> s
+
+  pp-analysis-component = ?("constraints",<id>) ; filter(not(irrelevant-constraint)) ; pp-V-list(prettyprint-Constraint)
+  pp-analysis-component = ?("initial-scopegraph",<id>) ; pp-one-Z(prettyprint-Graph)
+  pp-analysis-component = ?("initial-resolution",<id>) ; pp-one-Z(prettyprint-Resolution)
+  pp-analysis-component = ?("scopegraph",<id>)  ; pp-one-Z(prettyprint-Graph)
+  pp-analysis-component = ?("resolution",<id>) ; pp-one-Z(prettyprint-RefDecl)
+  pp-analysis-component = ?("subtyping-relation",<id>) ; pp-one-Z(prettyprint-SubtypingRelation)
+  pp-analysis-component = ?("position-types",<id>) ; filter(not(irrelevant-pos)) ; pp-one-Z(prettyprint-PosType)
+  pp-analysis-component = ?("substitution",<id>) ; pp-one-Z(prettyprint-Subst)
+  pp-analysis-component = ?("errors",<id>) ; pp-one-Z(prettyprint-EditorMessages)
+  pp-analysis-component = ?("warnings",<id>) ; pp-one-Z(prettyprint-EditorMessages)
+  pp-analysis-component = ?("notes",<id>) ; pp-one-Z(prettyprint-EditorMessages)
+  pp-analysis-component = ?("alternative-solutions",<id>) ; map-with-index(id) ; pp-V-list(prettyprint-alternative-solution|"1")
+  pp-analysis-component = ?(key,<id>) ; with(<debug(!"prettyprint-analysis-component undefined for ")> key) ; pp-one-Z(prettyprint-Term)
+

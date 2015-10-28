@@ -3,10 +3,12 @@ module libanalysis2/analysis
 imports
 
   libstratego-sglr
+  libstratego-gpp
   signatures/libanalysis2/-
   runtime/analysis/core
   runtime/editor/time
   runtime/index/-
+  runtime/tmpl/pp
   libanalysis2/extraction/-
   libanalysis2/positioning/-
   libanalysis2/unification/-
@@ -57,7 +59,7 @@ rules
   ; where(<debug> ">>> Extracting constraints <<<")
   ; report-time(
       (annotated-ast,c*) := <extract-constraints> desugared-ast
-    ; <index-collect(|c*,source)> "constraints"
+    ; <index-collect-pair(|source)> ("constraints",c*)
     ; sol-i := <initial-solution>
     )
 
@@ -70,9 +72,9 @@ rules
   ; report-time(
       [(sol-wm1,c1*)] := <solve-constraints-phase1> (sol-i,c0*)
     ; g := <fromWM;sol-g> sol-wm1
-    ; <index-collect(|g,source)> "scopegraph"
+    ; <index-collect-pair(|source)> ("initial-scopegraph",g)
     ; fr* := <resolve-all> g
-    ; <index-collect(|fr*,source)> "resolution"
+    ; <index-collect-pair(|source)> ("initial-resolution",fr*)
     ; r* := <filterv(?[<id>])> fr*
     )
 
@@ -85,16 +87,17 @@ rules
   ; report-time(
       sol-wm* := <qsort((wm-errors;length,wm-errors;length);lt)> sol-wm2*
     ; sol* := <map( ![ ("scopegraph", <fromWM;sol-g>)
-                     , ("ref-decl", <fromWM;sol-r>)
-                     , ("sub-types", <fromWM;sol-x>)
-                     , ("pos-types", <fromWM;sol-p>)
-                     , ("subst", <fromWM;sol-s>)
+                     , ("resolution", <fromWM;sol-r>)
+                     , ("subtyping-relation", <fromWM;sol-x>)
+                     , ("position-types", <fromWM;sol-p>)
+                     , ("substitution", <fromWM;sol-s>)
                      , ("errors", <wm-errors>)
                      , ("warnings", <wm-warnings>)
                      , ("notes", <wm-notes>)
                      ]
                   )> sol-wm*
-    ; <index-collect(|sol*,source)> "solutions"
+    ; <Hd;map(index-collect-pair(|source))> sol*
+    ; <index-collect-pair(|source)> ("alternative-solutions",<Tl> sol*)
     ; (good,bad) := <partition(not(is-erronious));(length,length)> sol-wm*
     ; status := (None(),$[Found [<int-to-string> good] correct and [<int-to-string> bad] erronious solutions.])
     ; ( sol-wm := <Hd> sol-wm*
@@ -124,25 +127,4 @@ rules
 
   report-time(s) = measure-time(s,where(<debug> $[Finished in [<cputime-to-seconds;real-to-string(|2)>]s]))
 
-rules
-
-  pp-analysis = map(pp-analysis-component) ; !Some(<id>)
-
-  pp-analysis-component: ("constraints",_) -> <(id,filter(not(irrelevant-constraint));map(pp-Constraint))>
-  pp-analysis-component: ("scopegraph",_)  -> <(id,pp-Graph)>
-  pp-analysis-component: ("resolution",_) -> <(id,pp-Resolution)>
-  pp-analysis-component: ("ref-decl",_) -> <(id,pp-RefDecl)>
-  pp-analysis-component: ("sub-types",_) -> <(id,pp-SubtypeRelation)>
-  pp-analysis-component: ("pos-types",_) -> <(id,filter(not(irrelevant-pos));map((pp-Pos,pp-Term)))>
-  pp-analysis-component: ("subst",_) -> <(id,map((pp-Var,pp-Term)))>
-  pp-analysis-component: ("errors",_) -> <(id,map((pp-Term,id)))>
-  pp-analysis-component: ("warnings",_) -> <(id,map((pp-Term,id)))>
-  pp-analysis-component: ("notes",_) -> <(id,map((pp-Term,id)))>
-  pp-analysis-component: ("solutions",_) -> <(id,map(pp-analysis))>
-  pp-analysis-component: (_,_) -> <(id,pp-Term)>
-    where Fst;debug(!"pp-analysis-component undefined for ")
-
-  pp-RefDecl = map((pp-RefId,(pp-DeclId,map(pp-Term))))
-
-  irrelevant-constraint = fail
-  irrelevant-pos = fail
+  index-collect-pair(|source): (key,value) -> <index-collect(|value,source)> key

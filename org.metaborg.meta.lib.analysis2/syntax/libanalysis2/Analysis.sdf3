@@ -12,8 +12,8 @@ context-free syntax
   Scope.Scope               = <scope(<Int>)>
   Scope                     = Var
 
-  OptionScope.NoneScope     = <->
-  OptionScope.SomeScope     = <<Scope>>
+  OptionScope.None          = <->
+  OptionScope               = Scope
 
   DeclId.DeclId             = <decl(<Namespace>,<String>,<Pos>)>
   DeclId                    = Var
@@ -57,16 +57,54 @@ context-free syntax // base
 
   Message.Message           = <<MessageKind>=[<MessageContent>]<TermPos>>
 
+  EditorMessages            = {EditorMessage "\n"}*
+  EditorMessage             = <<Term> : <String>>
+
   Constraint.CTrue          = <T>
   Constraint.CAndStar       = <<{Constraint "/\\"}*>> {longest-match}
 
-context-free syntax // unification
+context-free syntax // equality
 
   Constraint.CEqual         = [[Term] == [Term] [Message]]
+
+  Subst      = {SubstEntry "\n"}*
+  SubstEntry = [[Var] |--> [Term]]
 
 context-free syntax // types
 
   Constraint.CTypeOf        = <<Pos> : <Type> <Message>>
+
+  PosType = {PosTypeEntry "\n"}*
+  PosTypeEntry = <<Pos> : <Type>>
+
+context-free syntax // scope graph
+
+  Graph.G = <
+    scope graph {
+      <{ScopeEntry "\n"}*>
+      assocs = <{AssocEntry "\n"}*>
+    }
+  >
+ 
+  ScopeEntry = <<Scope> = <ScopeImpl>>
+ 
+  ScopeImpl.S = <
+    {
+      parent    = <OptionScope>
+      decls     = <{DeclId ", "}*>
+      refs      = <{RefId ", "}*>
+      r-imports = <{ImportREntry ", "}*>
+      s-imports = <{ImportSEntry ", "}*>
+    }
+  >
+ 
+  ImportREntry = <<RefId>/<Term>>
+  ImportSEntry = <<Scope>/<Term>>
+  AssocEntry = <<DeclId> : <Scope>>
+
+  Resolution = {ResolutionEntry "\n"}*
+  ResolutionEntry = <<RefId> <{Resolved "\n"}*>>
+  Resolved = [|--> [DeclId]/[{Term ","}*]]
 
 context-free syntax // name resolution
 
@@ -82,6 +120,9 @@ context-free syntax // name resolution
   Constraint.CDistinct      = <distinct <Scope> <Message>>
   Constraint.CInit          = <init <Scope> <Message>>
 
+  RefDecl = {RefDeclEntry "\n"}*
+  RefDeclEntry = [[RefId] [Resolved]]
+
 context-free syntax // subtyping
 
   Constraint.FSubType       = [[TypeDef] <: [Type] [Message]]
@@ -89,6 +130,12 @@ context-free syntax // subtyping
   Constraint.CLubType       = [[Type] == lub([Type],[Type]) [Message]]
   Constraint.CSubType       = [[Type] <= [Type] [Message]]
 
+  SubtypingRelation = {SubtypingEntry "\n"}*
+  SubtypingEntry    = [[TypeCon][SubtypingEntry2]]
+  SubtypingEntry2   = [[SubtypingEntry3] <: [{Supertype " <: "}*]]
+  SubtypingEntry3   = <[<{TypeArg ","}*>]>
+  Supertype         = <<TypeCon>[<{Type ","}*>]>
+  
 context-free syntax // substitutions
 
   Constraint.CMkSub         = [[Substitution] == [Type] |-->* [Type] [Message]]

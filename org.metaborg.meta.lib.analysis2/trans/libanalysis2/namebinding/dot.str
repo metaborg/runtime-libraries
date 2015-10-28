@@ -42,8 +42,8 @@ rules
      ; <collect(?Var(_)); stmts(sg-dot-node(|"circle"))> is* => scope-var-nodes
 
 
-  sg-dot-parent(|s): NoneScope() -> ""
-  sg-dot-parent(|s): SomeScope(p) -> <sg-dot-arrow-from(|s,"normal")> p
+  sg-dot-parent(|s): None() -> ""
+  sg-dot-parent(|s): p -> <sg-dot-arrow-from(|s,"normal")> p
 
   sg-dot-node(|shape): n -> ${{<sg-dot-id> n} [shape="{shape}",label={<sg-dot-lbl> n}];}
 

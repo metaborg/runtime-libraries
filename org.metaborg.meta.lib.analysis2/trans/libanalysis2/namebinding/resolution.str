@@ -127,8 +127,6 @@ rules // resolution internal
 
 rules
  
-  pp-Resolution = map((pp-RefId,map((pp-DeclId,map(pp-Term)))))
-
   pp-Env = fmap(map((pp-Atom,fmap(map((pp-DeclId,map(pp-Term)))))))
 
   dbg-res(s|n) = id // s ; debug(!n)

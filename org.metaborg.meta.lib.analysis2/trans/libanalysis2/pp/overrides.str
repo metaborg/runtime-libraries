@@ -9,32 +9,33 @@ imports
 
 rules
 
-  prettyprint-ATerm: t@c#(a*) -> [ H( [SOpt(HS(), "0")],
-                                     [S(c),S("("),b,S(")")] ) ]
-  where b := <pp-H-list(prettyprint-Term|",")> a*
+  prettyprint-aterm: c#(a*) -> [ H([SOpt(HS(),"0")], [S(c),S("("),a',S(")")] ) ]
+    with a' := <pp-H-list(prettyprint-Term|",")> a*
 
   // allow printing of actual Ints as well
   prettyprint-Int: i -> [S(<int-to-string> i)]
-  where is-int
+    where is-int
 
   // easy list printing
-  prettyprint-List(pp): t -> [ H( [SOpt(HS(), "0")],
-                                  [S("["),b,S("]")] ) ]
-  where is-list
-  with b := <pp-H-list(pp|",")> t
+  prettyprint-list(pp): t -> [ H([SOpt(HS(),"0")], [S("["),t',S("]")] ) ]
+    where is-list
+    with t' := <pp-H-list(pp|",")> t
+
+  // easy tuple printing
+  prettyprint-tuple(pp1,pp2): (t1,t2) -> [ H([SOpt(HS(),"0")], [S("("),t1',S(","),t2',S(")")] ) ]
+    with t1' := <pp-one-Z(pp1)> t1
+    with t2' := <pp-one-Z(pp2)> t2
 
   // print origins more compactly
   prettyprint-Pos:
     Pos(key, file, line, column, begin, end) ->
-      [ H( [SOpt(HS(), "0")]
-         , [ key', S("@("), line', S(","), column', S(")") ] ) ]
+      [ H([SOpt(HS(),"0")], [ key', S("@("), line', S(","), column', S(")") ] ) ]
     with key'    := <pp-one-Z(prettyprint-Int)> key
     with line'   := <inc;pp-one-Z(prettyprint-Int)> line
     with column' := <inc;pp-one-Z(prettyprint-Int)> column
 
   prettyprint-TermPos:
-    t -> [ H( [SOpt(HS(), "0")]
-            , [ S("@("), S(line'), S(","), S(column'), S(")") ] ) ]
+    t -> [ H([SOpt(HS(),"0")], [ S("@("), S(line'), S(","), S(column'), S(")") ] ) ]
     with line'   := <(origin-line;inc<+!-1);int-to-string> t
     with column' := <(origin-column;inc<+!-1);int-to-string> t
 
@@ -57,5 +58,5 @@ rules
   prettyprint-Term = prettyprint-Message
   prettyprint-Term = prettyprint-MessageKind
   // catch all cases
-  prettyprint-Term = prettyprint-List(prettyprint-Term)
-  prettyprint-Term = prettyprint-ATerm
+  prettyprint-Term = prettyprint-list(prettyprint-Term)
+  prettyprint-Term = prettyprint-aterm
