@@ -39,7 +39,7 @@ rules
   irrelevant-constraint = fail
   irrelevant-pos = fail
 
-  pp-analysis = qsort((pp-order,pp-order);lt) ; debug(!0) ; pp-Analysis(prettyprint-analysis;debug(!88)) ; debug(!99)
+  pp-analysis = qsort((pp-order,pp-order);lt) ; pp-Analysis(prettyprint-analysis)
 
   pp-order: (key,_) -> <get-index <+ !99> (key,[ "constraints"
                                                , "initial-scopegraph"
