@@ -102,21 +102,21 @@ rules
     ; status := (None(),$[Found [<int-to-string> good] correct and [<int-to-string> bad] erronious solutions.])
     ; ( sol-wm := <Hd> sol-wm*
       < where(<debug> ">>> Found solution <<<")
-      ; <fromWM;sol-r> sol-wm => r'*
-      ; where(<debug> ">>> Applying name resolution <<<")
-      ; resolved-ast := <apply-resolution(|<conc;mapv(Fst)> (r'*,r*))> annotated-ast
-      ; <fromWM;sol-p;mapk(position-to-key)> sol-wm => p*
-      ; where(<debug> ">>> Applying types <<<")
-      ; typed-ast := <apply-types(|p*)> resolved-ast
-      ; analysed-ast := typed-ast
-      ; error* := <wm-errors;mapv(xmlencode)> sol-wm
-      ; warning* := <wm-warnings;mapv(xmlencode)> sol-wm
-      ; note* := [status|<wm-notes;mapv(xmlencode)> sol-wm]
+        ; <fromWM;sol-r> sol-wm => r'*
+        ; where(<debug> ">>> Applying name resolution <<<")
+        ; resolved-ast := <apply-resolution(|<conc;mapv(Fst)> (r'*,r*))> annotated-ast
+        ; where(<debug> ">>> Applying types <<<")
+        ; <fromWM;sol-p> sol-wm => p*
+        ; typed-ast := <apply-types(|p*)> resolved-ast
+        ; analysed-ast := typed-ast
+        ; error* := <wm-errors;mapv(xmlencode)> sol-wm
+        ; warning* := <wm-warnings;mapv(xmlencode)> sol-wm
+        ; note* := [status|<wm-notes;mapv(xmlencode)> sol-wm]
       + where(<debug> ">>> No solution found <<<")
-      ; analysed-ast := <apply-resolution(|<mapv(Fst)> r*)> annotated-ast
-      ; error* := [(None(),"Found no correct or erronious solutions.")]
-      ; warning* := []
-      ; note* := [status]
+        ; analysed-ast := <apply-resolution(|<mapv(Fst)> r*)> annotated-ast
+        ; error* := [(None(),"Found no correct or erronious solutions.")]
+        ; warning* := []
+        ; note* := [status]
       )
     )
 

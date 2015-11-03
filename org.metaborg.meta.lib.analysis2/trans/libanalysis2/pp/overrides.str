@@ -27,7 +27,7 @@ rules
     with t2' := <pp-one-Z(pp2)> t2
 
   // print origins more compactly
-  prettyprint-Pos:
+  prettyprint-KeyPos:
     Pos(key, file, line, column, begin, end) ->
       [ H([SOpt(HS(),"0")], [ key', S("@("), line', S(","), column', S(")") ] ) ]
     with key'    := <pp-one-Z(prettyprint-Int)> key

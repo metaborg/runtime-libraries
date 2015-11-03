@@ -9,7 +9,7 @@ imports
   signatures/libanalysis2/-
 
 rules
-  
+ 
   annotate-keys =
     where(
       dr-begin-scope(|"NewKey");
@@ -25,25 +25,27 @@ rules
   
 rules
 
-  get-position: Var(_) -> POfDecl(<id>)
-  
-  get-position: DeclId(_, _, p) -> p
-  
+  get-position = ?Var(_)
+  get-position = ?DeclId(_,_,_)
+  get-position = ?RefId(_,_,_)
   get-position: t{k} -> Pos(k,f,l,c,s,e)
   with <is-int> k <+ debug(!"ERROR: Cannot get key for ") ; fail
   with (origin-location-offset <+ debug(!"WARNING: Cannot get origin for ") ; !("",-1,-1,-1,-1)) => (f,l,c,s,e)
 
-  position-to-origin:
-    Pos(_,f,l,c,s,e) -> (f,l,c,s,e)
+  position-to-origin: Pos(_,f,l,c,s,e) -> (f,l,c,s,e)
+  position-to-origin = ?DeclId(_,_,<position-to-origin>)
+  position-to-origin = ?RefId(_,_,<position-to-origin>)
 
-  position-to-key:
-    Pos(k,_,_,_,_,_) -> k
+  position-to-key = ?Pos(<id>,_,_,_,_,_)
+  position-to-key = ?DeclId(_,_,<position-to-key>)
+  position-to-key = ?RefId(_,_,<position-to-key>)
 
 rules
  
   apply-annotations(s|aa*): ast -> ast'
-  with <topdown(try(apply-annotations-to-term(s|aa*)))> ast => ast'
+  with <topdown(try(apply-annotations-to-term(s|<mapk(position-to-key)> aa*)))> ast => ast'
 
   apply-annotations-to-term(s|aa*): t{a*} -> t{a''*}
   where a'* := <filter(<lookup> (<id>,aa*));map(s)> a*;
         a''* := [a*,a'*]
+ 

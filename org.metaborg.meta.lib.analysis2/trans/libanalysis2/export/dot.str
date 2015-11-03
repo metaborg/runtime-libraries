@@ -1,0 +1,75 @@
+module libanalysis2/export/dot
+
+imports
+
+  libanalysis2/export/-
+  signatures/libanalysis2/-
+
+rules
+
+  analysis-to-dot: a -> dot
+    with sp  := <calculate-simple-positions> a
+       ; a'  := <apply-simple-positions(|sp)> a
+       ; dot := <lookup;scopegraph-to-dot> ("scopegraph",a')
+ 
+  scopegraph-to-dot: G(s*,as*) -> $[
+    digraph scopegraph {
+      [s']
+      [as']
+    }
+  ]
+    with s'  := <map(scope-to-dot);concat-strings> s*
+       ; as' := <map(assoc-to-dot);concat-strings> as*
+ 
+  scope-to-dot: (s,S(p,d*,r*,ir*,is*)) ->  ${
+    {s'}
+    {p'}
+    {d'}
+    {r'}
+    {ir'}
+    {is'}
+  }
+    with s'  := <to-dot> s
+    with sid := <to-dot-id> s
+    with p'  := <!${{sid} -> {<to-dot-id>};} <+ !""> p
+    with d'  := <map(!${{<to-dot>} {sid} -> {<to-dot-id>};});concat-strings> d*
+    with r'  := <map(!${{<to-dot>} {<to-dot-id>} -> {sid};});concat-strings> r*
+    with ir'  := <map(!${{sid} -> {<Fst;to-dot-id>} [arrowhead=onormal];});concat-strings> ir*
+    with is'  := <map(!${{sid} -> {<Fst;to-dot-id>} [arrowhead=onormal];});concat-strings> is*
+
+  assoc-to-dot: (d,s) -> ${{d'} -> {s'} [arrowhead=onormal];}
+    with d' := <to-dot-id> d
+    with s' := <to-dot-id> s
+
+rules
+  
+  to-dot: g@Global() -> ${{g'} [shape=circle,label=<0>];}
+    with g' := <to-dot-id> g
+
+  to-dot: s@Scope(i) -> ${{s'} [shape=circle,label=<{i'}>];}
+    with s' := <to-dot-id> s
+    with i' := <int-to-string> i
+  
+  to-dot: d@DeclId(ns,n,i) -> ${{d'} [shape=box,label=<{n}<sub>{i'}</sub>>];}
+    with d' := <to-dot-id> d
+    with ns' := <?Namespace(<id>) <+ !""> ns
+    with i' := <int-to-string> i
+  
+  to-dot: d@RefId(ns,n,i) -> ${{d'} [shape=box,label=<{n}<sub>{i'}</sub>>];}
+    with d' := <to-dot-id> d
+    with ns' := <?Namespace(<id>) <+ !""> ns
+    with i' := <int-to-string> i
+  
+  to-dot-id: Global() -> $[global]
+
+  to-dot-id: Scope(i) -> $[scope_[i']]
+    with i' := <int-to-string> i
+
+  to-dot-id: Var(i) -> $[var_[i']]
+    with i' := <int-to-string> i
+
+  to-dot-id: DeclId(ns,n,i) -> $[decl_[n]_[i']]
+    with i' := <int-to-string> i
+
+  to-dot-id: RefId(ns,n,i) -> $[decl_[n]_[i']]
+    with i' := <int-to-string> i

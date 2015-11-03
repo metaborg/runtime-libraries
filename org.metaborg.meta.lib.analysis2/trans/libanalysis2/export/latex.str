@@ -1,0 +1,111 @@
+module libanalysis2/export/latex
+
+imports
+
+  libanalysis2/export/-
+  signatures/libanalysis2/-
+
+rules
+
+  analysis-to-latex: a -> $[
+    % constraints
+    \begin{align*}
+      [c']
+    \end{align*}
+
+    % substitution
+    \begin{align*}
+      [s']
+    \end{align*}
+
+    % resolution
+    \begin{align*}
+      [r']
+    \end{align*}
+  ]
+    with sp := <calculate-simple-positions> a
+       ; a' := <apply-simple-positions(|sp)> a
+       ; c* := <lookup;filter(not(irrelevant-constraint))> ("constraints",a')
+       ; c' := <map(to-latex;make-line);concat-strings> c*
+       ; s  := <lookup> ("substitution",a')
+       ; s' := <map(sub-to-latex;make-line);concat-strings> s
+       ; r  := <lookup> ("resolution",a')
+       ; r' := <map(res-to-latex;make-line);concat-strings> r
+
+  make-line: tex -> $[[tex] \\
+  ]
+
+  sub-to-latex: (v,t) -> $[[v'] \mapsto [t']]
+    with v' := <to-latex> v
+       ; t' := <to-latex> t
+
+  res-to-latex: (r,(d,_)) -> $[[r'] \mapsto [d']]
+    with r' := <to-latex> r
+       ; d' := <to-latex> d
+
+rules
+
+  to-latex: Var(i) -> $[\alpha_[i']]
+    with i' := <int-to-string> i
+
+  to-latex: Global() -> $[\Scope{\top}]
+
+  to-latex: Scope(i) -> $[\Scope{[i']}] 
+    with i' := <int-to-string> i
+
+  to-latex: None() -> $[\bot]
+
+  to-latex: DeclId(ns,n,i) -> $[\Decl{[n]}{[i']}]
+    with i' := <int-to-string> i
+
+  to-latex: RefId(ns,n,i) -> $[\Ref{[n]}{[i']}]
+    with i' := <int-to-string> i
+
+  to-latex: CTrue() -> $[\top]
+
+  to-latex: CTypeOf(pos,ty,_) -> $[\CTypeOf{[pos']}{[ty']}]
+    with pos' := <to-latex> pos
+    with ty'  := <to-latex> ty
+
+  to-latex: FParent(s,ps) -> $[\FParent{[s']}{[ps']}]
+    with s'  := <to-latex> s
+    with ps' := <to-latex> ps
+
+  to-latex: FDecl(d,s) -> $[\FDecl{[d']}{[s']}]
+    with d' := <to-latex> d
+    with s' := <to-latex> s
+
+  to-latex: FRef(r,s) -> $[\FRef{[r']}{[s']}]
+    with r' := <to-latex> r
+    with s' := <to-latex> s
+
+  to-latex: FImportR(r,_,s) -> $[\FImportR{[r']}{[s']}]
+    with r' := <to-latex> r
+    with s' := <to-latex> s
+
+  to-latex: FImportS(is,_,s) -> $[\FImportS{[is']}{[s']}]
+    with is' := <to-latex> is
+    with s'  := <to-latex> s
+
+  to-latex: FAssoc(d,s) -> $[\FAssoc{[d']}{[s']}]
+    with d' := <to-latex> d
+    with s' := <to-latex> s
+
+  to-latex: CAssoc(d,s,_) -> $[\CAssoc{[d']}{[s']}]
+    with d' := <to-latex> d
+    with s' := <to-latex> s
+
+  to-latex: CResolves(r,_,d,_) -> $[\CResolve{[r']}{[d']}]
+    with r' := <to-latex> r
+    with d' := <to-latex> d
+
+  to-latex: FSubType(t1,t2,_) -> $[\FSubType{[t1']}{[t2']}]
+    with t1' := <to-latex> t1
+    with t2' := <to-latex> t2
+
+  to-latex: CSubType(t1,t2,_) -> $[\CSubType{[t1']}{[t2']}]
+    with t1' := <to-latex> t1
+    with t2' := <to-latex> t2
+
+  to-latex: t -> $[\texttt{[t']}]
+    with t' := <write-to-string> t

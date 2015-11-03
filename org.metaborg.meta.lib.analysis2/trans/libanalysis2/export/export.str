@@ -1,0 +1,18 @@
+module libanalysis2/export/export
+
+imports
+
+  libanalysis2/positioning/-
+  signatures/libanalysis2/-
+  pp/libanalysis2/-
+
+rules
+
+  calculate-simple-positions =
+      collect-all(?DeclId(_,_,<id>) <+ ?RefId(_,_,<id>))
+    ; qsort((position-to-key,position-to-key);lt)
+    ; map-with-index(Swap)
+
+  apply-simple-positions(|sp) = bottomup(try(<lookup> (<is-KeyPos>,sp)))
+ 
+rules

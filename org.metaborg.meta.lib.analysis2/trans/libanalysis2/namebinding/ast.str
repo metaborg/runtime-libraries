@@ -15,9 +15,9 @@ signature
 rules
 
   apply-resolution(|r*) =
-    apply-annotations(make-ref|<mapk(refid-to-key)> r*)
+    apply-annotations(make-ref|<mapk(refid-to-pos)> r*)
 
-  refid-to-key = ?RefId(_,_,<position-to-key>)
+  refid-to-pos = ?RefId(_,_,<id>)
 
   make-ref: d@DeclId(_,_,pos) -> r
   with o := <position-to-origin> pos

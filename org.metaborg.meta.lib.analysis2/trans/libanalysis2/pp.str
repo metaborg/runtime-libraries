@@ -7,6 +7,7 @@ imports
   include/libanalysis2-parenthesize
   pp/libanalysis2/-
   libanalysis2/pp/overrides
+  libanalysis2/prelude/-
 
 rules
 
@@ -36,8 +37,8 @@ rules
 
 rules
 
-  irrelevant-constraint = fail
-  irrelevant-pos = fail
+  irrelevant-constraint = ?CTypeOf(<irrelevant-pos>,_,_)
+  irrelevant-pos = ?Pos(_,_,_,_,_,_)
 
   pp-analysis = qsort((pp-order,pp-order);lt) ; pp-Analysis(prettyprint-analysis)
 
@@ -69,11 +70,10 @@ rules
   pp-analysis-component = ?("scopegraph",<id>)  ; pp-one-Z(prettyprint-Graph)
   pp-analysis-component = ?("resolution",<id>) ; pp-one-Z(prettyprint-RefDecl)
   pp-analysis-component = ?("subtyping-relation",<id>) ; pp-one-Z(prettyprint-SubtypingRelation)
-  pp-analysis-component = ?("position-types",<id>) ; filter(not(irrelevant-pos)) ; pp-one-Z(prettyprint-PosType)
+  pp-analysis-component = ?("position-types",<id>) ; filterk(not(irrelevant-pos)) ; pp-one-Z(prettyprint-PosType)
   pp-analysis-component = ?("substitution",<id>) ; pp-one-Z(prettyprint-Subst)
   pp-analysis-component = ?("errors",<id>) ; pp-one-Z(prettyprint-EditorMessages)
   pp-analysis-component = ?("warnings",<id>) ; pp-one-Z(prettyprint-EditorMessages)
   pp-analysis-component = ?("notes",<id>) ; pp-one-Z(prettyprint-EditorMessages)
   pp-analysis-component = ?("alternative-solutions",<id>) ; map-with-index(id) ; pp-V-list(prettyprint-alternative-solution|"1")
   pp-analysis-component = ?(key,<id>) ; with(<debug(!"prettyprint-analysis-component undefined for ")> key) ; pp-one-Z(prettyprint-Term)
-

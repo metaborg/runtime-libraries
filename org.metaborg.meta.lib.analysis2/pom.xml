@@ -45,6 +45,10 @@
   <build>
     <resources>
       <resource>
+        <directory>editor</directory>
+        <targetPath>editor</targetPath>
+      </resource>
+      <resource>
         <directory>trans</directory>
         <targetPath>trans</targetPath>
       </resource>

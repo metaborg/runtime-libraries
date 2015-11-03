@@ -23,15 +23,5 @@ rules
 
   constraint-priority: CTypeOf(_,_,_) -> 1
 
-rules
-
-  is-op: POfDecl(_) -> <id>
-  is-op: POfRef(_) -> <id>
-
-  reduce-op(|x*): POfDecl(DeclId(_, _, <id>)) -> <id>
-  reduce-op(|x*): POfRef(RefId(_, _, <id>)) -> <id>
-
-rules
- 
   unsolved-message: CTypeOf(p,ty,msginfo) -> <default-message(|msg)> msginfo
   with msg := $[Could not assign type [<pp-Term> ty] to [<pp-Pos> p]]

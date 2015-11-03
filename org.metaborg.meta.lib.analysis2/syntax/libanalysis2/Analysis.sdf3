@@ -15,14 +15,12 @@ context-free syntax
   OptionScope.None          = <->
   OptionScope               = Scope
 
-  DeclId.DeclId             = <decl(<Namespace>,<String>,<Pos>)>
+  DeclId.DeclId             = <decl(<Namespace>,<String>,<KeyPos>)>
   DeclId                    = Var
 
-  RefId.RefId               = <ref(<Namespace>,<String>,<Pos>)>
+  RefId.RefId               = <ref(<Namespace>,<String>,<KeyPos>)>
 
-  Pos.Pos                   = <<String>@(<String>,<Int>,<Int>,<Int>,<Int>)>
-  Pos.POfDecl               = <posOf(<DeclId>)>
-  Pos.POfRef                = <posOf(<RefId>)>
+  KeyPos.Pos                = <<String>@(<String>,<Int>,<Int>,<Int>,<Int>)>
 
   Namespace.None            = <->
   Namespace.Namespace       = String
@@ -60,7 +58,7 @@ context-free syntax // base
   EditorMessages            = {EditorMessage "\n"}*
   EditorMessage             = <<Term> : <String>>
 
-  Constraint.CTrue          = <T>
+  Constraint.CTrue          = <True>
   Constraint.CAndStar       = <<{Constraint "/\\"}*>> {longest-match}
 
 context-free syntax // equality
@@ -76,6 +74,10 @@ context-free syntax // types
 
   PosType = {PosTypeEntry "\n"}*
   PosTypeEntry = <<Pos> : <Type>>
+
+  Pos                       = KeyPos
+  Pos                       = DeclId
+  Pos                       = RefId
 
 context-free syntax // scope graph
 
@@ -108,15 +110,15 @@ context-free syntax // scope graph
 
 context-free syntax // name resolution
 
+  Constraint.FParent        = <parent(<Scope>) is <OptionScope>>
   Constraint.FDecl          = <<DeclId> in <Scope>>
   Constraint.FRef           = <<RefId> in <Scope>>
-  Constraint.FImportR       = <import <RefId><Term> in <Scope>>
-  Constraint.FImportS       = <import <Scope><Term> in <Scope>>
-  Constraint.FParent        = <parent(<Scope>) is <OptionScope>>
+  Constraint.FImportR       = <import <RefId>/<Term> in <Scope>>
+  Constraint.FImportS       = <import <Scope>/<Term> in <Scope>>
   Constraint.FAssoc         = <<DeclId> with <Scope>>
 
-  Constraint.CResolves      = [[RefId] |-[Term]-> [DeclId] [Message]]
   Constraint.CAssoc         = [[DeclId] ~~> [Scope] [Message]]
+  Constraint.CResolves      = [[RefId] |-[Term]-> [DeclId] [Message]]
   Constraint.CDistinct      = <distinct <Scope> <Message>>
   Constraint.CInit          = <init <Scope> <Message>>
 
@@ -127,8 +129,8 @@ context-free syntax // subtyping
 
   Constraint.FSubType       = [[TypeDef] <: [Type] [Message]]
 
-  Constraint.CLubType       = [[Type] == lub([Type],[Type]) [Message]]
   Constraint.CSubType       = [[Type] <= [Type] [Message]]
+  Constraint.CLubType       = [[Type] == lub([Type],[Type]) [Message]]
 
   SubtypingRelation = {SubtypingEntry "\n"}*
   SubtypingEntry    = [[TypeCon][SubtypingEntry2]]

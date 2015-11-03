@@ -1,0 +1,20 @@
+module libanalysis2/editor/menus
+
+imports
+
+  libanalysis2/-
+  libanalysis2/export/-
+
+rules
+
+  show-analysis: (_, _, ast, path, project-path) -> (filename, result)
+    with filename := <guarantee-extension(|"analysis2")> path
+       ; result := <get-analysis;pp-analysis> ast
+
+  export-to-latex: (_, _, ast, path, project-path) -> (filename, result)
+    with filename := <guarantee-extension(|"tex")> path
+       ; result := <get-analysis;analysis-to-latex> ast
+
+  export-to-dot: (_, _, ast, path, project-path) -> (filename, result)
+    with filename := <guarantee-extension(|"gv")> path
+       ; result := <get-analysis;analysis-to-dot> ast

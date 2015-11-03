@@ -28,7 +28,7 @@ rules
        < msg := [ty1*," not a subtype of ",ty2*]
        ; msginfo' := <default-message(|msg)> msginfo
        ; !(sol-wm, <zip;map(!CSubType(<Fst>,<Snd>,msginfo'))> (ty1*,ty2*))
-       + msg := [ty1*," has different length from ",ty2*]
+       + msg := ["Cannot check subtyping for lists [",ty1*,"] and [",ty2*,"] of different length."]
        ; !(<add-message(|msginfo,msg)> sol-wm, [])
        ) => res
 

@@ -8,3 +8,4 @@ language
   TemplateLang includes   : syntax
   ds includes             : src-gen/ds-signatures
   Stratego-Sugar includes : trans, src-gen, .
+  EditorService includes  : editor
