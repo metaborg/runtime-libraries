@@ -55,29 +55,57 @@ context-free syntax // base
 
   Message.Message           = <<MessageKind>=[<MessageContent>]<TermPos>>
 
-  EditorMessages            = {EditorMessage "\n"}*
   EditorMessage             = <<Term> : <String>>
 
   Constraint.CTrue          = <True>
   Constraint.CAndStar       = <<{Constraint "/\\"}*>> {longest-match}
 
+  Analysis                   = {AnalysisResult "\n\n"}*
+  AnalysisResult.Constraints = <
+    constraints :=
+      <{Constraint "\n"}*>
+  >
+  AnalysisResult.Errors = <
+    errors :=
+      <{EditorMessage "\n"}*>
+  >
+  AnalysisResult.Warnings = <
+    warnings :=
+      <{EditorMessage "\n"}*>
+  >
+  AnalysisResult.Notes = <
+    notes :=
+      <{EditorMessage "\n"}*>
+  >
+  AnalysisResult.AlternativeSolutions = <
+    alternative solutions := 
+      <{AlternativeSolution "\n\n"}*>
+  >
+  AlternativeSolution = <[<Int> <Analysis>]>
+
 context-free syntax // equality
 
   Constraint.CEqual         = [[Term] == [Term] [Message]]
 
-  Subst      = {SubstEntry "\n"}*
-  SubstEntry = [[Var] |--> [Term]]
+  AnalysisResult.Substitution = <
+    substitution := 
+      <{Substitution "\n"}*>
+  >
+  Substitution = [[Var] |--> [Term]]
 
 context-free syntax // types
 
   Constraint.CTypeOf        = <<Pos> : <Type> <Message>>
 
-  PosType = {PosTypeEntry "\n"}*
-  PosTypeEntry = <<Pos> : <Type>>
-
   Pos                       = KeyPos
   Pos                       = DeclId
   Pos                       = RefId
+
+  AnalysisResult.PositionTypes = <
+    position types :=
+      <{PositionType "\n"}*>
+  >
+  PositionType = <<Pos> : <Type>>
 
 context-free syntax // scope graph
 
@@ -104,9 +132,28 @@ context-free syntax // scope graph
   ImportSEntry = <<Scope>/<Term>>
   AssocEntry = <<DeclId> : <Scope>>
 
-  Resolution = {ResolutionEntry "\n"}*
-  ResolutionEntry = <<RefId> <{Resolved "\n"}*>>
-  Resolved = [|--> [DeclId]/[{Term ","}*]]
+  AnalysisResult.InitialScopeGraph = <
+    initial scope graph :=
+      <Graph>
+  >
+
+  AnalysisResult.InitialResolution = <
+    initial name resolution := 
+      <{FullResolution "\n"}*>
+  >
+
+  FullResolution = <<RefId> <{Resolved "\n"}*>>
+  Resolved        = [
+    |--> [DeclId]
+         path = [Path]
+  ]
+
+  Path            = {Step "\n"}*
+  Step.D          = <D(<DeclId>)>
+  Step.E          = <E(<Label>,<Scope>)/<Term>>
+  Step.N          = <N(<Label>,<RefId>,<Scope>)/<Term>>
+  Label.I         = <I>
+  Label.P         = <P>
 
 context-free syntax // name resolution
 
@@ -118,12 +165,24 @@ context-free syntax // name resolution
   Constraint.FAssoc         = <<DeclId> with <Scope>>
 
   Constraint.CAssoc         = [[DeclId] ~~> [Scope] [Message]]
-  Constraint.CResolves      = [[RefId] |-[Term]-> [DeclId] [Message]]
+  Constraint.CResolves      = [[RefId] |-[Labels]-> [DeclId] [Message]]
   Constraint.CDistinct      = <distinct <Scope> <Message>>
   Constraint.CInit          = <init <Scope> <Message>>
 
-  RefDecl = {RefDeclEntry "\n"}*
-  RefDeclEntry = [[RefId] [Resolved]]
+  Labels = <[<{Term ","}*>]>
+  Labels = Var
+
+  AnalysisResult.ScopeGraph = <
+    scope graph :=
+      <Graph>
+  >
+  
+  AnalysisResult.Resolution = <
+    name resolution := 
+      <{OneResolution "\n"}*>
+  >
+  
+  OneResolution = [[RefId] [Resolved]]
 
 context-free syntax // subtyping
 
@@ -132,7 +191,10 @@ context-free syntax // subtyping
   Constraint.CSubType       = [[Type] <= [Type] [Message]]
   Constraint.CLubType       = [[Type] == lub([Type],[Type]) [Message]]
 
-  SubtypingRelation = {SubtypingEntry "\n"}*
+  AnalysisResult.SubtypingRelation = <
+    subtyping relation := 
+      <{SubtypingEntry "\n"}*>
+    >
   SubtypingEntry    = [[TypeCon][SubtypingEntry2]]
   SubtypingEntry2   = [[SubtypingEntry3] <: [{Supertype " <: "}*]]
   SubtypingEntry3   = <[<{TypeArg ","}*>]>
@@ -140,11 +202,11 @@ context-free syntax // subtyping
   
 context-free syntax // substitutions
 
-  Constraint.CMkSub         = [[Substitution] == [Type] |-->* [Type] [Message]]
-  Constraint.CComposeSub    = <<Substitution> == <{Substitution " . "}+> <Message>>
-  Constraint.CApplySub      = <<Type> == <Substitution>.<Type> <Message>>
+  Constraint.CMkSub         = [[TypeSubstitution] == [Type] |-->* [Type] [Message]]
+  Constraint.CComposeSub    = <<TypeSubstitution> == <{TypeSubstitution " . "}+> <Message>>
+  Constraint.CApplySub      = <<Type> == <TypeSubstitution>.<Type> <Message>>
 
   Mapping                   = [[Type] |--> [Type]]
 
-  Substitution.Sub          = <{<{Mapping ","}*>}>
-  Substitution              = Var
+  TypeSubstitution.Sub      = <{<{Mapping ","}*>}>
+  TypeSubstitution          = Var

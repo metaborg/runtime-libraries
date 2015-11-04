@@ -54,8 +54,9 @@ rules
   solve-constraint = solve-namebinding-constraint
 
   solve-namebinding-constraint: (CResolves(r,l,d,msginfo),sol-wm) -> [(sol-wm,c*)]
-  where <fromWM;sol-r> sol-wm => r*
-      ; <lookup> (r,r*) => (d',l')
+  where r* := <fromWM;sol-r> sol-wm
+      ; (d',p) := <lookup> (r,r*)
+      ; l' := <path-labels> p
   with msg := ["Unable to resolve ",r," to ",d]
      ; msginfo' := <default-message(|msg)> msginfo
      ; c* := [ CEqual(d,d',msginfo'),
@@ -63,31 +64,32 @@ rules
              ]
 
   solve-namebinding-constraint: (CResolves(r,l,d,msginfo),sol-wm) -> res*
-  where <fromWM;sol-r> sol-wm => r*
+  where r* := <fromWM;sol-r> sol-wm
       ; <not(lookup)> (r,r*)
-      ; <fromWM;sol-g> sol-wm => g
-      ; <resolve(|g)> r => dl*@[_|_]
+      ; g := <fromWM;sol-g> sol-wm
+      ; dl*@[_|_] := <resolve(|g)> r
   with msg := ["Unable to resolve ",r," to ",d]
      ; msginfo' := <default-message(|msg)> msginfo
      ; <map(solve-namebinding-constraint-step(|r,l,d,msginfo',sol-wm))> dl* => res*
 
-  solve-namebinding-constraint-step(|r,l,d,msginfo,sol-wm): (d',l') -> (sol-wm',c*)
-  with <fmap(sol-set-r(|r,(d',l')))> sol-wm => sol-wm'
+  solve-namebinding-constraint-step(|r,l,d,msginfo,sol-wm): (d',p) -> (sol-wm',c*)
+  with <fmap(sol-set-r(|r,(d',p)))> sol-wm => sol-wm'
+  with l' := <path-labels> p
   with c* := [ CEqual(d,d',msginfo)
              , CEqual(l,l',msginfo)
              ]
  
   solve-namebinding-constraint: (CAssoc(d,s,msginfo),sol-wm) -> [(sol-wm,c*)]
   where <is-ground> d
-      ; <fromWM;sol-g> sol-wm => g
-      ; <G-assoc> (g,d) => s'
+      ; g := <fromWM;sol-g> sol-wm
+      ; s' := <G-assoc> (g,d)
   with msg := ["Cannot find scope ",s," associated with ",d]
      ; c* := [ CEqual(s,s',<default-message(|msg)> msginfo) ]
  
   solve-namebinding-constraint: (CDistinct(s,msginfo),sol-wm) -> [(sol-wm',[])]
   where <is-ground> s
-      ; <sol-g> sol-wm => g
-      ; <G-decls;map(atom)> (g,s) => d*
+      ; g := <sol-g> sol-wm
+      ; d* := <G-decls;map(atom)> (g,s)
   with ( <dups> d* => d'*
        < msg := ["Duplicate declarations ",d'*]
        ; <add-message(|msginfo,msg)> sol-wm
@@ -96,9 +98,9 @@ rules
 
   solve-namebinding-constraint: (CInit(s,msginfo),sol-wm) -> [(sol-wm',[])]
   where <is-ground> s
-      ; <sol-g> sol-wm => g
-      ; <G-refs;map(atom)> (g,s) => r*
-      ; <env_v(|g,[],[]);fmap(keys)> s => Total(d*)
+      ; g := <sol-g> sol-wm
+      ; r* := <G-refs;map(atom)> (g,s)
+      ; Total(d*) := <env(|g,[],[]);fmap(keys)> s
   with <isect> (r*,d*) => i*
      ; ( ?[]
        < !sol-wm

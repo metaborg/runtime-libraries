@@ -25,6 +25,7 @@ rules
   pp-Pos                  = pp-Analysis(prettyprint-Pos)
   pp-Var                  = pp-Analysis(prettyprint-Var)
   pp-Constraint           = pp-Analysis(prettyprint-Constraint)
+  pp-Path                 = pp-Analysis(prettyprint-Path)
   pp-Type                 = pp-Analysis(prettyprint-Type)
   pp-TypeDef              = pp-Analysis(prettyprint-TypeDef)
   pp-TypeArg              = pp-Analysis(prettyprint-TypeArg)
@@ -40,40 +41,22 @@ rules
   irrelevant-constraint = ?CTypeOf(<irrelevant-pos>,_,_)
   irrelevant-pos = ?Pos(_,_,_,_,_,_)
 
-  pp-analysis = qsort((pp-order,pp-order);lt) ; pp-Analysis(prettyprint-analysis)
+  pp-analysis = qsort((pp-order,pp-order);lt) ; map(try(pp-sanitize)) ; pp-Analysis(prettyprint-Analysis)
 
-  pp-order: (key,_) -> <get-index <+ !99> (key,[ "constraints"
-                                               , "initial-scopegraph"
-                                               , "initial-resolution"
-                                               , "scopegraph"
-                                               , "resolution"
-                                               , "position-types"
-                                               , "substitution"
-                                               , "subtyping-relation"
-                                               , "errors"
-                                               , "warnings"
-                                               , "notes"
-                                               ])
+  pp-order: Constraints(_) -> 1
+  pp-order: InitialScopeGraph(_) -> 2
+  pp-order: InitialResolution(_) -> 3
+  pp-order: ScopeGraph(_) -> 4
+  pp-order: Resolution(_) -> 5
+  pp-order: PositionTypes(_) -> 6
+  pp-order: SubtypingRelation(_) -> 7
+  pp-order: Substitution(_) -> 8
+  pp-order: Errors(_) -> 9
+  pp-order: Warnings(_) -> 10
+  pp-order: Notes(_) -> 11
+  pp-order: AlternativeSolutions(_) -> 99
+  pp-order: _ -> 100
 
-  prettyprint-analysis: t -> [t']
-    with t' := <pp-V-list(prettyprint-analysis-entry|"1")> t
-
-  prettyprint-analysis-entry: e@(key,_) -> [ H([SOpt(HS(),"0")], [S(key),S(" := ")]) , e' ]
-    with e' := <pp-indent(|"2")> [<pp-analysis-component> e]
-
-  prettyprint-alternative-solution: e@(idx,s) -> [ H([SOpt(HS(),"0")], [S("["),S(<int-to-string> idx),S("] := "),s']) ]
-    with s' := <pp-one-Z(prettyprint-analysis)> s
-
-  pp-analysis-component = ?("constraints",<id>) ; filter(not(irrelevant-constraint)) ; pp-V-list(prettyprint-Constraint)
-  pp-analysis-component = ?("initial-scopegraph",<id>) ; pp-one-Z(prettyprint-Graph)
-  pp-analysis-component = ?("initial-resolution",<id>) ; pp-one-Z(prettyprint-Resolution)
-  pp-analysis-component = ?("scopegraph",<id>)  ; pp-one-Z(prettyprint-Graph)
-  pp-analysis-component = ?("resolution",<id>) ; pp-one-Z(prettyprint-RefDecl)
-  pp-analysis-component = ?("subtyping-relation",<id>) ; pp-one-Z(prettyprint-SubtypingRelation)
-  pp-analysis-component = ?("position-types",<id>) ; filterk(not(irrelevant-pos)) ; pp-one-Z(prettyprint-PosType)
-  pp-analysis-component = ?("substitution",<id>) ; pp-one-Z(prettyprint-Subst)
-  pp-analysis-component = ?("errors",<id>) ; pp-one-Z(prettyprint-EditorMessages)
-  pp-analysis-component = ?("warnings",<id>) ; pp-one-Z(prettyprint-EditorMessages)
-  pp-analysis-component = ?("notes",<id>) ; pp-one-Z(prettyprint-EditorMessages)
-  pp-analysis-component = ?("alternative-solutions",<id>) ; map-with-index(id) ; pp-V-list(prettyprint-alternative-solution|"1")
-  pp-analysis-component = ?(key,<id>) ; with(<debug(!"prettyprint-analysis-component undefined for ")> key) ; pp-one-Z(prettyprint-Term)
+  pp-sanitize = Constraints(filter(not(irrelevant-constraint)))
+  pp-sanitize = PositionTypes(filterk(not(irrelevant-pos)))
+  pp-sanitize = AlternativeSolutions(map-with-index(id))

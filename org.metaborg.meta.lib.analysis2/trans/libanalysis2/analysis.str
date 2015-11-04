@@ -39,7 +39,7 @@ rules // analysis
   where not(is-list)
   with result := <do-analysis(pre)> source-ast
 
-  get-analysis: source-ast -> <index-get-all-pairs-in-source> source
+  get-analysis: source-ast -> <index-get-all-values-in-source> source
   with source := <origin-file> source-ast
 
 rules
@@ -59,7 +59,7 @@ rules
   ; where(<debug> ">>> Extracting constraints <<<")
   ; report-time(
       (annotated-ast,c*) := <extract-constraints> desugared-ast
-    ; <index-collect-pair(|source)> ("constraints",c*)
+    ; <index-collect-analysis-result(|source)> Constraints(c*)
     ; sol-i := <initial-solution>
     )
 
@@ -72,9 +72,9 @@ rules
   ; report-time(
       [(sol-wm1,c1*)] := <solve-constraints-phase1> (sol-i,c0*)
     ; g := <fromWM;sol-g> sol-wm1
-    ; <index-collect-pair(|source)> ("initial-scopegraph",g)
+    ; <index-collect-analysis-result(|source)> InitialScopeGraph(g)
     ; fr* := <resolve-all> g
-    ; <index-collect-pair(|source)> ("initial-resolution",fr*)
+    ; <index-collect-analysis-result(|source)> InitialResolution(fr*)
     ; r* := <filterv(?[<id>])> fr*
     )
 
@@ -86,18 +86,18 @@ rules
   ; where(<debug> ">>> Processing solutions <<<")
   ; report-time(
       sol-wm* := <qsort((wm-errors;length,wm-errors;length);lt)> sol-wm2*
-    ; sol* := <map( ![ ("scopegraph", <fromWM;sol-g>)
-                     , ("resolution", <fromWM;sol-r>)
-                     , ("subtyping-relation", <fromWM;sol-x>)
-                     , ("position-types", <fromWM;sol-p>)
-                     , ("substitution", <fromWM;sol-s>)
-                     , ("errors", <wm-errors>)
-                     , ("warnings", <wm-warnings>)
-                     , ("notes", <wm-notes>)
+    ; sol* := <map( ![ ScopeGraph(<fromWM;sol-g>)
+                     , Resolution(<fromWM;sol-r>)
+                     , SubtypingRelation(<fromWM;sol-x>)
+                     , PositionTypes(<fromWM;sol-p>)
+                     , Substitution(<fromWM;sol-s>)
+                     , Errors(<wm-errors>)
+                     , Warnings(<wm-warnings>)
+                     , Notes(<wm-notes>)
                      ]
                   )> sol-wm*
-    ; <Hd;map(index-collect-pair(|source))> sol*
-    ; <index-collect-pair(|source)> ("alternative-solutions",<Tl> sol*)
+    ; <Hd;map(index-collect-analysis-result(|source))> sol*
+    ; <index-collect-analysis-result(|source)> AlternativeSolutions(<Tl> sol*)
     ; (good,bad) := <partition(not(is-erronious));(length,length)> sol-wm*
     ; status := (None(),$[Found [<int-to-string> good] correct and [<int-to-string> bad] erronious solutions.])
     ; ( sol-wm := <Hd> sol-wm*
@@ -127,4 +127,4 @@ rules
 
   report-time(s) = measure-time(s,where(<debug> $[Finished in [<cputime-to-seconds;real-to-string(|2)>]s]))
 
-  index-collect-pair(|source): (key,value) -> <index-collect(|value,source)> key
+  index-collect-analysis-result(|source): result -> <index-collect(|result,source)> "lala"
