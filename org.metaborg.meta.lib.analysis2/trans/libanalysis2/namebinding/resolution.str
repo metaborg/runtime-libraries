@@ -29,22 +29,32 @@ rules // resolution internal
   ; ( <G-scope> (g,r) // :: Scope
    <+ <debug(!"ERROR: Cannot get scope for reference ");fail> r
     )
-  ; env(|g,[r|ir*],[]) // :: Env
+  ; env_v(|g,[r|ir*],[]) // :: Env
   ; ( <lookup> (<atom> r,<fromP>) // :: [(Decl,Path)]
    <+ fromTotal ; ![]
     ) // :: [(Decl,Path)]
 
   // env(|Graph,[Ref],[Scope]) :: Scope -> Env
-  env(|g,ir*,s*) =
-    with(dbg-res(|"env "))
+  env_v(|g,ir*,s*) =
+    with(dbg-res(|"env_v "))
   ; ?s
-  ; <elem> (s,s*)
-  < <pureP> []
-  + <foldr(<pureP> [],shadow)> [ <env_d(|g,ir*,s*)>
-                               , <env_i(|g,ir*,s*)>
-                               , <env_p(|g,ir*,s*)>
-                               ]
-  ; with(dbg-res(pp-Env|"env "))
+  ; ( <elem> (s,s*) < <pureP> []
+  + <shadow> ( <env_l(|g,ir*,s*)>
+             , <env_p(|g,ir*,s*)>
+             )
+  )
+  ; with(dbg-res(pp-Env|"env_v "))
+
+  // env_e(|Graph,[Ref],[Scope]) :: Scope -> Env
+  env_l(|g,ir*,s*) =
+    with(dbg-res(|"env_l "))
+  ; ?s
+  ; ( <elem> (s,s*) < <pureP> []
+  + <shadow> ( <env_d(|g,ir*,s*)>
+             , <env_i(|g,ir*,s*)>
+             )
+  )
+  ; with(dbg-res(pp-Env|"env_l "))
 
   // env_d(|Graph,[Ref],[Scope]) :: Scope -> Env
   env_d(|g,ir*,s*) =
@@ -63,8 +73,7 @@ rules // resolution internal
   ; ( <union> ( <env_i_is2s(|g)> s
               , <env_i_ir2s(|g,ir*)> s
               ) // :: [(Scope,Step)]
-    < filterk(not(<elem> (<id>,s*))) // :: [(Scope,Step)]
-    ; map(env_i_s2env(|g,ir*,[s|s*])) // :: [Partial [(Atom,[(Decl,Path])]]
+    < map(env_i_s2env(|g,ir*,[s|s*])) // :: [Partial [(Atom,[(Decl,Path])]]
     ; sequenceP // :: Partial [[(Atom,[(Decl,Path)])]]
     ; fmap( foldr(![],merge(union,union)) ) // :: Env
     + !Partial([])
@@ -94,7 +103,7 @@ rules // resolution internal
   // env_i_sl2env(|Graph,[Ref],[Scope]) :: (Scope,Step) -> Env
   env_i_s2env(|g,ir*,s*) =
     ?(s,step)
-  ; <env(|g,ir*,s*)> s // :: Env
+  ; <env_l(|g,ir*,s*)> s // :: Env
   ; fmap(mapv(mapv(![step|<id>]))) // :: Env
 
   // env_p(|Graph,[Ref],[Scope]) :: Scope -> Env
@@ -102,7 +111,7 @@ rules // resolution internal
     with(dbg-res(|"env_p "))
   ; ?s
   ; ( s' := <G-parent> (g,s)
-    < env(|g,ir*,[s|s*])
+    < env_v(|g,ir*,[s|s*])
     ; fmap(mapv(mapv(![E(P(),s',None())|<id>]))) // :: Env
     + <pureP> []
     )

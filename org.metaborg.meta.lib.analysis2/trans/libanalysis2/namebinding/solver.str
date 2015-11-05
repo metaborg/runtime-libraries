@@ -100,7 +100,7 @@ rules
   where <is-ground> s
       ; g := <sol-g> sol-wm
       ; r* := <G-refs;map(atom)> (g,s)
-      ; Total(d*) := <env(|g,[],[]);fmap(keys)> s
+      ; Total(d*) := <env_v(|g,[],[]);fmap(keys)> s
   with <isect> (r*,d*) => i*
      ; ( ?[]
        < !sol-wm
