@@ -25,3 +25,17 @@ rules
   G-r-imports        = ?(G(s*,_),s) ; <lookup> (s,s*) ; ?S(_,_,_,<id>,_)
   G-s-imports        = ?(G(s*,_),s) ; <lookup> (s,s*) ; ?S(_,_,_,_,<id>)
   G-assoc            = ?(G(_,a*),d) ; <lookup> (d,a*)
+
+rules
+
+  name-eq = (id-name,id-name) ; eq
+
+  id-name = ?Name(ns,n)
+  id-name: RefId(ns,n,_) -> <strip-annos> Name(ns, n)
+  id-name: DeclId(ns,n,_) -> <strip-annos> Name(ns, n)
+
+  id-ns = ?Name(<id>,_)
+  id-ns = ?RefId(<id>,_,_)
+  id-ns = ?DeclId(<id>,_,_)
+
+  filter-ns(|ns) = filter(where(id-ns ; (?None() <+ ?ns)))

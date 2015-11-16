@@ -28,11 +28,10 @@ rules
 
   // print origins more compactly
   prettyprint-KeyPos:
-    Pos(key, file, line, column, begin, end) ->
-      [ H([SOpt(HS(),"0")], [ key', S("@("), line', S(","), column', S(")") ] ) ]
+    Pos(key, t) ->
+      [ H([SOpt(HS(),"0")], [ key', pos' ] ) ]
     with key'    := <pp-one-Z(prettyprint-Int)> key
-    with line'   := <inc;pp-one-Z(prettyprint-Int)> line
-    with column' := <inc;pp-one-Z(prettyprint-Int)> column
+    with pos'    := <pp-one-Z(prettyprint-TermPos)> t
 
   prettyprint-TermPos:
     t -> [ H([SOpt(HS(),"0")], [ S("@("), S(line'), S(","), S(column'), S(")") ] ) ]
@@ -45,18 +44,20 @@ rules
   prettyprint-Term = prettyprint-Int
   prettyprint-Term = prettyprint-DeclId
   prettyprint-Term = prettyprint-RefId
-  prettyprint-Term = prettyprint-Atom
+  prettyprint-Term = prettyprint-Name
   prettyprint-Term = prettyprint-Scope
   prettyprint-Term = prettyprint-OptionScope
   prettyprint-Term = prettyprint-Pos
   prettyprint-Term = prettyprint-Var
   prettyprint-Term = prettyprint-Constraint
+  prettyprint-Term = prettyprint-Names
   prettyprint-Term = prettyprint-Type
   prettyprint-Term = prettyprint-TypeDef
   prettyprint-Term = prettyprint-TypeArg
   prettyprint-Term = prettyprint-TypeCon
   prettyprint-Term = prettyprint-Message
   prettyprint-Term = prettyprint-MessageKind
+  prettyprint-Term = prettyprint-Placeholder
   // catch all cases
   prettyprint-Term = prettyprint-list(prettyprint-Term)
   prettyprint-Term = prettyprint-aterm

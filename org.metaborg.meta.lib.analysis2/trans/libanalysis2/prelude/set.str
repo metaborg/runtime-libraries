@@ -2,9 +2,13 @@ module libanalysis2/prelude/set
 
 strategies
   
-  dups = foldr(!([],[]),dup-step) ; Snd ; nub
-  dup-step = ?(x,(uniq,dup))
-           ; ( <elem> (x,uniq)
-             < !(uniq,[x|dup])
-             + !([x|uniq],dup)
-             )
+  dups = dups(eq)
+  
+  dups(eq): [x|x*] -> [d*|<dups(eq)> z*]
+    where (y*,z*) := <partition(where(<eq> (x,<id>)))> x*
+        ; if [] := y* then
+            d* := []
+          else
+            d* := [x|y*]
+          end
+  dups(eq): [] -> []

@@ -9,17 +9,23 @@ imports
 rules
 
   default-message(|defaultmsg): Message(kind,msg,pos) -> Message(kind,msg',pos)
-  with msg' := <message-or-default(|defaultmsg)> msg
+    with msg' := <message-or-default(|defaultmsg)> msg
 
   add-messages(|msginfo*,defaultmsg): sol-wm -> sol-wm'
-    with sol-wm' := <foldr(!sol-wm,add-messages-step(|defaultmsg))> msginfo*
-  add-messages-step(|defaultmsg): (msginfo,sol-wm) -> sol-wm'
-    with sol-wm' := <add-message(|msginfo,defaultmsg)> sol-wm
+    with sol-wm' := <foldr(!sol-wm,add-message-step(|defaultmsg))> msginfo*
 
   add-message(|msginfo,defaultmsg): sol-wm -> sol-wm'
-  with Message(kind,msg,pos) := msginfo
-     ; msg' := <message-or-default(|defaultmsg);pp-MessageContent> msg
-     ; sol-wm' := <add-message> (kind,(pos,msg'),sol-wm)
+    with Message(kind,msg,pos) := msginfo
+    where <is-list> pos
+    with sol-wm' := <map(!Message(kind,msg,<id>))
+                    ;foldr(!sol-wm,add-message-step(|defaultmsg))> pos
+  add-message(|msginfo,defaultmsg): sol-wm -> sol-wm'
+    with Message(kind,msg,pos) := msginfo
+       ; msg' := <message-or-default(|defaultmsg);pp-MessageContent> msg
+       ; sol-wm' := <add-message> (kind,(pos,msg'),sol-wm)
+
+  add-message-step(|defaultmsg): (msginfo,sol-wm) -> sol-wm'
+    with sol-wm' := <add-message(|msginfo,defaultmsg)> sol-wm
 
   add-message: (Error(), error, sol-wm) -> <add-error(|error)> sol-wm
   add-message: (Warning(), warning, sol-wm) -> <add-warning(|warning)> sol-wm

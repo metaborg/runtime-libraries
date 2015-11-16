@@ -20,12 +20,12 @@ context-free syntax
 
   RefId.RefId               = <ref(<Namespace>,<String>,<KeyPos>)>
 
-  KeyPos.Pos                = <<String>@(<String>,<Int>,<Int>,<Int>,<Int>)>
+  KeyPos.Pos                = <<String><TermPos>>
 
   Namespace.None            = <->
   Namespace.Namespace       = String
 
-  Atom.Atom                 = <atom(<Namespace>,<String>)>
+  Name.Name                 = <name(<Namespace>,<String>)>
 
 context-free syntax
 
@@ -166,8 +166,6 @@ context-free syntax // name resolution
 
   Constraint.CAssoc         = [[DeclId] ~~> [Scope] [Message]]
   Constraint.CResolves      = [[RefId] |-[Labels]-> [DeclId] [Message]]
-  Constraint.CDistinct      = <distinct <Scope> <Message>>
-  Constraint.CInit          = <init <Scope> <Message>>
 
   Labels = <[<{Term ","}*>]>
   Labels = Var
@@ -183,6 +181,18 @@ context-free syntax // name resolution
   >
   
   OneResolution = [[RefId] [Resolved]]
+
+context-free syntax // name sets
+
+  Constraint.CDistinct      = <!<Names> <Message>>
+  Constraint.CIncluded      = <<Names> in <Names> <Message>>
+  Constraint.CDisjoint      = <<Names> # <Names> <Message>>
+  
+  Names.Declarations  = <D(<Namespace>,<Scope>)>
+  Names.References    = <R(<Namespace>,<Scope>)>
+  Names.Visibles      = <V(<Namespace>,<Scope>)>
+
+  Placeholder.NAMES   = <NAMES>
 
 context-free syntax // subtyping
 

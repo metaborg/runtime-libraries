@@ -8,7 +8,7 @@ imports
 
 signature
 
-  // type Env = Env
+  // type Env = Partial [(Name,[(Decl,Path)])]
 
 rules
 
@@ -30,7 +30,7 @@ rules // resolution internal
    <+ <debug(!"ERROR: Cannot get scope for reference ");fail> r
     )
   ; env_v(|g,[r|ir*],[]) // :: Env
-  ; ( <lookup> (<atom> r,<fromP>) // :: [(Decl,Path)]
+  ; ( <lookup> (<id-name> r,<fromP>) // :: [(Decl,Path)]
    <+ fromTotal ; ![]
     ) // :: [(Decl,Path)]
 
@@ -61,8 +61,8 @@ rules // resolution internal
     with(dbg-res(|"env_d "))
   ; ?s
   ; <G-decls> (g,s) // :: [Decl]
-  ; group(atom) // :: [(Atom,[Decl])]
-  ; mapv(map(!(<id>,[D(<id>)]))) // :: [(Atom,[(Decl,Path)])]
+  ; group(id-name) // :: [(Name,[Decl])]
+  ; mapv(map(!(<id>,[D(<id>)]))) // :: [(Name,[(Decl,Path)])]
   ; pureP // :: Env
   ; with(dbg-res(pp-Env|"env_d "))
 
@@ -73,8 +73,8 @@ rules // resolution internal
   ; ( <union> ( <env_i_is2s(|g)> s
               , <env_i_ir2s(|g,ir*)> s
               ) // :: [(Scope,Step)]
-    < map(env_i_s2env(|g,ir*,[s|s*])) // :: [Partial [(Atom,[(Decl,Path])]]
-    ; sequenceP // :: Partial [[(Atom,[(Decl,Path)])]]
+    < map(env_i_s2env(|g,ir*,[s|s*])) // :: [Partial [(Name,[(Decl,Path])]]
+    ; sequenceP // :: Partial [[(Name,[(Decl,Path)])]]
     ; fmap( foldr(![],merge(union,union)) ) // :: Env
     + !Partial([])
     )
@@ -119,19 +119,20 @@ rules // resolution internal
 
   // shadow :: (Env, Env) -> Env
   shadow =
-    twrapP // :: Partial ([(Atom,[(Decl,Path)])], [(Atom,[(Decl,Path)])])
+    twrapP // :: Partial ([(Name,[(Decl,Path)])], [(Name,[(Decl,Path)])])
   ; fmap(merge(union,Fst)) // :: Env
-
-  atom: RefId(ns,n,_) -> <strip-annos> Atom(ns, n)
-  atom: DeclId(ns,n,_) -> <strip-annos> Atom(ns, n)
 
 rules
  
   path-labels = filter(step-label)
   step-label = ?E(_,_,<not(?None())>) 
   step-label = ?N(_,_,_,<not(?None())>) 
+
+  get-names(|g): Declarations(ns,s) -> <G-decls;filter-ns(|ns)> (g,s)
+  get-names(|g): References(ns,s) -> <G-refs;filter-ns(|ns)> (g,s)
+  get-names(|g): Visibles(ns,s) -> <env_v(|g,[],[]);fromTotal;values;concat;map(Fst);filter-ns(|ns)> s
  
-  pp-Env = fmap(map((pp-Atom,map((pp-DeclId,pp-Path)))))
+  pp-Env = fmap(map((pp-Name,map((pp-DeclId,pp-Path)))))
 
   dbg-res(s|n) = id // s ; debug(!n)
   dbg-res(|n) = dbg-res(id|n)

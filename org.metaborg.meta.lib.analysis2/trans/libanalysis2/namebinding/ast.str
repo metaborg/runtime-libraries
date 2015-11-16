@@ -20,7 +20,7 @@ rules
   refid-to-pos = ?RefId(_,_,<id>)
 
   make-ref: d@DeclId(_,_,pos) -> r
-  with o := <position-to-origin> pos
-     ; r := <origin-location-offset-set(|o)> Ref(d)
+  with t := <position-to-term> pos
+     ; r := <copy-origin(|t)> Ref(d)
 
   get-decl = get-annotation(?Ref(<id>))
