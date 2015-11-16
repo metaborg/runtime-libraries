@@ -38,4 +38,4 @@ rules
   id-ns = ?RefId(<id>,_,_)
   id-ns = ?DeclId(<id>,_,_)
 
-  filter-ns(|ns) = filter(where(id-ns ; (?None() <+ ?ns)))
+  filter-ns(|ns) = filter(where(id-ns ; ?ns))
