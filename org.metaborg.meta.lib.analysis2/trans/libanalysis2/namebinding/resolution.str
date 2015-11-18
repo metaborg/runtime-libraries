@@ -84,7 +84,7 @@ rules // resolution internal
   env_i_is2s(|g) =
     ?s
   ; <G-s-imports> (g,s) // :: [(Scope,Label)]
-  ; map((not(?Var(_)),!E(I(),s,<id>))) // :: [(Scope,Label)]
+  ; map(!(<Fst;not(?Var(_))>,E(I(),<Fst>,<Snd>))) // :: [(Scope,Step)]
 
   // env_i_ir2s(|Graph,[Ref]) :: Scope -|-> [(Scope,Step)]
   env_i_ir2s(|g,ir*) =
@@ -98,7 +98,7 @@ rules // resolution internal
     ?(r,l)
   ; <resolve(|g,ir*)> r // :: [(Decl,Path)]
   ; filter(?(<G-assoc> (g,<id>),_)) // :: [Scope]
-  ; map(!(<id>,N(I(),r,<id>,l))) // :: [(Decl,Label)]
+  ; map(!(<id>,N(I(),r,<id>,l))) // :: [(Scope,Step)]
 
   // env_i_sl2env(|Graph,[Ref],[Scope]) :: (Scope,Step) -> Env
   env_i_s2env(|g,ir*,s*) =
