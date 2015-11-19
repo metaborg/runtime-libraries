@@ -28,14 +28,17 @@ rules
 
 rules
 
-  name-eq = (id-name,id-name) ; eq
+  id-eq = (id-atom,id-atom) ; eq
 
-  id-name = ?Name(ns,n)
-  id-name: RefId(ns,n,_) -> <strip-annos> Name(ns, n)
-  id-name: DeclId(ns,n,_) -> <strip-annos> Name(ns, n)
+  id-atom = ?Name(_,_)
+  id-atom = !Name(<id-ns>,<id-name>)
 
-  id-ns = ?Name(<id>,_)
-  id-ns = ?RefId(<id>,_,_)
-  id-ns = ?DeclId(<id>,_,_)
+  id-name = ?Name(_,<strip-annos>)
+  id-name = ?RefId(_,<strip-annos>,_)
+  id-name = ?DeclId(_,<strip-annos>,_)
+
+  id-ns = ?Name(<strip-annos>,_)
+  id-ns = ?RefId(<strip-annos>,_,_)
+  id-ns = ?DeclId(<strip-annos>,_,_)
 
   filter-ns(|ns) = filter(where(id-ns ; ?ns))

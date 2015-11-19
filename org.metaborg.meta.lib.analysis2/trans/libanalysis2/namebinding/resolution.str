@@ -30,7 +30,7 @@ rules // resolution internal
    <+ <debug(!"ERROR: Cannot get scope for reference ");fail> r
     )
   ; env_v(|g,[r|ir*],[]) // :: Env
-  ; ( <lookup> (<id-name> r,<fromP>) // :: [(Decl,Path)]
+  ; ( <lookup> (<id-atom> r,<fromP>) // :: [(Decl,Path)]
    <+ fromTotal ; ![]
     ) // :: [(Decl,Path)]
 
@@ -61,7 +61,7 @@ rules // resolution internal
     with(dbg-res(|"env_d "))
   ; ?s
   ; <G-decls> (g,s) // :: [Decl]
-  ; group(id-name) // :: [(Name,[Decl])]
+  ; group(id-atom) // :: [(Name,[Decl])]
   ; mapv(map(!(<id>,[D(<id>)]))) // :: [(Name,[(Decl,Path)])]
   ; pureP // :: Env
   ; with(dbg-res(pp-Env|"env_d "))

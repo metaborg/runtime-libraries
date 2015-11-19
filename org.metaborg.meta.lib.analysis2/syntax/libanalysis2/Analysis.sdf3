@@ -185,7 +185,7 @@ context-free syntax // name resolution
 context-free syntax // name sets
 
   Constraint.CDistinct      = <!<Names> <Message>>
-  Constraint.CIncluded      = <<Names> in <Names> <Message>>
+  Constraint.CSubset        = <<Names> in <Names> <Message>>
   Constraint.CDisjoint      = <<Names> # <Names> <Message>>
   
   Names.Declarations  = <D(<Namespace>,<Scope>)>

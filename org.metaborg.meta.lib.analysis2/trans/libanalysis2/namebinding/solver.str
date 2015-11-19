@@ -90,20 +90,20 @@ rules
   where <is-ground> N
       ; g := <fromWM;sol-g> sol-wm
       ; n* := <get-names(|g)> N
-  with n'* := <dups(name-eq)> n*
+  with n'* := <dups(id-eq)> n*
      ; ( ?[]
        < !sol-wm
        + msg := "Duplicate name"
        ; <add-message(|<default-names-pos(|n'*)> msginfo,msg)> sol-wm
        ) => sol-wm'
 
-  solve-namebinding-constraint: (CIncluded(N1,N2,msginfo),sol-wm) -> [(sol-wm',[])]
+  solve-namebinding-constraint: (CSubset(N1,N2,msginfo),sol-wm) -> [(sol-wm',[])]
   where <is-ground> N1
       ; <is-ground> N2
       ; g := <fromWM;sol-g> sol-wm
       ; n1* := <get-names(|g)> N1
       ; n2* := <get-names(|g)> N2
-  with n'* := <diff(name-eq)> (n1*,n2*)
+  with n'* := <diff(id-eq)> (n1*,n2*)
      ; ( ?[]
        < !sol-wm
        + msg := "Missing name"
@@ -116,7 +116,7 @@ rules
       ; g := <fromWM;sol-g> sol-wm
       ; n1* := <get-names(|g)> N1
       ; n2* := <get-names(|g)> N2
-  with n'* := <isect(name-eq)> (n1*,n2*)
+  with n'* := <isect(id-eq)> (n1*,n2*)
      ; ( ?[]
        < !sol-wm
        + msg := "Duplicate name"
@@ -128,14 +128,14 @@ rules
   constraint-priority: CAssoc(_,_,_) -> 4
   constraint-priority: CResolves(_,_,_,_) -> 4
   constraint-priority: CDistinct(_,_) -> 4
-  constraint-priority: CIncluded(_,_,_) -> 4
+  constraint-priority: CSubset(_,_,_) -> 4
   constraint-priority: CDisjoint(_,_,_) -> 4
 
 rules
  
   default-names-pos(|n*) =
     try(Message(id,?None(),!NAMES()))
-  ; try(Message(id,id,?NAMES();<map(position-to-term)> n*))
+  ; Message(id,bottomup(try(?NAMES();<map(id-name)> n*)),try(?NAMES();<map(position-to-term)> n*))
  
   unsolved-message: CResolves(r,l,d,msginfo) -> <default-message(|msg)> msginfo
   with msg := ["Cannot resolve ",r," to ",d]
@@ -146,5 +146,8 @@ rules
   unsolved-message: CDistinct(n,msginfo) -> <default-message(|msg)> msginfo
   with msg := ["Cannot check if ",n," are distinct"]
 
-  unsolved-message: CIncluded(n1,n2,msginfo) -> <default-message(|msg)> msginfo
-  with msg := ["Cannot check if ",n2," includes ",n1]
+  unsolved-message: CSubset(n1,n2,msginfo) -> <default-message(|msg)> msginfo
+  with msg := ["Cannot check if ",n1," in ",n2]
+
+  unsolved-message: CDisjoint(n1,n2,msginfo) -> <default-message(|msg)> msginfo
+  with msg := ["Cannot check if ",n1," disjoint from ",n1]

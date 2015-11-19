@@ -9,7 +9,8 @@ imports
 
 rules
 
-  prettyprint-aterm: c#(a*) -> [ H([SOpt(HS(),"0")], [S(c),S("("),a',S(")")] ) ]
+  prettyprint-aterm: c#(a*) -> [ H( [SOpt(HS(),"0")]
+                                  , [S(c),S("("),a',S(")")] ) ]
     with a' := <pp-H-list(prettyprint-Term|",")> a*
 
   // allow printing of actual Ints as well
@@ -17,14 +18,22 @@ rules
     where is-int
 
   // easy list printing
-  prettyprint-list(pp): t -> [ H([SOpt(HS(),"0")], [S("["),t',S("]")] ) ]
+  prettyprint-list(pp): t -> [ H( [SOpt(HS(),"0")]
+                                , [S("["),t',S("]")] ) ]
     where is-list
     with t' := <pp-H-list(pp|",")> t
 
   // easy tuple printing
-  prettyprint-tuple(pp1,pp2): (t1,t2) -> [ H([SOpt(HS(),"0")], [S("("),t1',S(","),t2',S(")")] ) ]
+  prettyprint-tuple(pp1,pp2): (t1,t2) -> [ H( [SOpt(HS(),"0")]
+                                            , [S("("),t1',S(","),t2',S(")")] ) ]
     with t1' := <pp-one-Z(pp1)> t1
     with t2' := <pp-one-Z(pp2)> t2
+
+  // omit brackets if no type arguments are present
+  prettyprint-Type :
+    TApp(tc, []) -> [ H( [SOpt(HS(), "0")]
+                      , [ tc' ] ) ]
+    with tc' := <pp-one-Z(prettyprint-TypeCon)> tc
 
   // print origins more compactly
   prettyprint-KeyPos:
