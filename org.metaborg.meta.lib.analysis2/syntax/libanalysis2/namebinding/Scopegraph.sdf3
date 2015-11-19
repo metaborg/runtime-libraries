@@ -1,0 +1,31 @@
+module libanalysis2/namebinding/Scopegraph
+
+imports
+
+  libanalysis2/Common
+  libanalysis2/namebinding/Identifiers
+
+context-free syntax
+
+  Graph.G = <
+    scope graph {
+      <{ScopeEntry "\n"}*>
+      assocs = <{AssocEntry "\n"}*>
+    }
+  >
+ 
+  ScopeEntry = <<Scope> = <ScopeImpl>>
+ 
+  ScopeImpl.S = <
+    {
+      parent    = <OptionScope>
+      decls     = <{DeclId ", "}*>
+      refs      = <{RefId ", "}*>
+      r-imports = <{ImportREntry ", "}*>
+      s-imports = <{ImportSEntry ", "}*>
+    }
+  >
+ 
+  ImportREntry = <<RefId>/<Term>>
+  ImportSEntry = <<Scope>/<Term>>
+  AssocEntry = <<DeclId> : <Scope>>

@@ -1,4 +1,4 @@
-module libanalysis2/subtyping/ast
+module libanalysis2/typechecking/ast
 
 imports
   runtime/editor/annotations

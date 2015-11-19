@@ -1,0 +1,37 @@
+module libanalysis2/namebinding/Constraints
+
+imports
+
+  libanalysis2/Common
+  libanalysis2/namebinding/Identifiers
+  libanalysis2/namebinding/Scopegraph
+  libanalysis2/namebinding/Resolution
+  libanalysis2/solver/Errors
+  libanalysis2/solver/VarOps
+
+context-free syntax
+
+  Constraint.FParent        = <parent(<Scope>) is <OptionScope>>
+  Constraint.FDecl          = <<DeclId> in <Scope>>
+  Constraint.FRef           = <<RefId> in <Scope>>
+  Constraint.FImportR       = <import <RefId>/<Term> in <Scope>>
+  Constraint.FImportS       = <import <Scope>/<Term> in <Scope>>
+  Constraint.FAssoc         = <<DeclId> with <Scope>>
+
+  Constraint.CAssoc         = [[DeclId] ~~> [Scope] [Message]]
+  Constraint.CResolves      = [[RefId] |-[Labels]-> [DeclId] [Message]]
+
+  Labels = <[<{Term ","}*>]>
+  Labels = Var
+
+context-free syntax
+
+  Constraint.CDistinct      = <!<Names> <Message>>
+  Constraint.CSubset        = <<Names> in <Names> <Message>>
+  Constraint.CDisjoint      = <<Names> # <Names> <Message>>
+  
+  Names.Declarations  = <D(<Namespace>,<Scope>)>
+  Names.References    = <R(<Namespace>,<Scope>)>
+  Names.Visibles      = <V(<Namespace>,<Scope>)>
+
+  Placeholder.NAMES   = <NAMES>

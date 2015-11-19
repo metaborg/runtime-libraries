@@ -1,11 +1,11 @@
-module libanalysis2/subtyping/functions
+module libanalysis2/typechecking/functions
 
 imports
   libanalysis2/prelude/-
   libanalysis2/pp
-  libanalysis2/subtyping/-
-  libanalysis2/unification/functions
-  signatures/libanalysis2/-
+  libanalysis2/typechecking/-
+  libanalysis2/equality/functions
+  signatures/libanalysis2/typechecking/-
 
 signature
   sorts

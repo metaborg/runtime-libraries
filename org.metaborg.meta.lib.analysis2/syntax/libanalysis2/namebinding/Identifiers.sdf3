@@ -1,0 +1,26 @@
+module libanalysis2/namebinding/Identifiers
+
+imports
+
+  libanalysis2/Common
+  libanalysis2/positioning/Base
+  libanalysis2/solver/VarOps
+
+context-free syntax
+
+  Scope.Global              = <global>
+  Scope.Scope               = <scope(<Int>)>
+  Scope                     = Var
+
+  OptionScope.None          = <->
+  OptionScope               = Scope
+
+  DeclId.DeclId             = <decl(<Namespace>,<String>,<KeyPos>)>
+  DeclId                    = Var
+
+  RefId.RefId               = <ref(<Namespace>,<String>,<KeyPos>)>
+
+  Name.Name                 = <name(<Namespace>,<String>)>
+
+  Namespace.None            = <->
+  Namespace.Namespace       = String

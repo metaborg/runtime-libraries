@@ -6,7 +6,8 @@ imports
   libanalysis2/prelude/-
   libanalysis2/solver/-
   libanalysis2/pp
-  signatures/libanalysis2/-
+  signatures/libanalysis2/equality/-
+  signatures/libanalysis2/namebinding/-
 
 rules
  

@@ -1,7 +1,7 @@
 module libanalysis2/extraction/extraction
 
 imports
-  signatures/libanalysis2/-
+  signatures/libanalysis2/solver/-
 
 signature
   constructors

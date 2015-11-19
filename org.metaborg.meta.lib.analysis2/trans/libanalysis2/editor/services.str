@@ -4,7 +4,7 @@ imports
 
   libanalysis2/namebinding/-
   libanalysis2/prelude/-
-  libanalysis2/subtyping/-
+  libanalysis2/typechecking/-
 
 rules
 

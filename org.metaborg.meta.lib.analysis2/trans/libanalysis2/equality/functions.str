@@ -1,4 +1,4 @@
-module libanalysis2/unification/functions
+module libanalysis2/equality/functions
 
 imports
 

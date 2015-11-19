@@ -1,9 +1,10 @@
-module libanalysis2/subtyping/solver
+module libanalysis2/typechecking/solver
 
 imports
-  signatures/libanalysis2/-
+  signatures/libanalysis2/equality/-
+  signatures/libanalysis2/typechecking/-
   libanalysis2/solver/-
-  libanalysis2/subtyping/-
+  libanalysis2/typechecking/-
   libanalysis2/prelude/-
   libanalysis2/pp
 

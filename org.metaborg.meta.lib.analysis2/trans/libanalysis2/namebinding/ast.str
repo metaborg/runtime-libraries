@@ -6,7 +6,7 @@ imports
 
   libanalysis2/positioning/functions
   libanalysis2/prelude/-
-  signatures/libanalysis2/-
+  signatures/libanalysis2/namebinding/-
 
 signature
   constructors

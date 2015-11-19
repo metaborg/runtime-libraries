@@ -5,7 +5,10 @@ imports
   libstratego-sglr
   runtime/editor/origins
   runtime/editor/annotations
-  signatures/libanalysis2/-
+  signatures/libanalysis2/equality/-
+  signatures/libanalysis2/namebinding/-
+  signatures/libanalysis2/positioning/-
+  signatures/libanalysis2/typechecking/-
   libanalysis2/positioning/functions
   libanalysis2/pp
   

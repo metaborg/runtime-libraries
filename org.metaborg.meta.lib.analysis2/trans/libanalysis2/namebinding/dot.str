@@ -3,7 +3,7 @@ module libanalysis2/namebinding/dot
 imports
   libanalysis2/namebinding/scopegraph
   libanalysis2/pp
-  signatures/libanalysis2/-
+  signatures/libanalysis2/namebinding/-
  
 rules
 

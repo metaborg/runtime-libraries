@@ -1,0 +1,9 @@
+module libanalysis2/positioning/Base
+
+imports
+
+  libanalysis2/Common
+
+context-free syntax
+
+  KeyPos.Pos                = <<String><TermPos>>

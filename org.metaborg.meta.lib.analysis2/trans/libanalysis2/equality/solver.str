@@ -1,12 +1,13 @@
-module libanalysis2/unification/solver
+module libanalysis2/equality/solver
 
 imports
-  libanalysis2/unification/-
+  libanalysis2/equality/-
   libanalysis2/namebinding/-
   libanalysis2/solver/-
   libanalysis2/prelude/-
   libanalysis2/pp
-  signatures/libanalysis2/-
+  signatures/libanalysis2/equality/-
+  signatures/libanalysis2/substitution/-
 
 rules
   

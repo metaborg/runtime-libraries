@@ -3,7 +3,7 @@ module libanalysis2/export/dot
 imports
 
   libanalysis2/export/-
-  signatures/libanalysis2/-
+  signatures/libanalysis2/namebinding/-
 
 rules
 

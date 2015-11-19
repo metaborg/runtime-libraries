@@ -5,7 +5,7 @@ imports
   libanalysis2/pp
   libanalysis2/prelude/-
   libanalysis2/solver/varops
-  libanalysis2/unification/functions
+  libanalysis2/equality/functions
 
 signature
   sorts

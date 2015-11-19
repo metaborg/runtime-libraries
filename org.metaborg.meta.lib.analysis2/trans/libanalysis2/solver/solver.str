@@ -1,14 +1,14 @@
 module libanalysis2/solver/solver
 
 imports
-  signatures/libanalysis2/-
+  signatures/libanalysis2/solver/-
   runtime/editor/annotations
   runtime/editor/origins
   runtime/task/messages
   libanalysis2/prelude/-
   libanalysis2/pp
   libanalysis2/solver/-
-  libanalysis2/unification/functions
+  libanalysis2/equality/functions
 
 rules
 	

@@ -11,6 +11,10 @@ rules
     with filename := <guarantee-extension(|"analysis2")> path
        ; result := <get-analysis;pp-analysis> ast
 
+  show-analysis-aterm: (_, _, ast, path, project-path) -> (filename, result)
+    with filename := <guarantee-extension(|"analysis2.aterm")> path
+       ; result := <get-analysis> ast
+
   export-to-latex: (_, _, ast, path, project-path) -> (filename, result)
     with filename := <guarantee-extension(|"tex")> path
        ; result := <get-analysis;analysis-to-latex> ast

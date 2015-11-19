@@ -4,7 +4,7 @@ imports
   libanalysis2/namebinding/scopegraph
   libanalysis2/pp
   libanalysis2/prelude/-
-  signatures/libanalysis2/-
+  signatures/libanalysis2/namebinding/-
 
 signature
 

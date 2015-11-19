@@ -5,7 +5,14 @@ imports
   libstratego-gpp
   runtime/tmpl/pp
   include/libanalysis2-parenthesize
-  pp/libanalysis2/-
+  signatures/libanalysis2/namebinding/-
+  signatures/libanalysis2/positioning/-
+  signatures/libanalysis2/typechecking/-
+  pp/libanalysis2/equality/-
+  pp/libanalysis2/namebinding/-
+  pp/libanalysis2/positioning/-
+  pp/libanalysis2/solver/-
+  pp/libanalysis2/typechecking/-
   libanalysis2/pp/overrides
   libanalysis2/prelude/-
 

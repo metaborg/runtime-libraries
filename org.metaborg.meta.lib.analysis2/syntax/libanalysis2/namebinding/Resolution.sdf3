@@ -1,0 +1,22 @@
+module libanalysis2/namebinding/Resolution
+
+imports
+
+  libanalysis2/Common
+  libanalysis2/namebinding/Identifiers
+  libanalysis2/namebinding/Scopegraph
+
+context-free syntax
+
+  FullResolution = <<RefId> <{Resolved "\n"}*>>
+  Resolved        = [
+    |--> [DeclId]
+         path = [Path]
+  ]
+
+  Path            = {Step "\n"}*
+  Step.D          = <D(<DeclId>)>
+  Step.E          = <E(<Label>,<Scope>)/<Term>>
+  Step.N          = <N(<Label>,<RefId>,<Scope>)/<Term>>
+  Label.I         = <I>
+  Label.P         = <P>

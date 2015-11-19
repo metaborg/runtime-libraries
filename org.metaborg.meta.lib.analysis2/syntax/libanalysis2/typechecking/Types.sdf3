@@ -1,0 +1,22 @@
+module libanalysis2/typechecking/Types
+
+imports
+
+  libanalysis2/Common
+  libanalysis2/solver/VarOps
+
+context-free syntax
+
+  Type.TApp                 = <<TypeCon>[<{Type ","}*>]>
+  Type.TVar                 = <'<String>>
+  Type.TList                = <Type[<{Type ", "}*>]>
+  Type                      = Var
+
+  TypeDef.TDef              = <<TypeCon>[<{TypeArg ","}*>]>
+  TypeArg.TArg              = <<Variance><Type>>
+
+  Variance.Invariant        = <=>
+  Variance.Covariant        = <+>
+  Variance.Contravariant    = <->
+
+  TypeCon                   = NotImplemented

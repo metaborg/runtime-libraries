@@ -4,16 +4,16 @@ imports
 
   libstratego-sglr
   libstratego-gpp
-  signatures/libanalysis2/-
+  signatures/libanalysis2/typechecking/-
   runtime/analysis/core
   runtime/editor/time
   runtime/index/-
   runtime/tmpl/pp
   libanalysis2/extraction/-
   libanalysis2/positioning/-
-  libanalysis2/unification/-
+  libanalysis2/equality/-
   libanalysis2/namebinding/-
-  libanalysis2/subtyping/-
+  libanalysis2/typechecking/-
   libanalysis2/substitution/-
   libanalysis2/solver/-
   libanalysis2/prelude/-

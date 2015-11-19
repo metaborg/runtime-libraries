@@ -2,8 +2,13 @@ module libanalysis2/export/latex
 
 imports
 
+  libanalysis2/solver/-
   libanalysis2/export/-
-  signatures/libanalysis2/-
+  signatures/libanalysis2/solver/-
+  signatures/libanalysis2/equality/-
+  signatures/libanalysis2/namebinding/-
+  signatures/libanalysis2/positioning/-
+  signatures/libanalysis2/typechecking/-
 
 rules
 

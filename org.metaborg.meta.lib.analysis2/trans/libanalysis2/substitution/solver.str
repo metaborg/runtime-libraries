@@ -1,12 +1,13 @@
 module libanalysis2/substitution/solver
 
 imports
-  libanalysis2/unification/functions
+  libanalysis2/equality/functions
   libanalysis2/prelude/-
   libanalysis2/solver/-
-  libanalysis2/subtyping/functions
+  libanalysis2/typechecking/functions
   libanalysis2/pp
-  signatures/libanalysis2/-
+  signatures/libanalysis2/equality/-
+  signatures/libanalysis2/substitution/-
 
 rules
 

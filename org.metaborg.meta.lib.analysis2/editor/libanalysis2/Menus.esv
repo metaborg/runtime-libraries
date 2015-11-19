@@ -4,6 +4,7 @@ menus
 
   menu: "Analysis"
 
-    action: "Show Analysis"          = show-analysis   (meta) (realtime) (openeditor)
-    action: "Export to LaTeX"        = export-to-latex (meta) (realtime) (openeditor)
-    action: "Export to DOT"          = export-to-dot   (meta) (realtime) (openeditor)
+    action: "Show Analysis"          = show-analysis       (meta) (realtime) (openeditor)
+    action: "Show Analysis ATerm"    = show-analysis-aterm (meta) (realtime) (openeditor)
+    action: "Export to LaTeX"        = export-to-latex     (meta) (realtime) (openeditor)
+    action: "Export to DOT"          = export-to-dot       (meta) (realtime) (openeditor)

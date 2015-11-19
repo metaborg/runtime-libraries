@@ -1,7 +1,7 @@
 module libanalysis2/solver/varops
 
 imports
-  signatures/libanalysis2/-
+  signatures/libanalysis2/solver/-
 
 rules
   

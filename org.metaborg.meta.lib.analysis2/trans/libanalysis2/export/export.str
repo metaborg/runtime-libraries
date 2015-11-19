@@ -3,8 +3,8 @@ module libanalysis2/export/export
 imports
 
   libanalysis2/positioning/-
-  signatures/libanalysis2/-
-  pp/libanalysis2/-
+  signatures/libanalysis2/namebinding/-
+  pp/libanalysis2/namebinding/-
 
 rules
 

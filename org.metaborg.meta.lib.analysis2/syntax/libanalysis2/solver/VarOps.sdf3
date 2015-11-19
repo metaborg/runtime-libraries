@@ -1,0 +1,9 @@
+module libanalysis2/solver/VarOps
+
+imports
+
+  libanalysis2/Common
+
+context-free syntax
+
+  Var.Var                   = <v<Int>>
