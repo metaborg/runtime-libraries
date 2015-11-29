@@ -13,11 +13,6 @@ rules
  
   solve-fact = solve-namebinding-fact 
  
-  solve-namebinding-fact: (FParent(s,p),sol-wm)   -> [(sol-wm',[])]
-  with <fromWM;sol-g> sol-wm => g
-     ; <G-with-parent> (g,s,p) => g'
-     ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
-
   solve-namebinding-fact: (FDecl(d,s),sol-wm) -> [(sol-wm',[])]
   with <fromWM;sol-g> sol-wm => g
      ; <G-with-decl> (g,s,d) => g'
@@ -28,14 +23,14 @@ rules
      ; <G-with-ref> (g,s,r) => g'
      ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
 
-  solve-namebinding-fact: (FImportR(r,l,s),sol-wm) -> [(sol-wm',[])]
+  solve-namebinding-fact: (FImportR(l,r,t,s),sol-wm) -> [(sol-wm',[])]
   with <fromWM;sol-g> sol-wm => g
-     ; <G-with-r-import> (g,s,(r,l)) => g'
+     ; <G-with-r-import> (g,s,(l,r,t)) => g'
      ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
 
-  solve-namebinding-fact: (FImportS(s',l,s),sol-wm) -> [(sol-wm',[])]
+  solve-namebinding-fact: (FImportS(l,s',t,s),sol-wm) -> [(sol-wm',[])]
   with <fromWM;sol-g> sol-wm => g
-     ; <G-with-s-import> (g,s,(s',l)) => g'
+     ; <G-with-s-import> (g,s,(l,s',t)) => g'
      ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
 
   solve-namebinding-fact: (FAssoc(d,s),sol-wm)    -> [(sol-wm',[])]
@@ -43,11 +38,10 @@ rules
      ; <G-with-assoc> (g,d,s) => g'
      ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
 
-  constraint-priority: FParent(_,_) -> 3
   constraint-priority: FDecl(_,_) -> 3
   constraint-priority: FRef(_,_) -> 3
-  constraint-priority: FImportR(_,_,_) -> 3
-  constraint-priority: FImportS(_,_,_) -> 3
+  constraint-priority: FImportR(_,_,_,_) -> 3
+  constraint-priority: FImportS(_,_,_,_) -> 3
   constraint-priority: FAssoc(_,_) -> 3
 
 rules

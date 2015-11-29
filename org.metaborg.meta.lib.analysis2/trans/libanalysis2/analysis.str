@@ -76,16 +76,17 @@ rules
     ; fr* := <resolve-all> g
     ; <index-collect-analysis-result(|source)> InitialResolution(fr*)
     ; r* := <filterv(?[<id>])> fr*
+    ; sol-wm2 := <fmap(sol-set-r(|r*))> sol-wm1
     )
 
   ; where(<debug> ">>> Solving constraints <<<")
   ; report-time(
-      sol-wm2* := <solve-constraints-phase2;map(postprocess-errors)> (sol-wm1,c1*)
+      sol-wm3* := <solve-constraints-phase2;map(postprocess-errors)> (sol-wm2,c1*)
     )
 
   ; where(<debug> ">>> Processing solutions <<<")
   ; report-time(
-      sol-wm* := <qsort((wm-errors;length,wm-errors;length);lt)> sol-wm2*
+      sol-wm* := <qsort((wm-errors;length,wm-errors;length);lt)> sol-wm3*
     ; sol* := <map( ![ ScopeGraph(<fromWM;sol-g>)
                      , Resolution(<fromWM;sol-r>)
                      , SubtypingRelation(<fromWM;sol-x>)
@@ -104,7 +105,7 @@ rules
       < where(<debug> ">>> Found solution <<<")
         ; <fromWM;sol-r> sol-wm => r'*
         ; where(<debug> ">>> Applying name resolution <<<")
-        ; resolved-ast := <apply-resolution(|<conc;mapv(Fst)> (r'*,r*))> annotated-ast
+        ; resolved-ast := <apply-resolution(|<mapv(Fst)> r'*)> annotated-ast
         ; where(<debug> ">>> Applying types <<<")
         ; <fromWM;sol-p> sol-wm => p*
         ; typed-ast := <apply-types(|p*)> resolved-ast

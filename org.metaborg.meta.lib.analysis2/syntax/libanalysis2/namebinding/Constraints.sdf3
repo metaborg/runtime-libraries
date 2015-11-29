@@ -11,11 +11,10 @@ imports
 
 context-free syntax
 
-  Constraint.FParent        = <parent(<Scope>) is <OptionScope>>
   Constraint.FDecl          = <<DeclId> in <Scope>>
   Constraint.FRef           = <<RefId> in <Scope>>
-  Constraint.FImportR       = <import <RefId>/<Term> in <Scope>>
-  Constraint.FImportS       = <import <Scope>/<Term> in <Scope>>
+  Constraint.FImportR       = <<Label> import <RefId>/<Term> in <Scope>>
+  Constraint.FImportS       = <<Label> import <Scope>/<Term> in <Scope>>
   Constraint.FAssoc         = <<DeclId> with <Scope>>
 
   Constraint.CAssoc         = [[DeclId] ~~> [Scope] [Message]]

@@ -1,10 +1,11 @@
 module libanalysis2/namebinding/resolution
 
 imports
-  libanalysis2/namebinding/scopegraph
+  libanalysis2/namebinding/-
   libanalysis2/pp
   libanalysis2/prelude/-
   signatures/libanalysis2/namebinding/-
+  signatures/libanalysis2/solver/-
 
 signature
 
@@ -25,112 +26,122 @@ rules // resolution internal
 
   // resolve :: Ref -|-> [(Decl,Path)]
   resolve(|g,ir*) =
-    ?r
+    with(dbg-res(|"resolve "))
+  ; ?r
   ; ( <G-scope> (g,r) // :: Scope
    <+ <debug(!"ERROR: Cannot get scope for reference ");fail> r
     )
-  ; env_v(|g,[r|ir*],[]) // :: Env
+  ; env(|<labels-wf<+default-labels-wf>,g,[r|ir*],[]) // :: Env
   ; ( <lookup> (<id-atom> r,<fromP>) // :: [(Decl,Path)]
    <+ fromTotal ; ![]
     ) // :: [(Decl,Path)]
+  ; with(dbg-res(|"resolve = "))
 
-  // env(|Graph,[Ref],[Scope]) :: Scope -> Env
-  env_v(|g,ir*,s*) =
-    with(dbg-res(|"env_v "))
-  ; ?s
-  ; ( <elem> (s,s*) < <pureP> []
-  + <shadow> ( <env_l(|g,ir*,s*)>
-             , <env_p(|g,ir*,s*)>
-             )
-  )
-  ; with(dbg-res(pp-Env|"env_v "))
 
-  // env_e(|Graph,[Ref],[Scope]) :: Scope -> Env
-  env_l(|g,ir*,s*) =
-    with(dbg-res(|"env_l "))
-  ; ?s
-  ; ( <elem> (s,s*) < <pureP> []
-  + <shadow> ( <env_d(|g,ir*,s*)>
-             , <env_i(|g,ir*,s*)>
-             )
-  )
-  ; with(dbg-res(pp-Env|"env_l "))
 
-  // env_d(|Graph,[Ref],[Scope]) :: Scope -> Env
-  env_d(|g,ir*,s*) =
-    with(dbg-res(|"env_d "))
+  // env(|RE,Graph,[Ref],[Scope]) :: Scope -> Env
+  env(|re,g,ir*,is*) =
+    with(dbg-res(|"env "))
   ; ?s
-  ; <G-decls> (g,s) // :: [Decl]
-  ; group(id-atom) // :: [(Name,[Decl])]
-  ; mapv(map(!(<id>,[D(<id>)]))) // :: [(Name,[(Decl,Path)])]
-  ; pureP // :: Env
-  ; with(dbg-res(pp-Env|"env_d "))
+  ; ( (<elem> (s,is*) + <emptiness> re)
+    < <pureP> []
+    + <env_L(|[D(),I(),P()|<labels<+![]>],re,g,ir*,is*)> s
+    )
+  ; with(dbg-res(pp-Env|"env = "))
 
-  // env_i(|Graph,[Ref],[Scope]) :: Scope -> Env
-  env_i(|g,ir*,s*) =
-    with(dbg-res(|"env_i "))
+
+
+  // env(|[Label],RE,Graph,[Ref],[Scope]) :: Scope -> Env
+  env_L(|L,re,g,ir*,is*) =
+    where(<is-list> L)
+  ; with(dbg-res(|"env^L "))
   ; ?s
-  ; ( <union> ( <env_i_is2s(|g)> s
-              , <env_i_ir2s(|g,ir*)> s
-              ) // :: [(Scope,Step)]
-    < map(env_i_s2env(|g,ir*,[s|s*])) // :: [Partial [(Name,[(Decl,Path])]]
-    ; sequenceP // :: Partial [[(Name,[(Decl,Path)])]]
-    ; fmap( foldr(![],merge(union,union)) ) // :: Env
+  ; <max-labels> L
+  ; map(\ l -> <env-shadow> ( <env_L(|<labels-lt(|l)> L,re,g,ir*,is*)> s
+                            , <env_l(|l,re,g,ir*,is*)> s
+                            ) \)
+  ; env-unions
+  ; with(dbg-res(pp-Env|"env^L = "))
+
+
+
+  // env(|D(),RE,Graph,[Ref],[Scope]) :: Scope -> Env
+  env_l(|l,re,g,ir*,is*) =
+    where(D() := l)
+  ; with(dbg-res(|"env^D "))
+  ; ?s
+  ; ( Empty() := <nullable> re
+    < ![]
+    + <G-decls;map(\ d -> (d,[D(d)]) \)> (g,s)
+    ; group(Fst;id-atom)
+    ) ; pureP
+  ; with(dbg-res(pp-Env|"env^D = "))
+
+
+
+  // env(|Label,RE,Graph,[Ref],[Scope]) :: Scope -> Env
+  env_l(|l,re,g,ir*,is*) =
+    with(dbg-res(|"env^l "))
+  ; ?s
+  ; ( <union> ( <iss(|l,g)> s
+              , <irs(|l,g,ir*)> s
+              )
+    < map(\ (s',step) -> e' where
+              e  := <env(|<deriv(|l)> re,g,ir*,[s|is*])> s'
+            ; e' := <env-prepend(|step)> e \)
+    ; env-unions
     + !Partial([])
     )
-  ; with(dbg-res(pp-Env|"env_i "))
+  ; with(dbg-res(pp-Env|"env^l = "))
 
-  // env_i_is2s(|Graph) :: Scope -|-> [(Scope,Step)]
-  env_i_is2s(|g) =
-    ?s
-  ; <G-s-imports> (g,s) // :: [(Scope,Label)]
-  ; map(!(<Fst;not(?Var(_))>,E(I(),<Fst>,<Snd>))) // :: [(Scope,Step)]
-
-  // env_i_ir2s(|Graph,[Ref]) :: Scope -|-> [(Scope,Step)]
-  env_i_ir2s(|g,ir*) =
-    ?s
-  ; <G-r-imports> (g,s) // :: [(Ref,Label)]
-  ; filterk(not(<elem> (<id>,ir*))) // :: [(Ref,Label)]
-  ; mapconcat(resolve_i_ir2s(|g,ir*)) // :: [(Scope,Step)]
-
-  // resolve_i_r2s(|Graph,[Ref]) :: (Ref,Label) -|-> [(Scope,Step)]
-  resolve_i_ir2s(|g,ir*) =
-    ?(r,l)
-  ; <resolve(|g,ir*)> r // :: [(Decl,Path)]
-  ; filter(?(<G-assoc> (g,<id>),_)) // :: [Scope]
-  ; map(!(<id>,N(I(),r,<id>,l))) // :: [(Scope,Step)]
-
-  // env_i_sl2env(|Graph,[Ref],[Scope]) :: (Scope,Step) -> Env
-  env_i_s2env(|g,ir*,s*) =
-    ?(s,step)
-  ; <env_l(|g,ir*,s*)> s // :: Env
-  ; fmap(mapv(mapv(![step|<id>]))) // :: Env
-
-  // env_p(|Graph,[Ref],[Scope]) :: Scope -> Env
-  env_p(|g,ir*,s*) =
-    with(dbg-res(|"env_p "))
+  // iss(|Graph,[Ref]) :: Scope -|-> [(Scope,Step)]
+  iss(|l,g) =
+    with(dbg-res(|"iss^l "))
   ; ?s
-  ; ( s' := <G-parent> (g,s)
-    < env_v(|g,ir*,[s|s*])
-    ; fmap(mapv(mapv(![E(P(),s',None())|<id>]))) // :: Env
-    + <pureP> []
-    )
-  ; with(dbg-res(pp-Env|"env_p "))
+  ; <G-s-imports> (g,s) // :: [(Label,Scope,Term)]
+  ; map(where(Snd;is-ground))
+  ; filter(?(l,_,_);!(<Snd>,<Third>)) // :: [(Scope,Term)]
+  ; map(\ (s',t) -> (s',E(l,s',t)) \) // :: [(Scope,Step)]
+  ; with(dbg-res(|"iss^l = "))
+
+  // irs(|Graph,[Ref]) :: Scope -|-> [(Scope,Step)]
+  irs(|l,g,ir*) =
+    with(dbg-res(|"irs^l "))
+  ; ?s
+  ; <G-r-imports> (g,s) // :: [(Label,Ref,Term)]
+  ; filter(?(l,_,_);!(<Snd>,<Third>)) // :: [(Ref,Term)]
+  ; filterk(\ r -> r where <not(elem)> (r,ir*) \) // :: [(Ref,Term)]
+  ; mapconcat(\ (r,t) -> <resolve(|g,ir*);mapv(!(r,t))> r \) // :: [(Decl,(Ref,Term))]
+  ; filter(\ (d,(r,t)) -> (s',N(l,r,s',t)) where s' := <G-assoc> (g,d) \) // :: [(Scope,Step)]
+  ; with(dbg-res(|"irs^l = "))
+
+
 
   // shadow :: (Env, Env) -> Env
-  shadow =
+  env-shadow =
     twrapP // :: Partial ([(Name,[(Decl,Path)])], [(Name,[(Decl,Path)])])
   ; fmap(merge(union,Fst)) // :: Env
+
+  // shadow :: [Env] -> Env
+  env-unions =
+    sequenceP // :: [[(Name,[(Decl,Path)])]]
+  ; fmap(foldr(![],merge(union,union))) // :: Env
+
+  // env-prepend(|Step) = Env -> Env
+  env-prepend(|step) = fmap(mapv(map(\ (d,p) -> (d,[step|p]) \)))
+
+
 
 rules
  
   path-labels = filter(step-label)
+
   step-label = ?E(_,_,<not(?None())>) 
   step-label = ?N(_,_,_,<not(?None())>) 
 
   get-names(|g): Declarations(ns,s) -> <G-decls;filter-ns(|ns)> (g,s)
   get-names(|g): References(ns,s) -> <G-refs;filter-ns(|ns)> (g,s)
-  get-names(|g): Visibles(ns,s) -> <env_v(|g,[],[]);fromTotal;values;concat;map(Fst);filter-ns(|ns)> s
+  get-names(|g): Visibles(ns,s) -> <env(|<labels-wf<+default-labels-wf>,g,[],[]);fromTotal;values;concat;map(Fst);filter-ns(|ns)> s
  
   pp-Env = fmap(map((pp-Name,map((pp-DeclId,pp-Path)))))
 

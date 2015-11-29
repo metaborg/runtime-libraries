@@ -18,7 +18,6 @@ context-free syntax
  
   ScopeImpl.S = <
     {
-      parent    = <OptionScope>
       decls     = <{DeclId ", "}*>
       refs      = <{RefId ", "}*>
       r-imports = <{ImportREntry ", "}*>
@@ -26,6 +25,6 @@ context-free syntax
     }
   >
  
-  ImportREntry = <<RefId>/<Term>>
-  ImportSEntry = <<Scope>/<Term>>
+  ImportREntry = <<Label>/<RefId>/<Term>>
+  ImportSEntry = <<Label>/<Scope>/<Term>>
   AssocEntry = <<DeclId> : <Scope>>

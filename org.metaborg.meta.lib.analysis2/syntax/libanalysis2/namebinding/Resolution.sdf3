@@ -14,9 +14,20 @@ context-free syntax
          path = [Path]
   ]
 
+context-free syntax
+
   Path            = {Step "\n"}*
+
   Step.D          = <D(<DeclId>)>
   Step.E          = <E(<Label>,<Scope>)/<Term>>
   Step.N          = <N(<Label>,<RefId>,<Scope>)/<Term>>
-  Label.I         = <I>
-  Label.P         = <P>
+ 
+context-free syntax
+
+  LabelRE.Empty      = <0>
+  LabelRE.Epsilon    = <>
+  LabelRE            = Label
+  LabelRE.Closure    = <<LabelRE>*>
+  LabelRE.Concat     = <<LabelRE> . <LabelRE>>
+  LabelRE.And        = <<LabelRE> & <LabelRE>>
+  LabelRE.Or         = <<LabelRE> | <LabelRE>>

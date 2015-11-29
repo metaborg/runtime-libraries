@@ -12,9 +12,6 @@ context-free syntax
   Scope.Scope               = <scope(<Int>)>
   Scope                     = Var
 
-  OptionScope.None          = <->
-  OptionScope               = Scope
-
   DeclId.DeclId             = <decl(<Namespace>,<String>,<KeyPos>)>
   DeclId                    = Var
 
@@ -24,3 +21,8 @@ context-free syntax
 
   Namespace.None            = <->
   Namespace.Namespace       = String
+
+  Label.D         = <D>
+  Label.P         = <P>
+  Label.I         = <I>
+  Label.Label     = String

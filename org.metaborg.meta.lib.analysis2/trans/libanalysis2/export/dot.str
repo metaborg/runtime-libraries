@@ -21,9 +21,8 @@ rules
     with s'  := <map(scope-to-dot);concat-strings> s*
        ; as' := <map(assoc-to-dot);concat-strings> as*
  
-  scope-to-dot: (s,S(p,d*,r*,ir*,is*)) ->  ${
+  scope-to-dot: (s,S(d*,r*,ir*,is*)) ->  ${
     {s'}
-    {p'}
     {d'}
     {r'}
     {ir'}
@@ -31,7 +30,6 @@ rules
   }
     with s'  := <to-dot> s
     with sid := <to-dot-id> s
-    with p'  := <!${{sid} -> {<to-dot-id>};} <+ !""> p
     with d'  := <map(!${{<to-dot>} {sid} -> {<to-dot-id>};});concat-strings> d*
     with r'  := <map(!${{<to-dot>} {<to-dot-id>} -> {sid};});concat-strings> r*
     with ir'  := <map(!${{sid} -> {<Fst;to-dot-id>} [arrowhead=onormal];});concat-strings> ir*

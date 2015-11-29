@@ -72,10 +72,6 @@ rules
     with pos' := <to-latex> pos
     with ty'  := <to-latex> ty
 
-  to-latex: FParent(s,ps) -> $[\FParent{[s']}{[ps']}]
-    with s'  := <to-latex> s
-    with ps' := <to-latex> ps
-
   to-latex: FDecl(d,s) -> $[\FDecl{[d']}{[s']}]
     with d' := <to-latex> d
     with s' := <to-latex> s
@@ -84,11 +80,11 @@ rules
     with r' := <to-latex> r
     with s' := <to-latex> s
 
-  to-latex: FImportR(r,_,s) -> $[\FImportR{[r']}{[s']}]
+  to-latex: FImportR(l,r,_,s) -> $[\FImportR{[r']}{[s']}]
     with r' := <to-latex> r
     with s' := <to-latex> s
 
-  to-latex: FImportS(is,_,s) -> $[\FImportS{[is']}{[s']}]
+  to-latex: FImportS(l,is,_,s) -> $[\FImportS{[is']}{[s']}]
     with is' := <to-latex> is
     with s'  := <to-latex> s
 

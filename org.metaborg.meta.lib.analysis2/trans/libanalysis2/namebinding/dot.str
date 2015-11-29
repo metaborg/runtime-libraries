@@ -3,6 +3,7 @@ module libanalysis2/namebinding/dot
 imports
   libanalysis2/namebinding/scopegraph
   libanalysis2/pp
+  signatures/libanalysis2/solver/-
   signatures/libanalysis2/namebinding/-
  
 rules
@@ -18,20 +19,18 @@ rules
      ; <stmts(sg-dot-arrow(|"empty"))> a* => a-stmts
      
 
-  sg-dot-scope: (s,S(p,d*,r*,ir*,is*)) -> 
+  sg-dot-scope: (s,S(d*,r*,ir*,is*)) -> 
     $[[s-node]
       [d-nodes]
       [d-arrows]
       [r-nodes]
       [r-arrows]
-      [p-arrow]
       [ir-nodes]
       [ir-arrows]
       [is-arrows]
       [scope-var-nodes]
      ]
   with <sg-dot-node(|"circle")> s => s-node
-     ; <sg-dot-parent(|s)> p => p-arrow
      ; <reverse; stmts(sg-dot-node(|"square"))> d* => d-nodes
      ; <reverse; stmts(sg-dot-arrow-from(|s,"normal",1,"true"))> d* => d-arrows
      ; <reverse; stmts(sg-dot-node(|"square"))> r* => r-nodes

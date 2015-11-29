@@ -13,6 +13,6 @@ context-free syntax
     >
   SubtypingEntry    = [[TypeCon][SubtypingEntry2]]
   SubtypingEntry2   = [[SubtypingEntry3] <: [{Supertype " <: "}*]]
-  SubtypingEntry3   = <[<{TypeArg ","}*>]>
+  SubtypingEntry3   = <[<{Variance ","}*>]>
   Supertype         = <<TypeCon>[<{Type ","}*>]>
   

@@ -53,6 +53,9 @@ rules
     -> Sol(g,r*,p*,s*,x'*)
   with <set(!ty*)> (ty,x*) => x'*
 
+  sol-set-r(|r'*): Sol(g,r*,p*,s*,x*)
+    -> Sol(g,[r'*,r*],p*,s*,x*)
+
   sol-set-r(|r,d): Sol(g,r*,p*,s*,x*)
     -> Sol(g,r'*,p*,s*,x*)
   with <set(!d)> (r,r*) => r'*
