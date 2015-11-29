@@ -64,8 +64,8 @@ rules
 
 rules
 
-  unsolved-message: FSubType(ty1,ty2,msginfo) -> <default-message(|msg)> msginfo
+  unsolved-message: FSubType(ty1,ty2,msginfo) -> <default-message(|msg,"Unsolved: ")> msginfo
   with msg := ["Could not set ",ty1," subtype of ",ty2]
 
-  unsolved-message: CSubType(ty1,ty2,msginfo) -> <default-message(|msg)> msginfo
+  unsolved-message: CSubType(ty1,ty2,msginfo) -> <default-message(|msg,"Unsolved: ")> msginfo
   with msg := ["Could not determine if ",ty1," subtype of ",ty2]

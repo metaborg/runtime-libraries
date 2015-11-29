@@ -4,6 +4,7 @@ imports
   
   libanalysis2/namebinding/-
   libanalysis2/prelude/-
+  libanalysis2/positioning/-
   libanalysis2/solver/-
   libanalysis2/pp
   signatures/libanalysis2/equality/-
@@ -132,17 +133,17 @@ rules
     try(Message(id,?None(),!NAMES()))
   ; Message(id,bottomup(try(?NAMES();<map(id-name)> n*)),try(?NAMES();<map(position-to-term)> n*))
  
-  unsolved-message: CResolves(r,l,d,msginfo) -> <default-message(|msg)> msginfo
+  unsolved-message: CResolves(r,l,d,msginfo) -> <default-message(|msg,"Unsolved: ")> msginfo
   with msg := ["Cannot resolve ",r," to ",d]
 
-  unsolved-message: CAssoc(d,s,msginfo) -> <default-message(|msg)> msginfo
+  unsolved-message: CAssoc(d,s,msginfo) -> <default-message(|msg,"Unsolved: ")> msginfo
   with msg := ["Cannot find associated scope ",s," of ",d]
 
-  unsolved-message: CDistinct(n,msginfo) -> <default-message(|msg)> msginfo
+  unsolved-message: CDistinct(n,msginfo) -> <default-message(|msg,"Unsolved: ")> msginfo
   with msg := ["Cannot check if ",n," are distinct"]
 
-  unsolved-message: CSubset(n1,n2,msginfo) -> <default-message(|msg)> msginfo
+  unsolved-message: CSubset(n1,n2,msginfo) -> <default-message(|msg,"Unsolved: ")> msginfo
   with msg := ["Cannot check if ",n1," in ",n2]
 
-  unsolved-message: CDisjoint(n1,n2,msginfo) -> <default-message(|msg)> msginfo
+  unsolved-message: CDisjoint(n1,n2,msginfo) -> <default-message(|msg,"Unsolved: ")> msginfo
   with msg := ["Cannot check if ",n1," disjoint from ",n1]

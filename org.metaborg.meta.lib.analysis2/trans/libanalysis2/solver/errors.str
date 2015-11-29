@@ -9,7 +9,10 @@ imports
 rules
 
   default-message(|defaultmsg): Message(kind,msg,pos) -> Message(kind,msg',pos)
-    with msg' := <message-or-default(|defaultmsg)> msg
+    with msg' := <message-or-default(|defaultmsg,"")> msg
+
+  default-message(|defaultmsg,msgprefix): Message(kind,msg,pos) -> Message(kind,msg',pos)
+    with msg' := <message-or-default(|defaultmsg,msgprefix)> msg
 
   add-messages(|msginfo*,defaultmsg): sol-wm -> sol-wm'
     with sol-wm' := <foldr(!sol-wm,add-message-step(|defaultmsg))> msginfo*
@@ -21,7 +24,7 @@ rules
                     ;foldr(!sol-wm,add-message-step(|defaultmsg))> pos
   add-message(|msginfo,defaultmsg): sol-wm -> sol-wm'
     with Message(kind,msg,pos) := msginfo
-       ; msg' := <message-or-default(|defaultmsg);pp-MessageContent> msg
+       ; msg' := <message-or-default(|defaultmsg,"");pp-MessageContent> msg
        ; sol-wm' := <add-message> (kind,(pos,msg'),sol-wm)
 
   add-message-step(|defaultmsg): (msginfo,sol-wm) -> sol-wm'
@@ -31,7 +34,8 @@ rules
   add-message: (Warning(), warning, sol-wm) -> <add-warning(|warning)> sol-wm
   add-message: (Note(), note, sol-wm) -> <add-note(|note)> sol-wm
 
-  message-or-default(|defaultmsg) = try(?None() ; !defaultmsg)
+  message-or-default(|defaultmsg,msgprefix) =
+    ?None() < !defaultmsg + (is-list < ![msgprefix|<id>] + ![msgprefix,<id>])
 
 rules
 

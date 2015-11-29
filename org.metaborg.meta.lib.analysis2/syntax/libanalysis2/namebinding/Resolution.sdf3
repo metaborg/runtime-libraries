@@ -31,3 +31,8 @@ context-free syntax
   LabelRE.Concat     = <<LabelRE> . <LabelRE>>
   LabelRE.And        = <<LabelRE> & <LabelRE>>
   LabelRE.Or         = <<LabelRE> | <LabelRE>>
+
+context-free syntax
+
+  TotalOrPartial.Total   = <T>
+  TotalOrPartial.Partial = <P>

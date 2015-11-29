@@ -51,5 +51,5 @@ rules
 
   default-unify-error(|t1,t2) = !["Cannot not unify ",t1," with ",t2]
 
-  unsolved-message: CEqual(t1,t2,msginfo) -> <default-message(|msg)> msginfo
+  unsolved-message: CEqual(t1,t2,msginfo) -> <default-message(|msg,"Unsolved: ")> msginfo
   with msg := <default-unify-error(|t1,t2)>
