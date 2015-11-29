@@ -88,9 +88,11 @@ rules // resolution internal
   ; ( <union> ( <iss(|l,g)> s
               , <irs(|l,g,ir*)> s
               )
-    < map(\ (s',step) -> e' where
-              e  := <env(|<deriv(|l)> re,g,ir*,[s|is*])> s'
-            ; e' := <env-prepend(|step)> e \)
+    < map({ step:
+              ?(<id>,step)
+            ; env(|<deriv(|l)> re,g,ir*,[s|is*])
+            ; env-prepend(|step)
+         })
     ; env-unions
     + !(Partial(),[])
     )
@@ -112,9 +114,13 @@ rules // resolution internal
   ; ?s
   ; <G-r-imports> (g,s) // :: [(Label,Ref,Term)]
   ; filter(?(l,_,_);!(<Snd>,<Third>)) // :: [(Ref,Term)]
-  ; filterk(\ r -> r where <not(elem)> (r,ir*) \) // :: [(Ref,Term)]
+  ; filterk(where(<not(elem)> (<id>,ir*))) // :: [(Ref,Term)]
   ; mapconcat(\ (r,t) -> <resolve(|g,ir*);mapv(!(r,t))> r \) // :: [(Decl,(Ref,Term))]
-  ; filter(\ (d,(r,t)) -> (s',N(l,r,s',t)) where s' := <G-assoc> (g,d) \) // :: [(Scope,Step)]
+  ; filter({ d,r,t,s':
+               ?(d,(r,t))
+             ; s' := <G-assoc> (g,d)
+             ; !(s',N(l,r,s',t))
+          }) // :: [(Scope,Step)]
   ; with(dbg-res(|"irs^l = "))
 
 
@@ -136,10 +142,10 @@ rules // resolution internal
 
 rules
  
-  path-labels = filter(step-label)
+  path-annos = filter(step-anno)
 
-  step-label = ?E(_,_,<not(?None())>) 
-  step-label = ?N(_,_,_,<not(?None())>) 
+  step-anno = ?E(_,_,<not(?None())>) 
+  step-anno = ?N(_,_,_,<not(?None())>) 
 
 
 

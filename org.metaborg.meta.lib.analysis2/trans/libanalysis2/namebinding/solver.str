@@ -49,14 +49,14 @@ rules
 
   solve-constraint = solve-namebinding-constraint
 
-  solve-namebinding-constraint: (CResolves(r,l,d,msginfo),sol-wm) -> [(sol-wm,c*)]
+  solve-namebinding-constraint: (CResolves(r,a,d,msginfo),sol-wm) -> [(sol-wm,c*)]
   where r* := <fromWM;sol-r> sol-wm
       ; (d',p) := <lookup> (r,r*)
-      ; l' := <path-labels> p
+      ; a' := <path-annos> p
   with msg := ["Unable to resolve ",r," to ",d]
      ; msginfo' := <default-message(|msg)> msginfo
      ; c* := [ CEqual(d,d',msginfo'),
-               CEqual(l,l',msginfo')
+               CEqual(a,a',msginfo')
              ]
 
   solve-namebinding-constraint: (CResolves(r,l,d,msginfo),sol-wm) -> res*
@@ -68,11 +68,11 @@ rules
      ; msginfo' := <default-message(|msg)> msginfo
      ; <map(solve-namebinding-constraint-step(|r,l,d,msginfo',sol-wm))> dl* => res*
 
-  solve-namebinding-constraint-step(|r,l,d,msginfo,sol-wm): (d',p) -> (sol-wm',c*)
+  solve-namebinding-constraint-step(|r,a,d,msginfo,sol-wm): (d',p) -> (sol-wm',c*)
   with <fmap(sol-set-r(|r,(d',p)))> sol-wm => sol-wm'
-  with l' := <path-labels> p
+  with a' := <path-annos> p
   with c* := [ CEqual(d,d',msginfo)
-             , CEqual(l,l',msginfo)
+             , CEqual(a,a',msginfo)
              ]
  
   solve-namebinding-constraint: (CAssoc(d,s,msginfo),sol-wm) -> [(sol-wm,c*)]
