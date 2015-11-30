@@ -124,16 +124,17 @@ rules // resolution internal
   ; with(dbg-res(|"irs^l = "))
 
 
-
   // shadow :: (Env, Env) -> Env
   env-shadow: ((Total(),e1),(f,e2)) -> (f, e')
     with e' := <merge(union,Fst)> (e1,e2)
   env-shadow: (e@(Partial(),_),_) -> e
 
   // shadow :: [Env] -> Env
-  env-unions: e* -> (f,e')
+  env-unions: e* -> (f,pe)
     with f  := <map(Fst;?Total())<!Total()+!Partial()> e*
-       ; e' := <map(Snd);foldr(![],merge(union,union))> e*
+       ; (t*,p*) := <partition(?(Total(),<id>),?(Partial(),<id>))> e*
+       ; te := <foldr(![],merge(union,union))> t*
+       ; pe := <foldr(!te,merge(isect,union))> p*
 
   // env-prepend(|Step) = Env -> Env
   env-prepend(|step) = (id,mapv(map(\ (d,p) -> (d,[step|p]) \)))
