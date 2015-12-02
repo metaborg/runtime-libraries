@@ -3,6 +3,7 @@ module libanalysis2/namebinding/Scopegraph
 imports
 
   libanalysis2/Common
+  libanalysis2/positioning/Base
   libanalysis2/namebinding/Identifiers
 
 context-free syntax
@@ -27,4 +28,4 @@ context-free syntax
  
   ImportREntry = <<Label>/<RefId>/<Term>>
   ImportSEntry = <<Label>/<Scope>/<Term>>
-  AssocEntry = <<DeclId> : <Scope>>
+  AssocEntry = <<Pos> : <Scope>>

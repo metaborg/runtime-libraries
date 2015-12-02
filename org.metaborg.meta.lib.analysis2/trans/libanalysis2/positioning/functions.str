@@ -6,7 +6,7 @@ imports
   editor-common.generated
 
   libanalysis2/prelude/-
-  signatures/libanalysis2/namebinding/-
+  signatures/libanalysis2/positioning/-
   signatures/libanalysis2/solver/-
 
 rules

@@ -3,7 +3,12 @@ module libanalysis2/positioning/Base
 imports
 
   libanalysis2/Common
+  libanalysis2/namebinding/Identifiers
 
 context-free syntax
 
-  KeyPos.Pos                = <<String><TermPos>>
+  ASTPos.Pos                = <<String><Origin>>
+
+  Pos                       = ASTPos
+  Pos                       = DeclId
+  Pos                       = RefId

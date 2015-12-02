@@ -3,7 +3,6 @@ module libanalysis2/positioning/Constraints
 imports
 
   libanalysis2/Common
-  libanalysis2/namebinding/Identifiers
   libanalysis2/positioning/Base
   libanalysis2/solver/Errors
   libanalysis2/typechecking/Types
@@ -11,7 +10,3 @@ imports
 context-free syntax
 
   Constraint.CTypeOf        = <<Pos> : <Type> <Message>>
-
-  Pos                       = KeyPos
-  Pos                       = DeclId
-  Pos                       = RefId

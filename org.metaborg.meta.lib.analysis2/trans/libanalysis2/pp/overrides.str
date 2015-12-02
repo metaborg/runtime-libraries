@@ -41,13 +41,13 @@ rules
     with tc' := <pp-one-Z(prettyprint-TypeCon)> tc
 
   // print origins more compactly
-  prettyprint-KeyPos:
+  prettyprint-ASTPos:
     Pos(key, t) ->
       [ H([SOpt(HS(),"0")], [ key', pos' ] ) ]
     with key'    := <pp-one-Z(prettyprint-Int)> key
-    with pos'    := <pp-one-Z(prettyprint-TermPos)> t
+    with pos'    := <pp-one-Z(prettyprint-Origin)> t
 
-  prettyprint-TermPos:
+  prettyprint-Origin:
     t -> [ H([SOpt(HS(),"0")], [ S("@("), S(line'), S(","), S(column'), S(")") ] ) ]
     with line'   := <(origin-line;inc<+!-1);int-to-string> t
     with column' := <(origin-column;inc<+!-1);int-to-string> t

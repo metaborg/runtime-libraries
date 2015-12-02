@@ -14,6 +14,6 @@ context-free syntax
   MessageContent            = {Term ""}*
   MessageContent            = Term
 
-  Message.Message           = <<MessageKind>=[<MessageContent>]<TermPos>>
+  Message.Message           = <<MessageKind>=[<MessageContent>]<Origin>>
 
   EditorMessage             = <<Term> : <String>>

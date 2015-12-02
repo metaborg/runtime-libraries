@@ -12,10 +12,10 @@ context-free syntax
   Scope.Scope               = <scope(<Int>)>
   Scope                     = Var
 
-  DeclId.DeclId             = <decl(<Namespace>,<String>,<KeyPos>)>
+  DeclId.DeclId             = <decl(<Namespace>,<String>,<ASTPos>)>
   DeclId                    = Var
 
-  RefId.RefId               = <ref(<Namespace>,<String>,<KeyPos>)>
+  RefId.RefId               = <ref(<Namespace>,<String>,<ASTPos>)>
 
   Name.Name                 = <name(<Namespace>,<String>)>
 

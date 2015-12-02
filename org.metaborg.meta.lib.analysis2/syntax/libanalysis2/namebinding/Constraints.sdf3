@@ -6,6 +6,7 @@ imports
   libanalysis2/namebinding/Identifiers
   libanalysis2/namebinding/Scopegraph
   libanalysis2/namebinding/Resolution
+  libanalysis2/positioning/Base
   libanalysis2/solver/Errors
   libanalysis2/solver/VarOps
 
@@ -15,7 +16,7 @@ context-free syntax
   Constraint.FRef           = <<RefId> in <Scope>>
   Constraint.FImportR       = <<Label> import <RefId>/<Term> in <Scope>>
   Constraint.FImportS       = <<Label> import <Scope>/<Term> in <Scope>>
-  Constraint.FAssoc         = <<DeclId> with <Scope>>
+  Constraint.FAssoc         = <<Pos> with <Scope>>
 
   Constraint.CAssoc         = [[DeclId] ~~> [Scope] [Message]]
   Constraint.CResolves      = [[RefId] |-[Labels]-> [DeclId] [Message]]

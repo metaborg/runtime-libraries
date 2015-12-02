@@ -13,6 +13,6 @@ rules
     ; qsort((position-to-key,position-to-key);lt)
     ; map-with-index(Swap)
 
-  apply-simple-positions(|sp) = bottomup(try(<lookup> (<is-KeyPos>,sp)))
+  apply-simple-positions(|sp) = bottomup(try(<lookup> (<is-ASTPos>,sp)))
  
 rules
