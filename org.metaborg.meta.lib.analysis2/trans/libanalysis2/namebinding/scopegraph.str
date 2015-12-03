@@ -9,11 +9,12 @@ rules
 
   G-new = !G([(Global(),<G--new_s>)],[])
   G--new_s = !S([],[],[],[])
-  G-with-decl     = ?(G(s*,a*),s,d)  ; !G(<update(?S(d*,r*,ri*,si*);!S([d|d*],r*,ri*,si*)  ,G--new_s)> (s,s*), a*)
-  G-with-ref      = ?(G(s*,a*),s,r)  ; !G(<update(?S(d*,r*,ri*,si*);!S(d*,[r|r*],ri*,si*)  ,G--new_s)> (s,s*), a*)
-  G-with-r-import = ?(G(s*,a*),s,r)  ; !G(<update(?S(d*,r*,ri*,si*);!S(d*,r*,[r|ri*],si*)  ,G--new_s)> (s,s*), a*)
-  G-with-s-import = ?(G(s*,a*),s,s') ; !G(<update(?S(d*,r*,ri*,si*);!S(d*,r*,ri*,[s'|si*]) ,G--new_s)> (s,s*), a*)
-  G-with-assoc    = ?(G(s*,a*),d,s)  ; !G(s*                                                                 , [(d,s)|a*])
+  G-with-decl     = ?(<id>,s,d)  ; G(update(S(![d|<id>],id,id,id),G--new_s|s), id)
+  G-with-ref      = ?(<id>,s,r)  ; G(update(S(id,![r|<id>],id,id),G--new_s|s), id)
+  G-with-r-import = ?(<id>,s,n)  ; G(update(S(id,id,![n|<id>],id),G--new_s|s), id)
+  G-with-s-import = ?(<id>,s,e@(_,s',_)) ; G(update(id,G--new_s|s')
+                                            ;update(S(id,id,id,![e|<id>]),G--new_s|s), id)
+  G-with-assoc    = ?(<id>,d,s)  ; G(update(id,G--new_s|s),![(d,s)|<id>])
 
   G-refs             = ?G(<id>,_) ; map(?(_,<id>);?S(_,<id>,_,_)) ; concat
   G-scope            = ?(G(<id>,_),r) ; getfirst(G-scope_exists(|r))

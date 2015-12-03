@@ -54,10 +54,10 @@ rules
   group-step(s) =
     ?(a,kv*)
   ; <s> a => b
-  ; <update(![a|<id>],![])> (b,kv*)
+  ; <update(![a|<id>],![]|b)> kv*
 
-  // update(s: v -> v, v: v) :: (k * map k v) -> map k v
-  update(s,v) = ?(k,kv*) ; ![ (k,<(lookup<+v);s> (k,kv*)) | <filterk(not(?k))> kv* ]
+  // update(s: v -> v, v: v | k) :: map k v -> map k v
+  update(s,v|k) = ?kv* ; ![ (k,<(lookup<+v);s> (k,kv*)) | <filterk(not(?k))> kv* ]
 
   // set(v: v) :: (k * map k v) -> map k v
-  set(v) = update(v,v)
+  set(v|k) = update(v,v|k)
