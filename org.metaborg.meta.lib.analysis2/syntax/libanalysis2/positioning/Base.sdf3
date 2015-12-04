@@ -7,7 +7,7 @@ imports
 
 context-free syntax
 
-  ASTPos.Pos                = <<String><Origin>>
+  ASTPos.Pos                = <<Int><Origin>>
 
   Pos                       = ASTPos
   Pos                       = DeclId

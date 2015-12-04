@@ -15,7 +15,7 @@ signature
 rules
 
   apply-resolution(|r*) =
-    apply-annotations(make-ref|<mapk(refid-to-pos)> r*)
+    apply-annotations(make-ref|<filter((refid-to-pos,not(?None());Fst))> r*)
 
   refid-to-pos = ?RefId(_,_,<id>)
 

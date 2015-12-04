@@ -18,3 +18,5 @@ rules
     < debug(!$[[<n>]: [<write-to-string> t] -> ])
     + <debug> $[[<n>]: [<write-to-string> t] -> fail] ; fail
     )
+
+  assert(s|t) = with(<s> t <+ debug(!"Assert failed: "))

@@ -3,6 +3,7 @@ module libanalysis2/namebinding/scopegraph
 imports
   libanalysis2/pp
   libanalysis2/prelude/-
+  libanalysis2/solver/-
   signatures/libanalysis2/namebinding/-
 
 rules
@@ -12,7 +13,7 @@ rules
   G-with-decl     = ?(<id>,s,d)  ; G(update(S(![d|<id>],id,id,id),G--new_s|s), id)
   G-with-ref      = ?(<id>,s,r)  ; G(update(S(id,![r|<id>],id,id),G--new_s|s), id)
   G-with-r-import = ?(<id>,s,n)  ; G(update(S(id,id,![n|<id>],id),G--new_s|s), id)
-  G-with-s-import = ?(<id>,s,e@(_,s',_)) ; G(update(id,G--new_s|s')
+  G-with-s-import = ?(<id>,s,e@(_,s',_)) ; G(try(where(<is-ground> s');update(id,G--new_s|s'))
                                             ;update(S(id,id,id,![e|<id>]),G--new_s|s), id)
   G-with-assoc    = ?(<id>,d,s)  ; G(update(id,G--new_s|s),![(d,s)|<id>])
 

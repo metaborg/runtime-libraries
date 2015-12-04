@@ -35,7 +35,7 @@ rules
     with t2' := <pp-one-Z(pp2)> t2
 
   // omit brackets if no type arguments are present
-  prettyprint-Type :
+  prettyprint-Type:
     TApp(tc, []) -> [ H( [SOpt(HS(), "0")]
                       , [ tc' ] ) ]
     with tc' := <pp-one-Z(prettyprint-TypeCon)> tc
@@ -51,6 +51,14 @@ rules
     t -> [ H([SOpt(HS(),"0")], [ S("@("), S(line'), S(","), S(column'), S(")") ] ) ]
     with line'   := <(origin-line;inc<+!-1);int-to-string> t
     with column' := <(origin-column;inc<+!-1);int-to-string> t
+
+rules
+
+  check-Int = is-int
+
+  check-Term = id
+
+  check-list(s) = map(s)
 
 rules
 

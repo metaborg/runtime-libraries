@@ -39,6 +39,7 @@ rules
   pp-Message              = pp-Analysis(prettyprint-Message)
   pp-MessageContent       = pp-Analysis(prettyprint-MessageContent)
   pp-Substitution         = pp-Analysis(prettyprint-Substitution)
+  pp-Env                  = pp-Analysis(prettyprint-Env)
   pp-Term                 = pp-Analysis(prettyprint-Term)
   pp-List(pp)             = pp-Analysis(prettyprint-list(pp))
 

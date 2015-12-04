@@ -9,6 +9,7 @@ imports
   libanalysis2/pp
   signatures/libanalysis2/equality/-
   signatures/libanalysis2/namebinding/-
+  signatures/libanalysis2/solver/-
 
 rules
  
@@ -51,22 +52,32 @@ rules
 
   solve-namebinding-constraint: (CResolves(r,a,d,msginfo),sol-wm) -> [(sol-wm,c*)]
   where r* := <fromWM;sol-r> sol-wm
-      ; (d',p) := <lookup> (r,r*)
-      ; a' := <path-annos> p
-  with msg := ["Unable to resolve ",r," to ",d]
-     ; msginfo' := <default-message(|msg)> msginfo
-     ; c* := [ CEqual(d,d',msginfo'),
-               CEqual(a,a',msginfo')
-             ]
+      ; dp := <lookup> (r,r*)
+  with ( None() := dp
+       < ![]
+       + (d',p) := dp
+       ; msg := ["Cannot resolve ",r," to ",d]
+       ; msginfo' := <default-message(|msg)> msginfo
+       ; a' := <path-annos> p
+       ; ![ CEqual(d,d',msginfo'),
+            CEqual(a,a',msginfo')
+          ]
+       ) => c*
 
   solve-namebinding-constraint: (CResolves(r,l,d,msginfo),sol-wm) -> res*
   where r* := <fromWM;sol-r> sol-wm
       ; <not(lookup)> (r,r*)
       ; g := <fromWM;sol-g> sol-wm
-      ; dl*@[_|_] := <resolve(|g)> r
-  with msg := ["Unable to resolve ",r," to ",d]
-     ; msginfo' := <default-message(|msg)> msginfo
-     ; <map(solve-namebinding-constraint-step(|r,l,d,msginfo',sol-wm))> dl* => res*
+      ; dl* := <resolve(|g)> r
+  with ( [] := dl*
+       < msg := ["Cannot resolve ",r]
+       ; sol-wm' := <fmap(sol-set-r(|r,None()))
+                    ;add-message(|msginfo,msg)> sol-wm
+       ; ![ (sol-wm',[]) ]
+       + msg := ["Cannot resolve ",r," to ",d]
+       ; msginfo' := <default-message(|msg)> msginfo
+       ; <map(solve-namebinding-constraint-step(|r,l,d,msginfo',sol-wm))> dl*
+       ) => res*
 
   solve-namebinding-constraint-step(|r,a,d,msginfo,sol-wm): (d',p) -> (sol-wm',c*)
   with <fmap(sol-set-r(|r,(d',p)))> sol-wm => sol-wm'
@@ -132,6 +143,14 @@ rules
   default-names-pos(|n*) =
     try(Message(id,?None(),!NAMES()))
   ; Message(id,bottomup(try(?NAMES();<map(id-name)> n*)),try(?NAMES();<map(position-to-term)> n*))
+ 
+  unresolved-refs(|rn*): sol-wm -> sol-wm'
+    with sol := <fromWM> sol-wm
+       ; ref* := <sol-g;G-refs> sol
+       ; res* := <sol-r;keys> sol
+       ; ar* := <diff> (<keys> rn*, res*)
+       ; ur* := <diff> (ref*,[res*,ar*])
+       ; sol-wm' := <foldr(!sol-wm,{ ?(r,<id>) ; add-message(|Message(Error(),["Cannot resolve ",r],<position-to-term> r),"Resolution error") })> ur*
  
   unsolved-message: CResolves(r,l,d,msginfo) -> <default-message(|msg,"Unsolved: ")> msginfo
   with msg := ["Cannot resolve ",r," to ",d]

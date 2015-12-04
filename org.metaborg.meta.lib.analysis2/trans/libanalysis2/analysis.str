@@ -4,6 +4,8 @@ imports
 
   libstratego-sglr
   libstratego-gpp
+  signatures/libanalysis2/positioning/-
+  signatures/libanalysis2/namebinding/-
   signatures/libanalysis2/typechecking/-
   runtime/analysis/core
   runtime/editor/time
@@ -74,14 +76,14 @@ rules
     ; g := <fromWM;sol-g> sol-wm1
     ; <index-collect-analysis-result(|source)> InitialScopeGraph(g)
     ; fr* := <resolve-all> g
+    ; (r1*,rn*) := <partition({\ (r,[dp]) -> (r,dp) \})> fr*
+    ; sol-wm2 := <fmap(sol-set-r(|r1*))> sol-wm1
     ; <index-collect-analysis-result(|source)> InitialResolution(fr*)
-    ; r* := <filterv(?[<id>])> fr*
-    ; sol-wm2 := <fmap(sol-set-r(|r*))> sol-wm1
     )
 
   ; where(<debug> ">>> Solving constraints <<<")
   ; report-time(
-      sol-wm3* := <solve-constraints-phase2;map(postprocess-errors)> (sol-wm2,c1*)
+      sol-wm3* := <solve-constraints-phase2;map(postprocess-errors(|rn*))> (sol-wm2,c1*)
     )
 
   ; where(<debug> ">>> Processing solutions <<<")
@@ -103,9 +105,9 @@ rules
     ; status := (None(),$[Found [<int-to-string> good] correct and [<int-to-string> bad] erronious solutions.])
     ; ( sol-wm := <Hd> sol-wm*
       < where(<debug> ">>> Found solution <<<")
-        ; <fromWM;sol-r> sol-wm => r'*
+        ; r* := <fromWM;sol-r> sol-wm
         ; where(<debug> ">>> Applying name resolution <<<")
-        ; resolved-ast := <apply-resolution(|<mapv(Fst)> r'*)> annotated-ast
+        ; resolved-ast := <apply-resolution(|r*)> annotated-ast
         ; where(<debug> ">>> Applying types <<<")
         ; <fromWM;sol-p> sol-wm => p*
         ; typed-ast := <apply-types(|p*)> resolved-ast
@@ -114,7 +116,8 @@ rules
         ; warning* := <wm-warnings;mapv(xmlencode)> sol-wm
         ; note* := [status|<wm-notes;mapv(xmlencode)> sol-wm]
       + where(<debug> ">>> No solution found <<<")
-        ; analysed-ast := <apply-resolution(|<mapv(Fst)> r*)> annotated-ast
+        ; r* := <filter((id,Hd))> fr*
+        ; analysed-ast := <apply-resolution(|r*)> annotated-ast
         ; error* := [(None(),"Found no correct or erronious solutions.")]
         ; warning* := []
         ; note* := [status]

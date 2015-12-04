@@ -2,9 +2,10 @@ module libanalysis2/solver/errors
 
 imports
   signatures/libanalysis2/solver/-
-  libanalysis2/solver/-
+  libanalysis2/namebinding/-
   libanalysis2/prelude/-
   libanalysis2/pp
+  libanalysis2/solver/-
 
 rules
 
@@ -27,8 +28,7 @@ rules
        ; msg' := <message-or-default(|defaultmsg,"");pp-MessageContent> msg
        ; sol-wm' := <add-message> (kind,(pos,msg'),sol-wm)
 
-  add-message-step(|defaultmsg): (msginfo,sol-wm) -> sol-wm'
-    with sol-wm' := <add-message(|msginfo,defaultmsg)> sol-wm
+  add-message-step(|defaultmsg) = ?(msginfo,<id>) ; add-message(|msginfo,defaultmsg)
 
   add-message: (Error(), error, sol-wm) -> <add-error(|error)> sol-wm
   add-message: (Warning(), warning, sol-wm) -> <add-warning(|warning)> sol-wm
@@ -39,11 +39,12 @@ rules
 
 rules
 
-  postprocess-errors: (sol-wm,c*) -> sol-wm'
+  postprocess-errors(|rn*): (sol-wm,c*) -> sol-wm'
   with <fromWM> sol-wm => sol
      ; <sol-p;free-var-messages> sol => fmsg*
      ; <map(unsolved-message <+ default-unsolved-message)> c* => umsg*
      ; <add-messages(|[fmsg*,umsg*],"Unknown error")> sol-wm
+     ; unresolved-refs(|rn*)
      ; wm-nub => sol-wm'
 
   free-var-messages = all-vars;nub;map(!Message(Warning(),$[Free variable [<pp-Var>]],<id>))

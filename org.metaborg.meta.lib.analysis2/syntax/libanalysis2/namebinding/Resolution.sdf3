@@ -9,6 +9,7 @@ imports
 context-free syntax
 
   FullResolution = <<RefId> <{Resolved "\n"}*>>
+  Resolved.None  = <unresolved>
   Resolved        = [
     |--> [DeclId]
          path = [Path]
@@ -33,6 +34,9 @@ context-free syntax
   LabelRE.Or         = <<LabelRE> | <LabelRE>>
 
 context-free syntax
+
+  Env      = <<TotalOrPartial> <{EnvEntry "\n"}*>>
+  EnvEntry = <<Name> = <{Resolved "\n"}*>>
 
   TotalOrPartial.Total   = <T>
   TotalOrPartial.Partial = <P>
