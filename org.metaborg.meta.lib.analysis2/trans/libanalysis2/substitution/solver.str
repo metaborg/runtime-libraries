@@ -8,6 +8,7 @@ imports
   libanalysis2/pp
   signatures/libanalysis2/equality/-
   signatures/libanalysis2/substitution/-
+  signatures/libanalysis2/typechecking/-
 
 rules
 
@@ -24,9 +25,9 @@ rules
      ; ( <(length,length);eq> (dt*,rt*)
        < s' := Sub(<zip> (dt*, rt*))
        ; msg := ["Could not build substitution ",s," from ",s']
-       ; !(sol-wm, [CEqual(s,s',<default-message(|msg)> msginfo)])
+       ; !(sol-wm, [CEqual(s,s',<detail-message(|msg)> msginfo)])
        + msg := ["Different number of parameters ",rt*," and ",dt*]
-       ; !(<add-message(|msginfo,msg)> sol-wm, [])
+       ; !(<add-message(detail-message(|msg)|msginfo)> sol-wm, [])
        ) => (sol-wm',c*)
 
   solve-constraint: (c@CComposeSub(s,s*,msginfo),sol-wm) -> [(sol-wm,c*)]
@@ -34,7 +35,7 @@ rules
       ; <not(is-var);map(not(is-var))> s*
   with s' := <map(get-S);S-compose(is-tvar)> s*
      ; msg := ["Could not compose ",s," and ",s']
-     ; c* := [CEqual(s,s',<default-message(|msg)> msginfo)]
+     ; c* := [CEqual(s,s',<detail-message(|msg)> msginfo)]
 
   solve-constraint: (c@CApplySub(ty,s,ty',msginfo),sol-wm) -> [(sol-wm,c*)]
   where <not(is-var)> s

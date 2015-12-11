@@ -17,15 +17,18 @@ rules
   where <not(is-var)> t
 
   solve-constraint: (CEqual(v@Var(_),t,msginfo),sol-wm) -> [(sol-wm',[])]
-  with ( <var-occurs> (v,t)
-       < msg := [v," occurs in ",t]
-       ; <add-message(|msginfo,msg)> sol-wm
-       + <sol-wm-apply-s> ([(v,t)],sol-wm)
-       ) => sol-wm'
-
+  where <var-occurs> (v,t)
+  with msg := [v," occurs in ",t]
+     ; sol-wm' := <add-message(detail-message(|msg)|msginfo)> sol-wm
+  
+  solve-constraint: (CEqual(v@Var(_),t,msginfo),sol-wm) -> [(sol-wm',[])]
+  where <not(var-occurs)> (v,t)
+      ; <is-reduced> t
+  with sol-wm' := <sol-wm-apply-s> ([(v,t)],sol-wm)
+  
   solve-constraint: (CEqual(Sub(_),Sub(_),msginfo),sol-wm) -> [(sol-wm',[])]
-  with msg := "Unify subtitutions is forbidden"
-     ; sol-wm' := <add-message(|msginfo,msg)> sol-wm
+  with msg := "Unifying subtitutions is forbidden"
+     ; sol-wm' := <add-message(detail-message(|msg)|msginfo)> sol-wm
 
   solve-constraint: (CEqual(t1@c1#(a1),t2@c2#(a2),msginfo),sol-wm) -> [(sol-wm',[])]
   where <not(is-op)> t1
@@ -34,7 +37,7 @@ rules
        <+ <(length,length);not(eq)> (a1,a2)
         )
   with msg := <default-unify-error(|t1,t2)>
-     ; sol-wm' := <add-message(|msginfo,msg)> sol-wm
+     ; sol-wm' := <add-message(detail-message(|msg)|msginfo)> sol-wm
 
   solve-constraint: (CEqual(t1@c#(a1),t2@c#(a2),msginfo),sol-wm) -> [(sol-wm,c*)]
   where <not(is-op)> t1
@@ -51,5 +54,4 @@ rules
 
   default-unify-error(|t1,t2) = !["Cannot not unify ",t1," with ",t2]
 
-  unsolved-message: CEqual(t1,t2,msginfo) -> <default-message(|msg,"Unsolved: ")> msginfo
-  with msg := <default-unify-error(|t1,t2)>
+  constraint-message: CEqual(t1,t2,msginfo) -> <default-message(|<default-unify-error(|t1,t2)>)> msginfo

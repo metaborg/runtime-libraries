@@ -20,7 +20,7 @@ signature
         -> Solution
 
 rules
-  
+ 
   sol-new = !Sol(<G-new>,[],[],[],[])
 
   sol-g = ?Sol(<id>,_,_,_,_) 
@@ -28,21 +28,15 @@ rules
   sol-p = ?Sol(_,_,<id>,_,_)
   sol-s = ?Sol(_,_,_,<id>,_)
   sol-x = ?Sol(_,_,_,_,<id>)
-  
+ 
   sol-with-g: (g,Sol(_,r*,p*,s*,x*)) -> Sol(g,r*,p*,s*,x*)
 
-  sol-apply-s: (s',Sol(g,r*,p*,s*,x*))
-    -> Sol(g',r'*,p'*,s'*,x*)
+  sol-apply-s: (s',Sol(g,r*,p*,s*,x*)) -> Sol(g',r'*,p'*,s'*,x*)
     where g'  := <S-apply(is-var)> (s',g)
-        ; r'* := <S-apply(is-var);reduce-ops(|x*)> (s',r*)
-        ; p'* := <S-apply(is-var);reduce-ops(|x*)> (s',p*)
-        ; s'* := <S-compose(is-var);reduce-ops(|x*)> (s',s*)
-        ; x'* := <S-apply(is-var);reduce-ops(|x*)> (s',x*)
-    where g''  := <reduce-ops(|x'*)> g'
-        ; r''* := <reduce-ops(|x'*)> r'*
-        ; p''* := <reduce-ops(|x'*)> p'*
-        ; s''* := <reduce-ops(|x'*)> s'*
-        ; x''* := <reduce-ops(|x'*)> x'*
+        ; r'* := <S-apply(is-var)> (s',r*)
+        ; p'* := <S-apply(is-var)> (s',p*)
+        ; s'* := <S-compose(is-var)> (s',s*)
+        ; x'* := <S-apply(is-var)> (s',x*)
 
   sol-set-p(v): (p,Sol(g,r*,p*,s*,x*))
     -> Sol(g,r*,p'*,s*,x*)

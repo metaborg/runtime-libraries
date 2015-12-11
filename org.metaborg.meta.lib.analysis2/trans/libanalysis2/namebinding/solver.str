@@ -25,14 +25,14 @@ rules
      ; <G-with-ref> (g,s,r) => g'
      ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
 
-  solve-namebinding-fact: (FImportR(l,r,t,s),sol-wm) -> [(sol-wm',[])]
+  solve-namebinding-fact: (FDirectEdge(l,s',t,s),sol-wm) -> [(sol-wm',[])]
   with <fromWM;sol-g> sol-wm => g
-     ; <G-with-r-import> (g,s,(l,r,t)) => g'
+     ; <G-with-direct-edge> (g,s,(l,s',t)) => g'
      ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
 
-  solve-namebinding-fact: (FImportS(l,s',t,s),sol-wm) -> [(sol-wm',[])]
+  solve-namebinding-fact: (FNamedEdge(l,r,t,s),sol-wm) -> [(sol-wm',[])]
   with <fromWM;sol-g> sol-wm => g
-     ; <G-with-s-import> (g,s,(l,s',t)) => g'
+     ; <G-with-named-edge> (g,s,(l,r,t)) => g'
      ; <fmap(<sol-with-g> (g',<id>))> sol-wm => sol-wm'
 
   solve-namebinding-fact: (FAssoc(d,s),sol-wm)    -> [(sol-wm',[])]
@@ -42,8 +42,8 @@ rules
 
   constraint-priority: FDecl(_,_) -> 3
   constraint-priority: FRef(_,_) -> 3
-  constraint-priority: FImportR(_,_,_,_) -> 3
-  constraint-priority: FImportS(_,_,_,_) -> 3
+  constraint-priority: FDirectEdge(_,_,_,_) -> 3
+  constraint-priority: FNamedEdge(_,_,_,_) -> 3
   constraint-priority: FAssoc(_,_) -> 3
 
 rules
@@ -70,11 +70,11 @@ rules
       ; g := <fromWM;sol-g> sol-wm
       ; dl* := <resolve(|g)> r
   with ( [] := dl*
-       < msg := ["Cannot resolve ",r]
+       < msg := ["Missing declaration for ",r]
        ; sol-wm' := <fmap(sol-set-r(|r,None()))
-                    ;add-message(|msginfo,msg)> sol-wm
+                    ;add-message(detail-message(|msg)|msginfo)> sol-wm
        ; ![ (sol-wm',[]) ]
-       + msg := ["Cannot resolve ",r," to ",d]
+       + msg := ["Problem resolving ",r," to ",d]
        ; msginfo' := <default-message(|msg)> msginfo
        ; <map(solve-namebinding-constraint-step(|r,l,d,msginfo',sol-wm))> dl*
        ) => res*
@@ -86,12 +86,16 @@ rules
              , CEqual(a,a',msginfo)
              ]
  
-  solve-namebinding-constraint: (CAssoc(d,s,msginfo),sol-wm) -> [(sol-wm,c*)]
+  solve-namebinding-constraint: (CAssoc(d,s,msginfo),sol-wm) -> [res]
   where <is-ground> d
       ; g := <fromWM;sol-g> sol-wm
-      ; s' := <G-assoc> (g,d)
-  with msg := ["Cannot find scope ",s," associated with ",d]
-     ; c* := [ CEqual(s,s',<default-message(|msg)> msginfo) ]
+  with ( s' := <G-assoc> (g,d)
+       < msg := ["Problem associating scope ",s," with ",d]
+       ; !(sol-wm,[CEqual(s,s',<default-message(|msg)> msginfo)])
+       + msg := [d," is not associated with a scope"]
+       ; sol-wm' := <add-message(detail-message(|msg)|msginfo)> sol-wm
+       ; !(sol-wm',[])
+       ) => res
  
   solve-namebinding-constraint: (CDistinct(N,msginfo),sol-wm) -> [(sol-wm',[])]
   where <is-ground> N
@@ -101,7 +105,7 @@ rules
      ; ( ?[]
        < !sol-wm
        + msg := "Duplicate name"
-       ; <add-message(|<default-names-pos(|n'*)> msginfo,msg)> sol-wm
+       ; <add-message(default-message(|msg)|<default-names-pos(|n'*)> msginfo)> sol-wm
        ) => sol-wm'
 
   solve-namebinding-constraint: (CSubset(N1,N2,msginfo),sol-wm) -> [(sol-wm',[])]
@@ -114,7 +118,7 @@ rules
      ; ( ?[]
        < !sol-wm
        + msg := "Missing name"
-       ; <add-message(|<default-names-pos(|n'*)> msginfo,msg)> sol-wm
+       ; <add-message(default-message(|msg)|<default-names-pos(|n'*)> msginfo)> sol-wm
        ) => sol-wm'
 
   solve-namebinding-constraint: (CDisjoint(N1,N2,msginfo),sol-wm) -> [(sol-wm',[])]
@@ -127,7 +131,7 @@ rules
      ; ( ?[]
        < !sol-wm
        + msg := "Duplicate name"
-       ; <add-message(|<default-names-pos(|n'*)> msginfo,msg)> sol-wm
+       ; <add-message(default-message(|msg)|<default-names-pos(|n'*)> msginfo)> sol-wm
        ) => sol-wm'
 
 rules
@@ -150,19 +154,14 @@ rules
        ; res* := <sol-r;keys> sol
        ; ar* := <diff> (<keys> rn*, res*)
        ; ur* := <diff> (ref*,[res*,ar*])
-       ; sol-wm' := <foldr(!sol-wm,{ ?(r,<id>) ; add-message(|Message(Error(),["Cannot resolve ",r],<position-to-term> r),"Resolution error") })> ur*
+       ; sol-wm' := <foldr(!sol-wm,{ ?(r,<id>) ; add-message(id|Message(Error(),["Failed to resolve ",r],<position-to-term> r)) })> ur*
  
-  unsolved-message: CResolves(r,l,d,msginfo) -> <default-message(|msg,"Unsolved: ")> msginfo
-  with msg := ["Cannot resolve ",r," to ",d]
+  constraint-message: CResolves(r,l,d,msginfo) -> <default-message(|["Failed to resolve ",r])> msginfo
 
-  unsolved-message: CAssoc(d,s,msginfo) -> <default-message(|msg,"Unsolved: ")> msginfo
-  with msg := ["Cannot find associated scope ",s," of ",d]
+  constraint-message: CAssoc(d,s,msginfo) -><default-message(|["Failed to find associated scope of ",d])> msginfo
 
-  unsolved-message: CDistinct(n,msginfo) -> <default-message(|msg,"Unsolved: ")> msginfo
-  with msg := ["Cannot check if ",n," are distinct"]
+  constraint-message: CDistinct(n,msginfo) -><default-message(|["Failed to check if names in ",n," are distinct"])> msginfo
 
-  unsolved-message: CSubset(n1,n2,msginfo) -> <default-message(|msg,"Unsolved: ")> msginfo
-  with msg := ["Cannot check if ",n1," in ",n2]
+  constraint-message: CSubset(n1,n2,msginfo) -><default-message(|["Failed to check if names in ",n1," are in in ",n2])> msginfo
 
-  unsolved-message: CDisjoint(n1,n2,msginfo) -> <default-message(|msg,"Unsolved: ")> msginfo
-  with msg := ["Cannot check if ",n1," disjoint from ",n1]
+  constraint-message: CDisjoint(n1,n2,msginfo) -><default-message(|["Failed to check if names in ",n1," and ",n2," are disjoint"])> msginfo

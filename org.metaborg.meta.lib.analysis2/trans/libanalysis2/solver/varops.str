@@ -5,12 +5,12 @@ imports
 
 rules
   
-  is-var: Var(_) -> <id>
+  is-var = ?Var(_)
   all-vars = collect-all(is-var)
   var-occurs = (id,all-vars) ; elem
 
   is-op = fail
-  reduce-op(|x*) = fail
-  reduce-ops(|x*) = innermost(reduce-op(|x*))
+  reduce-op(|sol-wm) = fail
+  is-reduced = where(collect-all(is-op) => [])
 
   is-ground = where(collect-all(is-var <+ is-op) => [])

@@ -19,13 +19,13 @@ context-free syntax
  
   ScopeImpl.S = <
     {
-      decls     = <{DeclId ", "}*>
-      refs      = <{RefId ", "}*>
-      r-imports = <{ImportREntry ", "}*>
-      s-imports = <{ImportSEntry ", "}*>
+      decls        = <{DeclId ", "}*>
+      refs         = <{RefId ", "}*>
+      direct edges = <{DirectEdgeEntry ", "}*>
+      named edges  = <{NamedEdgeEntry ", "}*>
     }
   >
  
-  ImportREntry = <<Label>/<RefId>/<Term>>
-  ImportSEntry = <<Label>/<Scope>/<Term>>
+  DirectEdgeEntry = <<Label>/<Scope>/<Term>>
+  NamedEdgeEntry = <<Label>/<RefId>/<Term>>
   AssocEntry = <<Pos> : <Scope>>

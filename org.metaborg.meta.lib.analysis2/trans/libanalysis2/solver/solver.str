@@ -26,7 +26,7 @@ rules
   with
     s := <csolve( solve-specialise
                 , ( solve-fact
-                 <+ solve-trivial-constraints
+                  + solve-trivial-constraints
                   )
                 )> c*
 
@@ -34,14 +34,31 @@ rules
   with
     s := <csolve( solve-specialise
                 , ( solve-constraint
-                 <+ solve-trivial-constraints
+                  + solve-trivial-constraints
                   )
                 )> c*
 
-  solve-specialise: (sol-wm,c) -> c'
+  solve-specialise: (sol-wm,c) -> res
   with <fromWM;sol-s> sol-wm => s*
-     ; <fromWM;sol-x> sol-wm => x*
-     ; <S-apply(is-var);reduce-ops(|x*)> (s*,c) => c'
+     ; <fromWM> sol-wm => sol
+     ; <S-apply(is-var)> (s*,c) => c'
+     ; {| ReduceErrors:
+            rules(ReduceErrors : _ -> [])
+          ; <bottomup(try(reduce-op(|sol-wm)))> c' => c''
+          ; re* := <ReduceErrors>
+          ; if [] := re*
+            then
+              !(sol-wm,c'')
+            else
+              msg' := <get-constraint-message> c'
+            ; msg'' := <foldr(!msg',{ ?(re,<id>) ; detail-message(|re) })> re*
+            ; sol-wm' := <add-message(id|msg'')> sol-wm
+            ; !(sol-wm',CTrue())
+            end
+       |} => res
+
+  add-reduce-error(|msg) =
+    where(msg* := <ReduceErrors> ; rules(ReduceErrors : _ -> [msg|msg*]))
 
 rules
  

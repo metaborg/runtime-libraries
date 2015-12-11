@@ -11,6 +11,9 @@ context-free syntax
   Type.TVar                 = <'<String>>
   Type.TList                = <Type[<{Type ", "}*>]>
   Type                      = Var
+  Type                      = TypeOp
+
+  TypeOp.Lub                = <lub(<Type>,<Type>)>
 
   TypeDef.TDef              = <<TypeCon>[<{TypeArg ","}*>]>
   TypeArg.TArg              = <<Variance><Type>>

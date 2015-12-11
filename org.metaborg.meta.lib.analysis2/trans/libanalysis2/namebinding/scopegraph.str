@@ -10,11 +10,11 @@ rules
 
   G-new = !G([(Global(),<G--new_s>)],[])
   G--new_s = !S([],[],[],[])
-  G-with-decl     = ?(<id>,s,d)  ; G(update(S(![d|<id>],id,id,id),G--new_s|s), id)
-  G-with-ref      = ?(<id>,s,r)  ; G(update(S(id,![r|<id>],id,id),G--new_s|s), id)
-  G-with-r-import = ?(<id>,s,n)  ; G(update(S(id,id,![n|<id>],id),G--new_s|s), id)
-  G-with-s-import = ?(<id>,s,e@(_,s',_)) ; G(try(where(<is-ground> s');update(id,G--new_s|s'))
-                                            ;update(S(id,id,id,![e|<id>]),G--new_s|s), id)
+  G-with-decl        = ?(<id>,s,d)  ; G(update(S(![d|<id>],id,id,id),G--new_s|s), id)
+  G-with-ref         = ?(<id>,s,r)  ; G(update(S(id,![r|<id>],id,id),G--new_s|s), id)
+  G-with-direct-edge = ?(<id>,s,e@(_,s',_)) ; G(try(where(<is-ground> s');update(id,G--new_s|s'))
+                                               ;update(S(id,id,![e|<id>],id),G--new_s|s), id)
+  G-with-named-edge  = ?(<id>,s,n)  ; G(update(S(id,id,id,![n|<id>]),G--new_s|s), id)
   G-with-assoc    = ?(<id>,d,s)  ; G(update(id,G--new_s|s),![(d,s)|<id>])
 
   G-refs             = ?G(<id>,_) ; map(?(_,<id>);?S(_,<id>,_,_)) ; concat
@@ -22,8 +22,8 @@ rules
   G-scope_exists(|r) = ?(s,S(_,r*,_,_)) ; <elem> (r,r*) ; !s
   G-decls            = ?(G(s*,_),s) ; <lookup> (s,s*) ; ?S(<id>,_,_,_)
   G-refs             = ?(G(s*,_),s) ; <lookup> (s,s*) ; ?S(_,<id>,_,_)
-  G-r-imports        = ?(G(s*,_),s) ; <lookup> (s,s*) ; ?S(_,_,<id>,_)
-  G-s-imports        = ?(G(s*,_),s) ; <lookup> (s,s*) ; ?S(_,_,_,<id>)
+  G-direct-edges     = ?(G(s*,_),s) ; <lookup> (s,s*) ; ?S(_,_,<id>,_)
+  G-named-edges      = ?(G(s*,_),s) ; <lookup> (s,s*) ; ?S(_,_,_,<id>)
   G-assoc            = ?(G(_,a*),d) ; <lookup> (d,a*)
 
 rules

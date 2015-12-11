@@ -140,8 +140,3 @@ rules
 
   ta-variance: TArg(v,_) -> v
   ta-type: TArg(_,ty) -> ty
-
-rules
-  
-  pp-Supertype = (pp-TypeCon,map(pp-Type))
-  pp-SubtypeRelation = map((pp-TypeCon,(map(pp-TypeArg),map(pp-Supertype))))

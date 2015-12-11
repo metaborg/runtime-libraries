@@ -11,4 +11,3 @@ context-free syntax
   Constraint.FSubType       = [[TypeDef] <: [Type] [Message]]
 
   Constraint.CSubType       = [[Type] <= [Type] [Message]]
-  Constraint.CLubType       = [[Type] == lub([Type],[Type]) [Message]]

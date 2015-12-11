@@ -14,11 +14,3 @@ rules
   show-analysis-aterm: (_, _, ast, path, project-path) -> (filename, result)
     with filename := <guarantee-extension(|"analysis2.aterm")> path
        ; result := <get-analysis> ast
-
-  export-to-latex: (_, _, ast, path, project-path) -> (filename, result)
-    with filename := <guarantee-extension(|"tex")> path
-       ; result := <get-analysis;analysis-to-latex> ast
-
-  export-to-dot: (_, _, ast, path, project-path) -> (filename, result)
-    with filename := <guarantee-extension(|"gv")> path
-       ; result := <get-analysis;analysis-to-dot> ast

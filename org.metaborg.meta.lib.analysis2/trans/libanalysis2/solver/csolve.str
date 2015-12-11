@@ -31,12 +31,12 @@ rules
    */
 
   csolve-onepass(preprocess,solve): ([c|c*],e,c'*) -> res*
-  with <preprocess> (e,c) => c'
-     ; ( <solve> (c',e) => e'*
+  with <preprocess> (e,c) => (e',c')
+     ; ( <solve> (c',e') => e'*
        < map( !(<conc> (<Snd>,c*), <Fst>, c'*)
             ; csolve-onepass(preprocess,solve)
             ) ; concat
-       + <csolve-onepass(preprocess,solve)> (c*,e,[c|c'*])
+       + <csolve-onepass(preprocess,solve)> (c*,e,[c'|c'*])
        ) => res*
 
   csolve-onepass(preprocess,solve): ([],e,c'*) -> [(e, <reverse> c'*)]
