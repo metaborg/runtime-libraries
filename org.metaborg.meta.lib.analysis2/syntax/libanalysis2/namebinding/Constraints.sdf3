@@ -33,5 +33,6 @@ context-free syntax
   Names.Declarations  = <D(<Namespace>,<Scope>)>
   Names.References    = <R(<Namespace>,<Scope>)>
   Names.Visibles      = <V(<Namespace>,<Scope>)>
+  Names.Reachables    = <W(<Namespace>,<Scope>)>
 
   Placeholder.NAMES   = <NAMES>

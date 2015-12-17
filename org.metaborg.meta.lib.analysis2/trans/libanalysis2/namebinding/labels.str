@@ -43,4 +43,6 @@ rules
   
   labels-lt(|l) = filter(\ l' -> l' where <label-lt> (l',l) \) ; make-set
   
+  empty-lt(|l) = ![]
+  
   default-labels-wf = !Concat(Closure(I()),Closure(P()))
