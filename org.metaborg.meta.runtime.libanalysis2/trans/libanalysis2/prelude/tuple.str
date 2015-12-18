@@ -1,0 +1,8 @@
+module libanalysis2/prelude/tuple
+
+imports
+  libanalysis2/prelude/interfaces
+
+rules // applicative
+
+  pureT(|n): x -> <copy;ListToTuple> (n,x)

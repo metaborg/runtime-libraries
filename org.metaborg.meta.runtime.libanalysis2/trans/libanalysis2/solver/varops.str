@@ -1,0 +1,19 @@
+module libanalysis2/solver/varops
+
+imports
+  src-gen/signatures/libanalysis2/-
+  libanalysis2/positioning/functions
+
+rules
+  
+  is-var: Var(_) -> <id>
+  all-vars = collect-all(is-var)
+  var-occurs = (id,all-vars) ; elem
+
+  is-op = fail
+  reduce-op(|x*) = fail
+  reduce-ops(|x*) = innermost(reduce-op(|x*))
+
+  is-ground = where(collect-all(is-var <+ is-op) => [])
+
+  mkerror(|defaultmsg) = !(<try(position-fix)>,defaultmsg)

@@ -1,0 +1,10 @@
+module libanalysis2/prelude/set
+
+strategies
+  
+  dups = foldr(!([],[]),dup-step) ; Snd ; nub
+  dup-step = ?(x,(uniq,dup))
+           ; ( <elem> (x,uniq)
+             < !(uniq,[x|dup])
+             + !([x|uniq],dup)
+             )

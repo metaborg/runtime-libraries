@@ -1,0 +1,137 @@
+module libanalysis2/namebinding/resolution
+
+imports
+  libanalysis2/namebinding/scopegraph
+  libanalysis2/pp
+  libanalysis2/prelude/-
+  src-gen/signatures/libanalysis2/-
+
+signature
+  // types
+  //   Atom = (Ns,String)
+  //   Resolution = Partial [(Atom,Partial [(Decl,[Label])])]
+
+rules
+
+  // resolve-all :: Graph -> [(Ref,Partial [(Decl,[Label])])]
+  resolve-all =
+    ?g
+  ; G-refs
+  ; map(!(<id>,<resolve(|g)>))
+
+  // resolve(|Graph) :: Ref -> Partial [(Decl,[Label])]
+  resolve(|g) = resolve(|g,[])
+
+rules // resolution internal
+
+  // resolve :: Ref -> Partial [(Decl,[Label])]
+  resolve(|g,ir*) =
+    ?r
+  ; ( <G-scope> (g,r) // :: Scope
+   <+ <debug(!"ERROR: Cannot get scope for reference ");fail> r
+    )
+  ; env_v(|g,[r|ir*],[]) // :: Partial [(Atom,Partial [(Decl,[Label])])]
+  ; ( <lookup> (<atom> r, <fromP>) // :: Partial [(Decl,[Label])]
+   <+ fmap(![])
+    ) // :: Partial [(Decl,[Label])]
+
+  // env_v(|Graph,[Ref],[Scope]) :: Scope -> Partial [(Atom,Partial [(Decl,[Label])])]
+  env_v(|g,ir*,s*) =
+    with(dbg-res(|"env_v "))
+  ; <shadow> ( <env_l(|g,ir*,s*)>
+             , <env_p(|g,ir*,s*)>
+             )
+  ; with(dbg-res(pp-Env|"env_v "))
+
+  // env_l(|Graph,[Ref],[Scope]) :: Scope -> Partial [(Atom,Partial [(Decl,[Label])])]
+  env_l(|g,ir*,s*) =
+    with(dbg-res(|"env_l "))
+  ; <shadow> ( <env_d(|g,ir*,s*)>
+             , <env_i(|g,ir*,s*)>
+             )
+  ; with(dbg-res(pp-Env|"env_l "))
+
+  // env_d(|Graph,[Ref],[Scope]) :: Scope -> Partial [(Atom,Partial [(Decl,[Label])])]
+  env_d(|g,ir*,s*) =
+    with(dbg-res(|"env_d "))
+  ; ?s
+  ; ( <elem> (s,s*)
+    < ![]
+    + <G-decls> (g,s) // :: [Decl]
+    ; group(atom) // :: [(Atom,[Decl])]
+    ; mapv(map(!(<id>,[]));pureP) // :: [(Atom,Partial [(Decl,[Label])])]
+    )
+  ; pureP // :: Partial [(Atom,Partial [(Decl,[Label])])]
+  ; with(dbg-res(pp-Env|"env_d "))
+
+  // env_i(|Graph,[Ref],[Scope]) :: Scope -> Partial [(Atom,Partial [(Decl,[Label])])]
+  env_i(|g,ir*,s*) =
+    with(dbg-res(|"env_i "))
+  ; ?s
+  ; ( <elem> (s,s*)
+    < <pureP> []
+    + <G-r-imports> (g,s) // :: [(Ref,Label)]
+    ; filter(not(<elem> (<Fst>,ir*))) // :: [(Ref,Label)]
+    ; map(resolve_i_r2s(|g,ir*)) // :: [Partial [(Decl,Label)]]
+    ; sequenceP // :: Partial [[(Decl,Label)]] | outer partial
+    ; fmap( unions // :: [(Decl,Label)]
+          ; filter((<G-assoc> (g,<id>),id)) // :: [(Scope,Label)]
+          ; <union> ( <id> // :: [(Scope,Label)]
+                    , <G-s-imports>  (g,s) // :: [(Scope,Label)]
+                    ) // :: [(Scope,Label)]
+          ; filter(not(<elem> (<Fst>,s*))) // :: [(Scope,Label)]
+          ; map( ?(Var(_),_)
+               < !Partial([]) // :: Partial [(Atom,Partial [(Decl,[Label])])]
+               + env_i_l(|g,ir*,[s|s*]) // :: Partial [(Atom,Partial [(Decl,[Label])])]
+               ) // :: [Partial [(Atom,Partial [(Decl,[Label])])]]
+          ; sequenceP // :: Partial [[(Atom,Partial [(Decl,[Label])])]]
+          ; fmap( foldr(![],merge(union,mplus(union))) // :: [(Atom,Partial [(Decl,[Label])])]
+                ) // :: Partial [(Atom,Partial [(Decl,[Label])])]
+          ) // :: Partial (Partial [(Atom,Partial [(Decl,[Label])])])
+    ; join // :: Partial [(Atom,Partial [(Decl,[Label])])]
+    ; try(Partial(map((id,!Partial(<fromP>))))) // :: Partial [(Atom,Partial [(Decl,[Label])])]
+    )
+  ; with(dbg-res(pp-Env|"env_i "))
+
+  // resolve_i_r2s(|Graph,[Ref]) :: (Ref,Label) -> Partial [(Decl,Label)]
+  resolve_i_r2s(|g,ir*) =
+    ?(r,l)
+  ; <resolve(|g,ir*)> r // :: Partial [(Decl,[Label])]
+  ; fmap(map(!(<Fst>,l))) // :: Partial([(Decl,Label)])
+
+  // env_i_l(|Graph,[Ref],[Scope]) :: (Scope,Label) -> Partial [(Atom,Partial [(Decl,[Label])])]
+  env_i_l(|g,ir*,s*) =
+    ?(s,l)
+  ; <env_l(|g,ir*,s*)> s // :: Partial [(Atom,Partial [(Decl,[Label])])]
+  ; fmap(map((id,fmap(map((id,![l|<id>])))))) // :: Partial [(Atom,Partial [(Decl,[Label])])]
+
+  // env_p(|Graph,[Ref],[Scope]) :: Scope -> Partial [(Atom,Partial [(Decl,[Label])])]
+  env_p(|g,ir*,s*) =
+    with(dbg-res(|"env_p "))
+  ; ?s
+  ; ( <elem> (s,s*)
+    < <pureP> []
+    + ( <G-parent> (g,s)
+      < env_v(|g,ir*,[s|s*])
+      + <pureP> []
+      )
+    )
+  ; with(dbg-res(pp-Env|"env_p "))
+
+  // shadow :: (Partial [(Atom,Partial [(Decl,[Label])])], Partial [(Atom,Partial [(Decl,[Label])])]) -> Partial [(Atom,Partial [(Decl,[Label])])]
+  shadow =
+    twrapP // :: Partial ([(Atom,Partial [(Decl,[Label])])], [(Atom,Partial [(Decl,[Label])])])
+  ; fmap(merge(union,Fst)) // :: Partial [(Atom,Partial [(Decl,[Label])])]
+
+  atom: RefId(ns,n,_) -> <strip-annos> Atom(ns, n)
+  atom: DeclId(ns,n,_) -> <strip-annos> Atom(ns, n)
+
+rules
+ 
+  pp-Resolution = map((pp-RefId,fmap(map((pp-DeclId,map(pp-Term))))))
+
+  pp-Env = fmap(map((pp-Atom,fmap(map((pp-DeclId,map(pp-Term)))))))
+
+  dbg-res(s|n) = id//s;debug(!n)
+  dbg-res(|n) = dbg-res(id|n)
+  dbg-res(s) = dbg-res(s|"")

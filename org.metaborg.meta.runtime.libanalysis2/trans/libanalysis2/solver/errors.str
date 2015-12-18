@@ -1,0 +1,20 @@
+module libanalysis2/solver/errors
+
+imports
+  src-gen/signatures/libanalysis2/-
+  libanalysis2/solver/-
+  libanalysis2/prelude/-
+  libanalysis2/pp
+
+rules
+
+  postprocess-errors: (sol-wm,c*) -> sol-wm'
+  with <fromWM> sol-wm => sol
+     ; <sol-p;free-errors> sol => fe*
+     ; <map(unsolved-error <+ default-unsolved-error)> c* => use*
+     ; <add-errors(|[fe*,use*])> sol-wm => sol-wm'
+
+  free-errors = all-vars;nub;map(!(<id>,$[Free variable [<pp-Var>]]))
+
+  unsolved-error = fail
+  default-unsolved-error: c -> (c,$[Unsolved: [<pp-Constraint> c]])

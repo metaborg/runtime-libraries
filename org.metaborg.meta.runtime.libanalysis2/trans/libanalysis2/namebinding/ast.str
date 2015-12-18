@@ -1,0 +1,26 @@
+module libanalysis2/namebinding/ast
+
+imports
+  runtime/editor/annotations
+  runtime/editor/origins
+
+  libanalysis2/positioning/functions
+  libanalysis2/prelude/-
+  src-gen/signatures/libanalysis2/-
+
+signature
+  constructors
+    Ref : DeclId -> Annotation
+
+rules
+
+  apply-resolution(|r*) =
+    apply-annotations(make-ref|<mapk(refid-to-key)> r*)
+
+  refid-to-key = ?RefId(_,_,<position-to-key>)
+
+  make-ref: d@DeclId(_,_,pos) -> r
+  with o := <position-to-origin> pos
+     ; r := <origin-location-offset-set(|o)> Ref(d)
+
+  get-decl = get-annotation(?Ref(<id>))
