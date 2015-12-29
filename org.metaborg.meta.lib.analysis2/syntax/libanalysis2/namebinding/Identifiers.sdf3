@@ -22,6 +22,9 @@ context-free syntax
   Namespace.None            = <->
   Namespace.Namespace       = String
 
+  NamespaceMatch.Wld        = <_>
+  NamespaceMatch            = Namespace
+
   Label.D         = <D>
   Label.P         = <P>
   Label.I         = <I>

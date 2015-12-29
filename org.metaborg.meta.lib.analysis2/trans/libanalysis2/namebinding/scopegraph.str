@@ -41,4 +41,4 @@ rules
   id-ns = ?RefId(<strip-annos>,_,_)
   id-ns = ?DeclId(<strip-annos>,_,_)
 
-  filter-ns(|ns) = filter(where(id-ns ; ?ns))
+  filter-ns(|ns) = where(Wld() := ns) < id + filter(where(id-ns ; ?ns))

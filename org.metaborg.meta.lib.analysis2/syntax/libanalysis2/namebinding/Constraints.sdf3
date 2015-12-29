@@ -30,9 +30,9 @@ context-free syntax
   Constraint.CSubset        = <<Names> in <Names> <Message>>
   Constraint.CDisjoint      = <<Names> # <Names> <Message>>
   
-  Names.Declarations  = <D(<Namespace>,<Scope>)>
-  Names.References    = <R(<Namespace>,<Scope>)>
-  Names.Visibles      = <V(<Namespace>,<Scope>)>
-  Names.Reachables    = <W(<Namespace>,<Scope>)>
+  Names.Declarations  = <D(<NamespaceMatch>,<Scope>)>
+  Names.References    = <R(<NamespaceMatch>,<Scope>)>
+  Names.Visibles      = <V(<NamespaceMatch>,<Scope>)>
+  Names.Reachables    = <W(<NamespaceMatch>,<Scope>)>
 
   Placeholder.NAMES   = <NAMES>
