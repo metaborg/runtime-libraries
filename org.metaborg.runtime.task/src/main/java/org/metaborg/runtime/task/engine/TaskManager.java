@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
 import org.metaborg.runtime.task.digest.NonDeterministicCountingTermDigester;
 import org.metaborg.runtime.task.evaluation.ITaskEvaluationFrontend;
 import org.metaborg.runtime.task.evaluation.TaskEvaluationQueue;
@@ -16,10 +15,6 @@ import org.spoofax.terms.io.binary.SAFWriter;
 import org.spoofax.terms.io.binary.TermReader;
 
 public class TaskManager {
-    public static FileObject cacheFile(FileObject location) throws FileSystemException {
-        return location.resolveFile(".cache/tasks");
-    }
-
     public static ITaskEngine create(ITermFactory termFactory) {
         final TaskEngine taskEngine = new TaskEngine(termFactory, new NonDeterministicCountingTermDigester());
         final ITaskEvaluationFrontend taskEvaluationFrontend = new TaskEvaluationQueue(taskEngine, termFactory);
@@ -48,7 +43,7 @@ public class TaskManager {
         return new TaskEngineFactory();
     }
 
-    
+
     private static IStrategoTerm readTerm(FileObject file, ITermFactory termFactory) throws ParseError, IOException {
         final TermReader termReader = new TermReader(termFactory);
         return termReader.parseFromStream(file.getContent().getInputStream());
