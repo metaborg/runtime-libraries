@@ -27,7 +27,7 @@ rules
   pp-DeclId               = pp-Analysis(prettyprint-DeclId)
   pp-RefId                = pp-Analysis(prettyprint-RefId)
   pp-Name                 = pp-Analysis(prettyprint-Name)
-  pp-Scope                = pp-Analysis(prettyprint-Scope)
+  pp-ScopeId              = pp-Analysis(prettyprint-ScopeId)
   pp-Pos                  = pp-Analysis(prettyprint-Pos)
   pp-Var                  = pp-Analysis(prettyprint-Var)
   pp-Constraint           = pp-Analysis(prettyprint-Constraint)

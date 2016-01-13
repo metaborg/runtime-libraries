@@ -53,8 +53,8 @@ rules
   sg-dot-arrow-from(|src,style): dst -> ${{<sg-dot-id> src} -> {<sg-dot-id> dst}[arrowhead="{style}",weight=1,constraint=true];}
   sg-dot-arrow-from(|src,style,weight,cons): dst -> ${{<sg-dot-id> src} -> {<sg-dot-id> dst}[arrowhead="{style}",weight={weight},constraint={cons}];}
 
-  sg-dot-id: Scope(s) -> $["[s]"]
-  sg-dot-lbl: Scope(s) -> $[<[s]>]
+  sg-dot-id: ScopeId(s) -> $["[s]"]
+  sg-dot-lbl: ScopeId(s) -> $[<[s]>]
 
   sg-dot-id: Var(s) -> $["s[s]?"]
   sg-dot-lbl: Var(s) -> $[<&sigmaf;<sub>[s]</sub>>]

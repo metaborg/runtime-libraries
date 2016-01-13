@@ -15,9 +15,9 @@ context-free syntax
     }
   >
  
-  ScopeEntry = <<Scope> = <ScopeImpl>>
+  ScopeEntry = <<ScopeId> = <Scope>>
  
-  ScopeImpl.S = <
+  Scope.S = <
     {
       decls        = <{DeclId ", "}*>
       refs         = <{RefId ", "}*>
@@ -26,6 +26,6 @@ context-free syntax
     }
   >
  
-  DirectEdgeEntry = <<Label>/<Scope>/<Term>>
+  DirectEdgeEntry = <<Label>/<ScopeId>/<Term>>
   NamedEdgeEntry = <<Label>/<RefId>/<Term>>
-  AssocEntry = <<Pos> : <Scope>>
+  AssocEntry = <<Pos> : <ScopeId>>

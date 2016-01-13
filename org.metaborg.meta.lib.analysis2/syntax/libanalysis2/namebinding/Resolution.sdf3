@@ -20,8 +20,8 @@ context-free syntax
   Path            = {Step "\n"}*
 
   Step.D          = <D(<DeclId>)>
-  Step.E          = <E(<Label>,<Scope>)/<Term>>
-  Step.N          = <N(<Label>,<RefId>,<Scope>)/<Term>>
+  Step.E          = <E(<Label>,<ScopeId>)/<Term>>
+  Step.N          = <N(<Label>,<RefId>,<ScopeId>)/<Term>>
  
 context-free syntax
 

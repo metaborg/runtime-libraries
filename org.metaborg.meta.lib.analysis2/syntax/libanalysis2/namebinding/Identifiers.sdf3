@@ -8,9 +8,9 @@ imports
 
 context-free syntax
 
-  Scope.Global              = <global>
-  Scope.Scope               = <scope(<Int>)>
-  Scope                     = Var
+  ScopeId.Global            = <global>
+  ScopeId.ScopeId           = <scope(<Int>)>
+  ScopeId                   = Var
 
   DeclId.DeclId             = <decl(<Namespace>,<String>,<ASTPos>)>
   DeclId                    = Var

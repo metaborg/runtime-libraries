@@ -67,7 +67,7 @@ rules
   prettyprint-Term = prettyprint-DeclId
   prettyprint-Term = prettyprint-RefId
   prettyprint-Term = prettyprint-Name
-  prettyprint-Term = prettyprint-Scope
+  prettyprint-Term = prettyprint-ScopeId
   prettyprint-Term = prettyprint-Pos
   prettyprint-Term = prettyprint-Var
   prettyprint-Term = prettyprint-Constraint

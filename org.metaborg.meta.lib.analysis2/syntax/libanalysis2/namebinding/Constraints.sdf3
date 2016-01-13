@@ -12,13 +12,13 @@ imports
 
 context-free syntax
 
-  Constraint.FDecl          = <<DeclId> in <Scope>>
-  Constraint.FRef           = <<RefId> in <Scope>>
-  Constraint.FDirectEdge    = <<Label> import <Scope>/<Term> in <Scope>>
-  Constraint.FNamedEdge     = <<Label> import <RefId>/<Term> in <Scope>>
-  Constraint.FAssoc         = <<Pos> with <Scope>>
+  Constraint.FDecl          = <<DeclId> in <ScopeId>>
+  Constraint.FRef           = <<RefId> in <ScopeId>>
+  Constraint.FDirectEdge    = <<Label> import <ScopeId>/<Term> in <ScopeId>>
+  Constraint.FNamedEdge     = <<Label> import <RefId>/<Term> in <ScopeId>>
+  Constraint.FAssoc         = <<Pos> with <ScopeId>>
 
-  Constraint.CAssoc         = [[DeclId] ~~> [Scope] [Message]]
+  Constraint.CAssoc         = [[DeclId] ~~> [ScopeId] [Message]]
   Constraint.CResolves      = [[RefId] |-[Labels]-> [DeclId] [Message]]
 
   Labels = <[<{Term ","}*>]>
@@ -30,9 +30,9 @@ context-free syntax
   Constraint.CSubset        = <<Names> in <Names> <Message>>
   Constraint.CDisjoint      = <<Names> # <Names> <Message>>
   
-  Names.Declarations  = <D(<NamespaceMatch>,<Scope>)>
-  Names.References    = <R(<NamespaceMatch>,<Scope>)>
-  Names.Visibles      = <V(<NamespaceMatch>,<Scope>)>
-  Names.Reachables    = <W(<NamespaceMatch>,<Scope>)>
+  Names.Declarations  = <D(<NamespaceMatch>,<ScopeId>)>
+  Names.References    = <R(<NamespaceMatch>,<ScopeId>)>
+  Names.Visibles      = <V(<NamespaceMatch>,<ScopeId>)>
+  Names.Reachables    = <W(<NamespaceMatch>,<ScopeId>)>
 
   Placeholder.NAMES   = <NAMES>
