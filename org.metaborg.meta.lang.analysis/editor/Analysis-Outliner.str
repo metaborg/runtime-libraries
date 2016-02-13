@@ -4,7 +4,6 @@ imports
   include/Analysis
   lib/runtime/editor/outline-library
   lib/runtime/editor/origins
-  editor/Analysis-Outliner.generated
 
 rules
   

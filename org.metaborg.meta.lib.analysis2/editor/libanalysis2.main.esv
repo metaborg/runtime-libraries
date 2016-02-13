@@ -1,0 +1,11 @@
+module libanalysis2.main
+
+language
+
+  name                    : libanalysis2
+
+  SDF includes            : include/libanalysis2.def
+  TemplateLang includes   : syntax
+  ds includes             : src-gen/ds-signatures
+  Stratego-Sugar includes : trans, src-gen, .
+  EditorService includes  : editor

@@ -1,0 +1,8 @@
+module runtime/analysis/interface
+
+rules
+
+  editor-analyze = fail
+	
+	analysis-builtin-sources = fail
+	

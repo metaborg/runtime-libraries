@@ -1,0 +1,15 @@
+module runtime/analysis/resolve
+
+imports
+	
+	runtime/nabl/resolve
+	runtime/nabl/entries
+	runtime/index/query
+	
+rules
+	
+	analysis-resolve(|language, project-path):
+		node -> definition'
+		where
+    	definition  := <has-annos; get-annos; fetch-elem(?Use(<id>)); task-get-results; Hd> node;
+    	definition' := <index-get-one-value> definition // Get definition from index again to get updated origin location.

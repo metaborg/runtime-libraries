@@ -2,21 +2,18 @@ module Index
 
 imports
 
-	Term
+  Term
 
-templates
+context-free syntax
 
-	Section.Index =
-<index <Term>
+  Section.Index = <index <Term>
 
-	<Entry*; separator="\n">
->
-
-	Entry.Def    = <def <Term>>
-	Entry.Use    = <use <Term>>
-	Entry.Prop   = <prop <Term> -- <Term> \>\> <Term>>
-	Entry.Alias  = <alias <Term> -\> <Term>>
-	Entry.IAlias = <alias <Term> \<- <Term>>
-	Entry.Rel    = <rel <Term> \<<Term>: <Term>>
-	
-	Term = <<Entry>>
+  <{Entry "\n"}*>
+> 
+  Entry.Def = <def <Term>> 
+  Entry.Use = <use <Term>> 
+  Entry.Prop = <prop <Term> -- <Term> \>\> <Term>> 
+  Entry.Alias = <alias <Term> -\> <Term>> 
+  Entry.IAlias = <alias <Term> \<- <Term>> 
+  Entry.Rel = <rel <Term> \<<Term>: <Term>> 
+  Term = <<Entry>> 

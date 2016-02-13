@@ -1,7 +1,0 @@
-module modelware/modelware
-
-imports
-	
-	libstratego-lib
-	
-	modelware/-

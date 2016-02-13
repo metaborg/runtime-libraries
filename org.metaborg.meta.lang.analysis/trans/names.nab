@@ -1,13 +1,13 @@
 module names
 
 imports
-	
-	include/Analysis
-	
+
+	syntax/Analysis
+
 namespaces
 
 	Task
-	
+
 binding rules
 
 	Sections(_):
@@ -15,6 +15,6 @@ binding rules
 
 	TaskDef(t, _, _, _, _):
 		defines Task t
-		
+
 	TaskRef(t):
 		refers to Task t
