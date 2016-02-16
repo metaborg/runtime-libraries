@@ -4,7 +4,6 @@
   xmlns="http://maven.apache.org/POM/4.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 >
-
   <modelVersion>4.0.0</modelVersion>
   <name>libanalysis2</name>
   <artifactId>org.metaborg.meta.lib.analysis2</artifactId>
@@ -71,5 +70,4 @@
       </plugin>
     </plugins>
   </build>
-
 </project>
