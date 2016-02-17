@@ -1,31 +1,54 @@
 ---
-metaborgVersion: "2.0.0-SNAPSHOT"
-id: "org.metaborg:org.metaborg.meta.lib.analysis2:${metaborgVersion}"
-name: "libanalysis2"
-format: "ctree"
-compileDependencies:
-- "org.metaborg:org.metaborg.meta.lang.esv:${metaborgVersion}"
-- "org.metaborg:org.metaborg.meta.lang.template:${metaborgVersion}"
-runtimeDependencies:
-- "org.metaborg:org.metaborg.meta.lib.analysis:${metaborgVersion}"
+id: org.metaborg:org.metaborg.meta.lib.analysis2:${metaborgVersion}
+name: libanalysis2
+metaborgVersion: 2.0.0-SNAPSHOT
+dependencies:
+  compile:
+  - org.metaborg:org.metaborg.meta.lang.esv:${metaborgVersion}
+  - org.metaborg:org.metaborg.meta.lang.template:${metaborgVersion}
+  source:
+  - org.metaborg:org.metaborg.meta.lib.analysis:${metaborgVersion}
+exports:
+- export:
+    language: SDF
+    file: include/libanalysis2.def
+- export:
+    language: TemplateLang
+    directory: syntax
+- export:
+    language: ds
+    directory: src-gen/ds-signatures
+- export:
+    language: Stratego-Sugar
+    directory: trans
+- export:
+    language: Stratego-Sugar
+    directory: src-gen
+- export:
+    language: Stratego-Sugar
+    directory: .
+- export:
+    language: EditorService
+    directory: editor
 pardonedLanguages:
-- "EditorService"
-- "Stratego-Sugar"
-- "SDF"
+- EditorService
+- Stratego-Sugar
+- SDF
 language:
   stratego:
+    format: ctree
     args:
-    - "-la"
-    - "stratego-lib"
-    - "-la"
-    - "stratego-sglr"
-    - "-la"
-    - "stratego-gpp"
-    - "-la"
-    - "stratego-xtc"
-    - "-la"
-    - "stratego-aterm"
-    - "-la"
-    - "stratego-sdf"
-    - "-la"
-    - "strc"
+    - -la
+    - stratego-lib
+    - -la
+    - stratego-sglr
+    - -la
+    - stratego-gpp
+    - -la
+    - stratego-xtc
+    - -la
+    - stratego-aterm
+    - -la
+    - stratego-sdf
+    - -la
+    - strc

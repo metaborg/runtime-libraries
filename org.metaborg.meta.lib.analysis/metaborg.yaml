@@ -1,35 +1,37 @@
 ---
-id: "org.metaborg:org.metaborg.meta.lib.analysis:${metaborgVersion}"
-name: "runtime-libraries"
-metaborgVersion: "2.0.0-SNAPSHOT"
-metaborgBaselineVersion: "1.5.0-baseline-20150917-172646"
+id: org.metaborg:org.metaborg.meta.lib.analysis:${metaborgVersion}
+name: runtime-libraries
+metaborgVersion: 2.0.0-SNAPSHOT
+metaborgBaselineVersion: 1.5.0-baseline-20150917-172646
 dependencies:
   compile:
-  - "org.metaborg:org.metaborg.meta.lang.esv:${metaborgBaselineVersion}"
-  - "org.metaborg:org.metaborg.meta.lang.stratego:${metaborgBaselineVersion}"
+  - org.metaborg:org.metaborg.meta.lang.esv:${metaborgBaselineVersion}
+  - org.metaborg:org.metaborg.meta.lang.stratego:${metaborgBaselineVersion}
+  source:
+  - org.metaborg:org.metaborg.meta.lib.analysis:${metaborgBaselineVersion} # not needed, used for debugging
 exports:
 - export:
     language: Stratego-Sugar
     directory: trans
 pardonedLanguages:
-- "EditorService"
-- "Stratego-Sugar"
-- "SDF"
-format: "ctree"
+- EditorService
+- Stratego-Sugar
+- SDF
 language:
   stratego:
+    format: ctree
     args:
-    - "-la"
-    - "stratego-lib"
-    - "-la"
-    - "stratego-sglr"
-    - "-la"
-    - "stratego-gpp"
-    - "-la"
-    - "stratego-xtc"
-    - "-la"
-    - "stratego-aterm"
-    - "-la"
-    - "stratego-sdf"
-    - "-la"
-    - "strc"
+    - -la
+    - stratego-lib
+    - -la
+    - stratego-sglr
+    - -la
+    - stratego-gpp
+    - -la
+    - stratego-xtc
+    - -la
+    - stratego-aterm
+    - -la
+    - stratego-sdf
+    - -la
+    - strc
