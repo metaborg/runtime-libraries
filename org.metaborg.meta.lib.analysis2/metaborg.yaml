@@ -20,7 +20,7 @@ exports:
 - language: Stratego-Sugar
   directory: src-gen
 - language: Stratego-Sugar
-  directory: .
+  directory: ./
 - language: EditorService
   directory: editor
 pardonedLanguages:
