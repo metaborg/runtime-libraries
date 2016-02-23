@@ -3,5 +3,3 @@ module runtime-libraries.main
 language
 
   name : runtime-libraries
-
-  Stratego-Sugar includes : trans

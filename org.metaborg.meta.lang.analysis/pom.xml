@@ -6,7 +6,6 @@
 >
   <modelVersion>4.0.0</modelVersion>
   <artifactId>org.metaborg.meta.lang.analysis</artifactId>
-  <name>Analysis</name>
   <packaging>spoofax-language</packaging>
 
   <parent>
@@ -15,54 +14,4 @@
     <version>2.0.0-SNAPSHOT</version>
     <relativePath>../../releng/parent/language</relativePath>
   </parent>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>org.metaborg.meta.lib.analysis</artifactId>
-      <version>${metaborg-version}</version>
-      <type>spoofax-language</type>
-      <scope>${metaborg-meta-lang-scope}</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>org.metaborg.meta.lang.template</artifactId>
-      <version>${metaborg-version}</version>
-      <type>spoofax-language</type>
-      <scope>${metaborg-meta-lang-scope}</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>org.metaborg.meta.lang.nabl</artifactId>
-      <version>${metaborg-version}</version>
-      <type>spoofax-language</type>
-      <scope>${metaborg-meta-lang-scope}</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>org.metaborg.meta.lang.ts</artifactId>
-      <version>${metaborg-version}</version>
-      <type>spoofax-language</type>
-      <scope>${metaborg-meta-lang-scope}</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.metaborg</groupId>
-      <artifactId>org.metaborg.meta.lang.esv</artifactId>
-      <version>${metaborg-version}</version>
-      <type>spoofax-language</type>
-      <scope>${metaborg-meta-lang-scope}</scope>
-    </dependency>
-  </dependencies>
-
-  <build>
-    <plugins>
-      <plugin>
-        <groupId>org.metaborg</groupId>
-        <artifactId>spoofax-maven-plugin</artifactId>
-        <version>${metaborg-version}</version>
-        <extensions>true</extensions>
-      </plugin>
-    </plugins>
-  </build>
 </project>
