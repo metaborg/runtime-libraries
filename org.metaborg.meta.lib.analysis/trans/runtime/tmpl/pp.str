@@ -18,7 +18,7 @@ strategies
   pp-one-V(pp) = pp-one(pp); (?[] <+ !V([], <id>))
   pp-one-Z(pp) = pp-one(pp); (?[] <+ !Z([], <id>))
 
-  pp-option(pp) = \None() -> []\ + ?Some(<pp>)
+  pp-option(pp) = (is-string; pp) <+ \None() -> []\ + ?Some(<pp>)
 
   pp-V-list(pp)    = ?[] <+ !V([], <map(pp-one-V(pp))>)
   pp-V-list(pp|vs) = ?[] <+ !V([SOpt(VS(), vs)], <map(pp-one-V(pp))>)
@@ -34,6 +34,8 @@ strategies
 
   pp-HZ-list(pp)     = ?[] <+ !HZ([SOpt(HS(), "0")], <map(pp-one-Z(pp))>)
   pp-HZ-list(pp|sep) = ?[] <+ !HZ([SOpt(HS(), "0")], <map(pp-one-Z(pp)); separate-by(|S(sep))>)
+  
+  prettyprint-origin-term = (?""; ![]) <+ ![S(<is-string>)]
 
 rules
   
