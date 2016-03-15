@@ -1,0 +1,12 @@
+module runtime/completion/interface
+
+// interface for collecting the suggestions
+// getting the indentation, ws and separator
+rules
+    suggest-completions(|iset) = fail   
+    get-indent                 = fail
+    get-leading-ws             = fail
+    get-separator              = fail
+    pp-completion              = fail
+
+

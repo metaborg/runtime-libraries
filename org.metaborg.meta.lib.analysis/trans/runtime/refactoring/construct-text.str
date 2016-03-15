@@ -43,7 +43,7 @@ construct-text-from-source(pp, parenthesize, override-reconstruction, resugar):
 		<has-origin-term> oldnode	
 	with
 		parenthesized-node := <try(parenthesize)> newnode;
-		reconstructed-text := <topdown(try(strip-annos)); construct-text-from-old(pp, override-reconstruction, resugar)> (oldnode, parenthesized-node); 
+		reconstructed-text := <topdown(try(strip-annos)); construct-text-from-old(pp, override-reconstruction, resugar)> (oldnode, parenthesized-node);
 		newText := <origin-set-relation>(parenthesized-node, reconstructed-text)
 
 /*
@@ -129,10 +129,12 @@ construct-text-by-pp(pp, override-reconstruction, resugar):
 	node -> text
 	where 
 		text := <
-			all(alltd(is-string <+ construct-text-with-comments(pp, override-reconstruction, resugar|<DEFAULT-INDENT>))); 
+			all(alltd(is-string <+ is-completion-placeholder <+ try(construct-text-with-comments(pp, override-reconstruction, resugar|<DEFAULT-INDENT>))));
 			topdown(try(pp-default(pp))); //handle brackets
 			pp
 		> node
+
+is-completion-placeholder = where(get-constructor; is-substring(!"-Plhdr")); id
 
 construct-text-with-comments(pp, override-reconstruction, resugar|default-indent) = 
 	construct-text-with-comments-desugared(pp, override-reconstruction, resugar|default-indent) <+

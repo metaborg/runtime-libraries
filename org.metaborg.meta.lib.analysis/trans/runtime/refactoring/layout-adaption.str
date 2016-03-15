@@ -87,7 +87,6 @@ construct-text-list-element-last(pp, override-reconstruction, resugar|origin-nod
 		comments-after := <comments-after; correct-indentation(|elem); adapt-indentation(|origin-node)> elem;
 		elem-text := <concat-strings; trim-trailing-whitespace> [indented-prefix-text, " ", comments-after]
 
-
 rules //helper rules indentation
 
 /*
