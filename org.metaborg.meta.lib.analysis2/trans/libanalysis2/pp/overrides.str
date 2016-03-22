@@ -10,7 +10,7 @@ imports
   pp/libanalysis2/positioning/-
   pp/libanalysis2/solver/-
   pp/libanalysis2/typechecking/-
-  editor-common.generated
+  stratego/metaborg
 
 rules
 

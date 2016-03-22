@@ -2,7 +2,7 @@ module convert
 
 imports
 	
-	include/Analysis
+	signatures/Analysis-sig
 	runtime/task/tasks
 	runtime/task/messages
 	runtime/nabl/tasks
