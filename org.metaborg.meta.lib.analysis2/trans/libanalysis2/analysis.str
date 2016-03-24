@@ -20,7 +20,7 @@ imports
   libanalysis2/solver/-
   libanalysis2/prelude/-
   libanalysis2/pp
-  editor-common.generated
+  stratego/metaborg
 
 rules // analysis
 

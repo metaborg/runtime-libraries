@@ -1,4 +1,4 @@
-module Analysis-Colorer
+module Colorer
 
 imports 
 

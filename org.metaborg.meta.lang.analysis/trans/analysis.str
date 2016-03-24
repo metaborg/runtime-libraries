@@ -5,8 +5,8 @@ imports
 	libstratego-lib
 	libstratego-gpp
 	libstratego-aterm
-	include/Analysis
-	editor-common.generated
+	signatures/Analysis-sig
+	stratego/metaborg
 	runtime/analysis/-
 	runtime/nabl/-
 	runtime/task/-

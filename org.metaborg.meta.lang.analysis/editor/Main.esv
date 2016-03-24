@@ -1,0 +1,22 @@
+module Main
+
+imports 
+
+  Colorer
+  Menus
+  Syntax
+
+language
+
+  extensions : task, index, analysis
+  
+  table         : target/metaborg/sdf.tbl
+  start symbols : Start
+
+  provider : target/metaborg/stratego.ctree
+  observer : editor-analyze (multifile)
+
+references
+
+  reference _ : editor-resolve
+  hover _     : editor-hover
