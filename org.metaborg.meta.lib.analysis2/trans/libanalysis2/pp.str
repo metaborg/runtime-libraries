@@ -4,7 +4,6 @@ imports
 
   libstratego-gpp
   runtime/tmpl/pp
-  include/libanalysis2-parenthesize
   signatures/libanalysis2/namebinding/-
   signatures/libanalysis2/positioning/-
   signatures/libanalysis2/typechecking/-
@@ -19,8 +18,7 @@ imports
 rules
 
   pp-Analysis(pp) =
-      parenthesize-libanalysis2
-    ; (pp <+ debug(!"WARNING: Could not pp ") ; prettyprint-Term)
+      (pp <+ debug(!"WARNING: Could not pp ") ; prettyprint-Term)
     ; !V([], <id>)
     ; box2text-string(|120)
 
