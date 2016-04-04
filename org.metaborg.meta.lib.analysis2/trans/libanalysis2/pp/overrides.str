@@ -52,6 +52,13 @@ rules
     with line'   := <(origin-line;inc<+!-1);int-to-string> t
     with column' := <(origin-column;inc<+!-1);int-to-string> t
 
+  prettyprint-String:
+    t -> [ H( [SOpt(HS(), "0")]
+            , [S("[[...]]")]
+            )
+         ]
+    where is-SDF-placeholder
+
 rules
 
   check-Int = is-int
