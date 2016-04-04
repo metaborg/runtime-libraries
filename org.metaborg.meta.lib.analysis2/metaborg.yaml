@@ -23,9 +23,6 @@ exports:
 - language: Stratego-Sugar
   directory: src-gen
   includes: "**/*.str"
-- language: Stratego-Sugar
-  directory: "."
-  includes: "include/libanalysis2-parenthesize.str"
 - language: EditorService
   directory: editor
   includes: "libanalysis2/**/*.esv"

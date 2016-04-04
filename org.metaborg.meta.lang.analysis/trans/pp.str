@@ -3,7 +3,7 @@ module pp
 imports
 	
 	libstratego-gpp
-	include/Analysis-parenthesize
+	pp/Analysis-parenthesize
 	runtime/tmpl/pp
 	pp/Analysis-pp
 	

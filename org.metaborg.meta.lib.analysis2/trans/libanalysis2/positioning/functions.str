@@ -3,7 +3,7 @@ module libanalysis2/positioning/functions
 imports
   runtime/editor/annotations
   runtime/editor/origins
-  editor-common.generated
+  stratego/metaborg
 
   libanalysis2/prelude/-
   signatures/libanalysis2/positioning/-
