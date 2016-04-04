@@ -17,23 +17,6 @@ rules //Parenthetical
 
   origin-indent = ?Parenthetical(<origin-indent>)
 
-rules //pp rules for default nodes 
-	  
-  pp-default(pp):
-  	Parenthetical(node) -> <concat-strings> ["(", <pp> node, ")"]
-  
-  pp-default(pp):
-  	None() -> ""
-
-  pp-default(pp):
-  	Some(x) -> <pp> x
-
-  //pp-default(pp): amb([h|tail])
-
-  pp-default(pp) = is-string
-
-  pp-default(pp) = int-to-string
-  
 rules //interface
 
 construct-text-from-source(pp, parenthesize, override-reconstruction, resugar):
@@ -91,7 +74,6 @@ construct-textual-change(pp|pp-table)=
 rules //text-reconstruction
 
 construct-text(pp, override-reconstruction, resugar) = 
-	pp-default(construct-text(pp, override-reconstruction, resugar)) <+ //Parenthesis, None, ...
 	construct-text-from-origin-desugared(pp, override-reconstruction, resugar) <+ 
 	construct-text-from-origin(pp, override-reconstruction, resugar) <+
 	construct-text-by-pp(pp, override-reconstruction, resugar) <+
@@ -128,11 +110,22 @@ construct-text-from-origin(pp, override-reconstruction, resugar):
 construct-text-by-pp(pp, override-reconstruction, resugar):
 	node -> text
 	where 
-		text := <
+		text := < ?Parenthetical(<id>);
 			all(alltd(is-string <+ is-completion-placeholder <+ try(construct-text-with-comments(pp, override-reconstruction, resugar|<DEFAULT-INDENT>))));
-			topdown(try(pp-default(pp))); //handle brackets
+			!Parenthetical(<id>);
 			pp
 		> node
+
+construct-text-by-pp(pp, override-reconstruction, resugar):
+  node -> text
+  where
+    not(?Parenthetical(_)) 
+  where 
+    text := < 
+      all(alltd((is-string <+ is-completion-placeholder <+ try(construct-text-with-comments(pp, override-reconstruction, resugar|<DEFAULT-INDENT>)))));
+      pp
+    > node		
+		
 
 is-completion-placeholder = where(get-constructor; is-substring(!"-Plhdr")); id
 

@@ -14,7 +14,6 @@ rules
         suggestion-is := <new-iset>;
         suggestion*   := <try(suggest-completions(|suggestion-is)); <iset-elements> suggestion-is> placeholder;
         proposal*     := <map(get-text-from-placeholder-expand(|placeholder))> suggestion*   
-        
          
     get-text-from-placeholder-expand(|old-term) :
       (name, completion-term) ->(name, description, change)

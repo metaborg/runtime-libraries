@@ -8,5 +8,6 @@ rules
     get-leading-ws             = fail
     get-separator              = fail
     pp-completion              = fail
+    parenthesize-completion    = fail
 
 
