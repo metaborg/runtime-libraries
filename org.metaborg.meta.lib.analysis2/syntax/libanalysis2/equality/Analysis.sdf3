@@ -1,0 +1,14 @@
+module libanalysis2/equality/Analysis
+
+imports
+
+  libanalysis2/Common
+  libanalysis2/solver/VarOps
+
+context-free syntax
+
+  AnalysisResult.Substitution = <
+    substitution := 
+      <{Substitution "\n"}*>
+  >
+  Substitution = [[Var] |--> [Term]]

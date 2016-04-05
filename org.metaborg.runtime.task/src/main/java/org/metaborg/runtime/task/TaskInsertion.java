@@ -10,7 +10,6 @@ import java.util.Set;
 
 import org.metaborg.runtime.task.engine.ITaskEngine;
 import org.metaborg.util.iterators.Iterables2;
-import org.metaborg.util.iterators.SingletonIterable;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.library.ssl.StrategoHashMap;
 import org.spoofax.interpreter.stratego.Strategy;
@@ -50,7 +49,7 @@ public final class TaskInsertion {
                     return P.p(Iterables2.singleton(instruction), false);
                 } else {
                     return insertResultCombinations(taskEngine, context, collect, insert, instruction,
-                        actualDependencies, new SingletonIterable<IStrategoTerm>(taskID), singleLevel);
+                        actualDependencies, Iterables2.singleton(taskID), singleLevel);
                 }
             }
             case Combinator: {
@@ -143,7 +142,7 @@ public final class TaskInsertion {
         final ITask task = taskEngine.getTask(taskID);
 
         if(!task.solved()) {
-            return Either.right(new SingletonIterable<IStrategoTerm>(taskID));
+            return Either.right(Iterables2.singleton(taskID));
         } else if(task.failed() || task.results().empty()) {
             return null; // If a dependency does not have any results, the task cannot be executed.
         }

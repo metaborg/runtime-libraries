@@ -1,0 +1,10 @@
+module runtime/analysis/complete
+
+imports
+	
+	runtime/nabl/complete
+	
+rules
+	
+	analysis-propose-completions(|language, project-path):
+		ast -> <nabl-propose-completions> ast

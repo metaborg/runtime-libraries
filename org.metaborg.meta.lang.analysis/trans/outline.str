@@ -2,14 +2,16 @@ module outline
 
 imports
 	
-	include/Analysis
-	lib/runtime/editor/outline-library
+	signatures/Analysis-sig
+	runtime/editor/outline-library
 
 strategies
 	
   outline = simple-label-outline(to-outline-label)
 
 rules
+  
+  outline-expand-to-level = !3
   
   to-outline-label: 
   	TaskDef(task-id, _, _, _, _) -> task-id 

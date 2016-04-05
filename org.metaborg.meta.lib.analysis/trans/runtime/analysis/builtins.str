@@ -1,0 +1,20 @@
+module runtime/analysis/builtins
+
+imports
+	
+	runtime/analysis/core
+	runtime/analysis/interface
+	
+rules
+
+	analysis-analyze-builtin-sources(collector|language) =
+		analysis-get-builtin-sources; map(analysis-analyze-builtin-sources(collector|language))	
+
+	analysis-get-builtin-sources =
+		analysis-builtin-sources <+ ![]
+
+	analysis-analyze-builtin-sources(collector|language):
+		(source, ast) -> analyzed-ast
+		with
+	    Result([FileResult(_, _, analyzed-ast, _, _, _)], _, _, _, _) := 
+	    	<analyze-all-no-builtins(id, collector, id, id|language)> [File(source, ast, -1.0)]

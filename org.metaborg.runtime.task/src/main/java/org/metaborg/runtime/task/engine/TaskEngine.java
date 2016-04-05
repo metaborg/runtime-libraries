@@ -34,7 +34,6 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
 public class TaskEngine implements ITaskEngine {
-    private ITaskEngine wrapper;
     private final ITermFactory factory;
     private final ITermDigester digester;
     private ITaskEvaluationFrontend evaluationFrontend;
@@ -52,20 +51,16 @@ public class TaskEngine implements ITaskEngine {
 
 
     /** Origins of tasks. */
-    private final BiSetMultimap<IStrategoTerm, IStrategoTerm> toSource = BiLinkedHashMultimap
-        .create();
+    private final BiSetMultimap<IStrategoTerm, IStrategoTerm> toSource = BiLinkedHashMultimap.create();
 
     /** Bidirectional mapping of dependencies between tasks identifiers. */
-    private final BiSetMultimap<IStrategoTerm, IStrategoTerm> toDependency = BiLinkedHashMultimap
-        .create();
+    private final BiSetMultimap<IStrategoTerm, IStrategoTerm> toDependency = BiLinkedHashMultimap.create();
 
     /** Bidirectional mapping of dynamic dependencies between tasks identifiers. Can be updated during evaluation. */
-    private final BiSetMultimap<IStrategoTerm, IStrategoTerm> toDynamicDependency =
-        BiLinkedHashMultimap.create();
+    private final BiSetMultimap<IStrategoTerm, IStrategoTerm> toDynamicDependency = BiLinkedHashMultimap.create();
 
     /** Bidirectional mapping from task identifiers to URI's that they read during evaluation. */
-    private final BiSetMultimap<IStrategoTerm, IStrategoTerm> toRead = BiLinkedHashMultimap
-        .create();
+    private final BiSetMultimap<IStrategoTerm, IStrategoTerm> toRead = BiLinkedHashMultimap.create();
 
 
     /** Tasks that do not have a source are garbage. **/
@@ -84,10 +79,6 @@ public class TaskEngine implements ITaskEngine {
         this.taskCollection = new TaskCollection();
         this.baseTaskFactory = new BaseTaskFactory(factory, this);
         this.resultConstructor = factory.makeConstructor("Result", 1);
-    }
-
-    public void setWrapper(ITaskEngine wrapper) {
-        this.wrapper = wrapper;
     }
 
 
@@ -118,21 +109,21 @@ public class TaskEngine implements ITaskEngine {
 
 
     @Override public void startCollection(IStrategoTerm source) {
-        taskCollection.startCollection(source, wrapper.getFromSource(source));
+        taskCollection.startCollection(source, getFromSource(source));
     }
 
     @Override public IStrategoTerm createTaskID(IStrategoAppl instruction, IStrategoList dependencies) {
-        IStrategoTerm taskID = wrapper.getTaskID(instruction, dependencies);
+        IStrategoTerm taskID = getTaskID(instruction, dependencies);
         if(taskID != null)
             return taskID;
         taskID = digester.digest(factory, instruction, dependencies);
         toTaskID.put(instruction, dependencies, taskID);
-        final ITask task = wrapper.getTask(taskID);
+        final ITask task = getTask(taskID);
         if(task == null)
             return taskID;
         final IStrategoTerm instr = task.initialInstruction();
         if(!instruction.match(instr)) {
-            wrapper.reset();
+            reset();
             throw new IllegalStateException("Identifier collision, task " + instruction + " and " + instr
                 + " have the same identifier: " + taskID);
         }
@@ -151,7 +142,7 @@ public class TaskEngine implements ITaskEngine {
 
         final IStrategoTerm taskID = createTaskID(instruction, dependencies);
 
-        if(wrapper.getTask(taskID) == null) {
+        if(getTask(taskID) == null) {
             final ITask task =
                 taskFactory.create(instruction, dependencies, type, storageType, storageType, shortCircuit);
             toTask.put(taskID, task);
@@ -172,7 +163,7 @@ public class TaskEngine implements ITaskEngine {
     }
 
     @Override public void addPersistedTask(IStrategoTerm taskID, ITask task, IStrategoList initialDependencies) {
-        if(wrapper.getTask(taskID) != null)
+        if(getTask(taskID) != null)
             throw new RuntimeException("Trying to add a persisted task that already exists.");
 
         toTask.put(taskID, task);
@@ -210,8 +201,8 @@ public class TaskEngine implements ITaskEngine {
      */
     private void trashUnreferencedTasks(Iterable<IStrategoTerm> taskIDs, IStrategoTerm source) {
         for(final IStrategoTerm removed : taskIDs) {
-            wrapper.removeFromSource(removed, source);
-            if(wrapper.getSourcesOf(removed).isEmpty()) {
+            removeFromSource(removed, source);
+            if(getSourcesOf(removed).isEmpty()) {
                 garbage.add(removed);
             }
         }
@@ -222,7 +213,7 @@ public class TaskEngine implements ITaskEngine {
      */
     private void collectGarbage() {
         for(IStrategoTerm taskID; (taskID = garbage.poll()) != null;)
-            wrapper.removeTask(taskID);
+            removeTask(taskID);
     }
 
     /**
@@ -238,7 +229,7 @@ public class TaskEngine implements ITaskEngine {
     @Override public ITask invalidate(IStrategoTerm taskID) {
         ITask task = getTask(taskID);
         if(task == null) {
-            task = wrapper.getTask(taskID);
+            task = getTask(taskID);
             if(task == null)
                 throw new RuntimeException("Cannot invalidate task that does not exist: " + taskID);
             final ITaskFactory taskFactory = getTaskFactory(task.initialInstruction());
@@ -247,7 +238,7 @@ public class TaskEngine implements ITaskEngine {
         }
         task.unsolve();
         task.clearMessage();
-        wrapper.removeReads(taskID);
+        removeReads(taskID);
 
         return task;
     }
@@ -257,7 +248,7 @@ public class TaskEngine implements ITaskEngine {
         final Set<IStrategoTerm> seen = Sets.newHashSet();
         final Queue<IStrategoTerm> workList = Lists.newLinkedList();
         for(final IStrategoTerm changedRead : changedReads) {
-            Iterables.addAll(seen, wrapper.getReaders(changedRead));
+            Iterables.addAll(seen, getReaders(changedRead));
         }
         workList.addAll(seen);
 
@@ -265,7 +256,7 @@ public class TaskEngine implements ITaskEngine {
         for(IStrategoTerm taskID; (taskID = workList.poll()) != null;) {
             schedule(taskID);
 
-            final Iterable<IStrategoTerm> dependent = wrapper.getDependents(taskID, true);
+            final Iterable<IStrategoTerm> dependent = getDependents(taskID, true);
             for(IStrategoTerm dependentTaskID : dependent) {
                 if(seen.add(dependentTaskID)) {
                     workList.offer(dependentTaskID);
@@ -282,8 +273,8 @@ public class TaskEngine implements ITaskEngine {
             final ITask task = invalidate(taskID);
             task.clearInstructionOverride();
         }
-        wrapper.clearTimes();
-        wrapper.clearEvaluations();
+        clearTimes();
+        clearEvaluations();
 
         IStrategoTerm result = evaluationFrontend.evaluate(scheduled, context, collect, insert, perform);
         scheduled.clear();
@@ -369,7 +360,7 @@ public class TaskEngine implements ITaskEngine {
         seen.add(taskID);
 
         for(IStrategoTerm queueTaskID; (queueTaskID = queue.poll()) != null;) {
-            for(IStrategoTerm dependency : wrapper.getDependencies(queueTaskID, false)) {
+            for(IStrategoTerm dependency : getDependencies(queueTaskID, false)) {
                 if(seen.add(dependency))
                     queue.add(dependency);
             }
@@ -398,7 +389,7 @@ public class TaskEngine implements ITaskEngine {
         seen.add(taskIDTo);
 
         for(IStrategoTerm taskID; (taskID = queue.poll()) != null;) {
-            for(IStrategoTerm dependency : wrapper.getDependencies(taskID, false)) {
+            for(IStrategoTerm dependency : getDependencies(taskID, false)) {
                 if(dependency.equals(taskIDFrom))
                     return true;
                 if(seen.add(dependency))
