@@ -16,7 +16,7 @@ rules
   
   nabl2-constraint(|facts, constraints, scopes, position) = fail
   nabl2-scope(|facts, constraints, scopes, position) = fail
-  
+ 
 rules
 
   do-extract-constraint =
@@ -53,7 +53,9 @@ rules
   nabl2-traverse-children(|facts, constraints, scopes, position) =
     with(
       ?amb(_)
-    < where(<debug> "WARNING: Ignoring ambigous fragment.") 
+    < where(<debug> "WARNING: Ignoring ambigous fragment.")
+    + is-SDF-placeholder
+    < where(<debug> "WARNING: Ignoring placeholder.")
     + get-arguments;
     	map(nabl2-traverse(|facts, constraints, scopes, position))
     )
