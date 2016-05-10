@@ -5,6 +5,7 @@ imports
   runtime/editor/origins
   runtime/completion/core
   runtime/completion/interface
+  runtime/nabl/utils
 
 signature constructors 
    INSERTION_TERM    : NewTerm -> AST_CHANGE //Inserting a new term in the completed AST
@@ -16,7 +17,7 @@ rules
     (new-ast, completion-term, topmost-amb, parenthesized) -> (name, description, change) 
     where
       change      := <calculate-completion-change <+ create-insertion-or-replace(|topmost-amb)> completion-term;
-      description := <debug(!"change "); build-description-incorrect-programs(|parenthesized)> change;
+      description := <build-description-incorrect-programs(|parenthesized)> change;
       name        := <get-constructor> completion-term 
    
   create-insertion-or-replace(|topmost-amb):
@@ -47,13 +48,14 @@ rules
     (new-ast, completion-term, nestedCompletionName, replacement, parenthesized) -> (name, description, change)
     where
       name             := <concat-strings> [<get-constructor> completion-term, "-", nestedCompletionName];
-      change           := <create-change-nested-completion(|parenthesized); debug(!"change nested ")> (completion-term, replacement);
+      change           := <create-change-nested-completion(|parenthesized)> (completion-term, replacement);
       description      := <build-description-incorrect-programs(|<?REPLACE_TERM(_, <id>)> change)> change
 
   create-change-nested-completion(|parenthesized):
-    (term, REPLACE_TERM_TEXT(node, text)) -> REPLACE_TERM(term, completion-term-replaced)
-    where
-      completion-term-replaced := <topdown(try(match-node-origin(|node); <trim-whitespace> text))> parenthesized
+    (term, replace-change) -> REPLACE_TERM(term, completion-term-replaced)
+    where      
+      args* := <get-arguments; ?[subterm, replacement]> replace-change;
+      completion-term-replaced := <topdown(try(match-node-origin(|subterm); <trim-whitespace> replacement))> parenthesized
     
 
 //build description for completion inside lists in incorrect programs
@@ -217,9 +219,7 @@ rules
   build-description-incorrect-programs(|parenthesized):
     REPLACE_TERM(term, completion-term) -> <replace-indentation(|old-indent, "")> text
     where
-      <(origin-text; debug(!"origin text ")) <+ id> parenthesized 
-    where
-      text       := <debug(!"term "); parenthesize-completion; debug(!"parenthesized term "); construct-text-by-pp(pp-completion, override-reconstruction, resugar)> parenthesized;
+      text       := <parenthesize-completion; construct-text-by-pp(pp-completion, override-reconstruction, resugar)> parenthesized;
       old-indent := <origin-indent <+ !""> term
       
       
