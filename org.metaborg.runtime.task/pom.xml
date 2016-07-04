@@ -40,6 +40,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.google.code.findbugs</groupId>
+      <artifactId>jsr305</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.metaborg</groupId>
       <artifactId>org.spoofax.jsglr</artifactId>
       <version>${metaborg-version}</version>
