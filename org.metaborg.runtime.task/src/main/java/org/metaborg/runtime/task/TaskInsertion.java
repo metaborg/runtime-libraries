@@ -23,19 +23,95 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
-import fj.P;
-import fj.P2;
-import fj.data.Either;
-
 public final class TaskInsertion {
+    /**
+     * Data class representing either permutations or dynamic dependencies.
+     */
+    public static class PermsOrDeps {
+        public final Iterable<IStrategoTerm> permsOrDeps;
+        public final boolean hasDeps;
+
+
+        public PermsOrDeps(Iterable<IStrategoTerm> permsOrDeps, boolean hasDeps) {
+            this.permsOrDeps = permsOrDeps;
+            this.hasDeps = hasDeps;
+        }
+    }
+
+    /**
+     * Data class representing a result map or dynamic dependencies.
+     */
+    private static class ResultMapOrDeps {
+        public final Multimap<IStrategoTerm, IStrategoTerm> resultMap;
+        public final Iterable<IStrategoTerm> deps;
+
+
+        public ResultMapOrDeps(Multimap<IStrategoTerm, IStrategoTerm> resultMap) {
+            this.resultMap = resultMap;
+            this.deps = null;
+        }
+
+        public ResultMapOrDeps(Iterable<IStrategoTerm> deps) {
+            this.resultMap = null;
+            this.deps = deps;
+        }
+
+
+        public static ResultMapOrDeps resultMap(Multimap<IStrategoTerm, IStrategoTerm> resultMap) {
+            return new ResultMapOrDeps(resultMap);
+        }
+
+        public static ResultMapOrDeps deps(Iterable<IStrategoTerm> deps) {
+            return new ResultMapOrDeps(deps);
+        }
+
+
+        public boolean hasDeps() {
+            return this.deps != null;
+        }
+    }
+
+    /**
+     * Data class representing results or dynamic dependencies;
+     */
+    private static class ResultsOrDeps {
+        public final Collection<IStrategoTerm> results;
+        public final Iterable<IStrategoTerm> deps;
+
+
+        public ResultsOrDeps(Collection<IStrategoTerm> results) {
+            this.results = results;
+            this.deps = null;
+        }
+
+        public ResultsOrDeps(Iterable<IStrategoTerm> deps) {
+            this.results = null;
+            this.deps = deps;
+        }
+
+
+        public static ResultsOrDeps results(Collection<IStrategoTerm> results) {
+            return new ResultsOrDeps(results);
+        }
+
+        public static ResultsOrDeps deps(Iterable<IStrategoTerm> deps) {
+            return new ResultsOrDeps(deps);
+        }
+
+
+        public boolean hasDeps() {
+            return this.deps != null;
+        }
+    }
+
+
     /**
      * Returns all instruction permutations of given task based on its dependencies. For regular tasks,
      * {@link #insertResultCombinations} is called. For task combinators, {@link #insertResultLists} is called. This
      * function assumes that all dependencies of the given task have been solved (have a result or failed).
      */
-    public static P2<? extends Iterable<IStrategoTerm>, Boolean> taskCombinations(ITermFactory factory,
-        ITaskEngine taskEngine, IContext context, Strategy collect, Strategy insert, IStrategoTerm taskID, ITask task,
-        boolean singleLevel) {
+    public static PermsOrDeps taskCombinations(ITermFactory factory, ITaskEngine taskEngine, IContext context,
+        Strategy collect, Strategy insert, IStrategoTerm taskID, ITask task, boolean singleLevel) {
         final IStrategoTerm instruction = task.instruction();
         final Iterable<IStrategoTerm> actualDependencies = getResultIDs(context, collect, instruction);
 
@@ -46,18 +122,20 @@ public final class TaskInsertion {
                     return null;
 
                 if(Iterables.isEmpty(actualDependencies)) {
-                    return P.p(Iterables2.singleton(instruction), false);
+                    return new PermsOrDeps(Iterables2.singleton(instruction), false);
                 } else {
                     return insertResultCombinations(taskEngine, context, collect, insert, instruction,
                         actualDependencies, Iterables2.singleton(taskID), singleLevel);
                 }
             }
             case Combinator: {
-                return P.p(Iterables2.singleton(insertResultLists(factory, taskEngine, context, insert, instruction,
-                    actualDependencies)), false);
+                return new PermsOrDeps(
+                    Iterables2.singleton(
+                        insertResultLists(factory, taskEngine, context, insert, instruction, actualDependencies)),
+                    false);
             }
             case Raw: {
-                return P.p(Iterables2.singleton(instruction), false);
+                return new PermsOrDeps(Iterables2.singleton(instruction), false);
             }
             default: {
                 throw new RuntimeException("Task of type " + task.type() + " not handled.");
@@ -89,25 +167,24 @@ public final class TaskInsertion {
      * @return A 2-pair. If the second element is false, the first element contains permutations of the term. Otherwise
      *         it contains task IDs of dynamic task dependencies.
      */
-    public static P2<? extends Iterable<IStrategoTerm>, Boolean> insertResultCombinations(ITaskEngine taskEngine,
-        IContext context, Strategy collect, Strategy insert, IStrategoTerm term, Iterable<IStrategoTerm> dependencies,
-        Iterable<IStrategoTerm> initialSeen, boolean singleLevel) {
+    public static PermsOrDeps insertResultCombinations(ITaskEngine taskEngine, IContext context, Strategy collect,
+        Strategy insert, IStrategoTerm term, Iterable<IStrategoTerm> dependencies, Iterable<IStrategoTerm> initialSeen,
+        boolean singleLevel) {
         final Set<IStrategoTerm> seen = Sets.newHashSet(initialSeen);
-        final Either<Multimap<IStrategoTerm, IStrategoTerm>, ? extends Iterable<IStrategoTerm>> result =
+        final ResultMapOrDeps result =
             createResultMapping(taskEngine, context, collect, insert, dependencies, seen, singleLevel);
 
         if(result == null) {
             return null;
-        } else if(result.isRight()) {
-            return P.p(result.right().value(), true);
+        } else if(result.hasDeps()) {
+            return new PermsOrDeps(result.deps, true);
         } else {
-            return P.p(insertCarthesianProduct(context, insert, term, result.left().value()), false);
+            return new PermsOrDeps(insertCarthesianProduct(context, insert, term, result.resultMap), false);
         }
     }
 
-    private static Either<Multimap<IStrategoTerm, IStrategoTerm>, ? extends Iterable<IStrategoTerm>>
-        createResultMapping(ITaskEngine taskEngine, IContext context, Strategy collect, Strategy insert,
-            Iterable<IStrategoTerm> resultIDs, Set<IStrategoTerm> seen, boolean singleLevel) {
+    private static ResultMapOrDeps createResultMapping(ITaskEngine taskEngine, IContext context, Strategy collect,
+        Strategy insert, Iterable<IStrategoTerm> resultIDs, Set<IStrategoTerm> seen, boolean singleLevel) {
         final Multimap<IStrategoTerm, IStrategoTerm> resultsMap = ArrayListMultimap.create();
         final Collection<IStrategoTerm> dynamicDependencies = Lists.newLinkedList();
 
@@ -117,32 +194,31 @@ public final class TaskInsertion {
                 continue;
             }
 
-            final Either<Collection<IStrategoTerm>, ? extends Iterable<IStrategoTerm>> results =
+            final ResultsOrDeps results =
                 getResultsOf(taskEngine, context, collect, insert, resultID, Sets.newHashSet(seen), singleLevel);
 
             if(results == null) {
                 return null;
-            } else if(results.isRight()) {
-                Iterables.addAll(dynamicDependencies, results.right().value());
+            } else if(results.hasDeps()) {
+                Iterables.addAll(dynamicDependencies, results.deps);
             } else {
-                resultsMap.putAll(resultID, results.left().value());
+                resultsMap.putAll(resultID, results.results);
             }
         }
 
         if(dynamicDependencies.isEmpty())
-            return Either.left(resultsMap);
+            return ResultMapOrDeps.resultMap(resultsMap);
         else
-            return Either.right(dynamicDependencies);
+            return ResultMapOrDeps.deps(dynamicDependencies);
     }
 
-    private static Either<Collection<IStrategoTerm>, ? extends Iterable<IStrategoTerm>> getResultsOf(
-        ITaskEngine taskEngine, IContext context, Strategy collect, Strategy insert, IStrategoTerm taskID,
-        Set<IStrategoTerm> seen, boolean singleLevel) {
+    private static ResultsOrDeps getResultsOf(ITaskEngine taskEngine, IContext context, Strategy collect,
+        Strategy insert, IStrategoTerm taskID, Set<IStrategoTerm> seen, boolean singleLevel) {
         seen.add(taskID);
         final ITask task = taskEngine.getTask(taskID);
 
         if(!task.solved()) {
-            return Either.right(Iterables2.singleton(taskID));
+            return ResultsOrDeps.deps(Iterables2.singleton(taskID));
         } else if(task.failed() || task.results().empty()) {
             return null; // If a dependency does not have any results, the task cannot be executed.
         }
@@ -155,25 +231,25 @@ public final class TaskInsertion {
             if(singleLevel || Iterables.isEmpty(nestedResultIDs)) {
                 results.add(result);
             } else {
-                final Either<Multimap<IStrategoTerm, IStrategoTerm>, ? extends Iterable<IStrategoTerm>> resultMapping =
+                final ResultMapOrDeps resultMapping =
                     createResultMapping(taskEngine, context, collect, insert, nestedResultIDs, seen, singleLevel);
 
                 if(resultMapping == null) {
                     return null;
-                } else if(resultMapping.isRight()) {
-                    Iterables.addAll(dynamicDependencies, resultMapping.right().value());
+                } else if(resultMapping.hasDeps()) {
+                    Iterables.addAll(dynamicDependencies, resultMapping.deps);
                 } else {
                     final Collection<IStrategoTerm> insertedResults =
-                        insertCarthesianProduct(context, insert, result, resultMapping.left().value());
+                        insertCarthesianProduct(context, insert, result, resultMapping.resultMap);
                     results.addAll(insertedResults);
                 }
             }
         }
 
         if(dynamicDependencies.isEmpty())
-            return Either.left(results);
+            return ResultsOrDeps.results(results);
         else
-            return Either.right(dynamicDependencies);
+            return ResultsOrDeps.deps(dynamicDependencies);
     }
 
     private static Collection<IStrategoTerm> insertCarthesianProduct(IContext context, Strategy insert,

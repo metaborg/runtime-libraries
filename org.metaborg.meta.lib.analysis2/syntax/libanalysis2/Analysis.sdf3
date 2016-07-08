@@ -1,5 +1,0 @@
-module libanalysis2/Analysis
-
-imports
-
-  libanalysis2/Common

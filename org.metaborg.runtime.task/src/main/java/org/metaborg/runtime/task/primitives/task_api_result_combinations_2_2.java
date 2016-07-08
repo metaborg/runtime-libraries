@@ -1,6 +1,7 @@
 package org.metaborg.runtime.task.primitives;
 
 import org.metaborg.runtime.task.TaskInsertion;
+import org.metaborg.runtime.task.TaskInsertion.PermsOrDeps;
 import org.metaborg.runtime.task.engine.ITaskEngine;
 import org.metaborg.runtime.task.util.InvokeStrategy;
 import org.metaborg.runtime.task.util.TermTools;
@@ -11,8 +12,6 @@ import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
-
-import fj.P2;
 
 public class task_api_result_combinations_2_2 extends TaskEnginePrimitive {
     public static task_api_result_combinations_2_2 instance = new task_api_result_combinations_2_2();
@@ -30,14 +29,14 @@ public class task_api_result_combinations_2_2 extends TaskEnginePrimitive {
         final Strategy insert = svars[1];
 
         final IStrategoTerm resultIDs = InvokeStrategy.invoke(env, collect, term);
-        final P2<? extends Iterable<IStrategoTerm>, Boolean> result =
-            TaskInsertion.insertResultCombinations(taskEngine, env, collect, insert, term, resultIDs,
-                Iterables2.<IStrategoTerm>empty(), singleLevel);
-        if(result == null || result._1() == null)
+        final PermsOrDeps result = TaskInsertion.insertResultCombinations(taskEngine, env, collect, insert, term,
+            resultIDs, Iterables2.<IStrategoTerm>empty(), singleLevel);
+        if(result == null || result.permsOrDeps == null) {
             return false; // No combinations could be constructed because a dependency failed or had no results.
-        final IStrategoList resultList = TermTools.makeList(factory, result._1());
+        }
+        final IStrategoList resultList = TermTools.makeList(factory, result.permsOrDeps);
 
-        if(result._2()) {
+        if(result.hasDeps) {
             // Results are task IDs of dependencies instead.
             env.setCurrent(factory.makeAppl(factory.makeConstructor("Dependency", 1), resultList));
         } else {
