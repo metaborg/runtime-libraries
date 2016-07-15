@@ -10,13 +10,20 @@ imports
 signature constructors 
    INSERTION_TERM    : NewTerm -> AST_CHANGE //Inserting a new term in the completed AST
    REPLACE_TERM_TEXT : OldTerm * String -> AST_CHANGE
+   Foo : any -> any
 
 rules
+
+  /*
+     Either adds a recovered element to a list by creating a change INSERT_AT_END or INSERT_BEFORE
+     or replace a term by the topmost ambiguity (REPLACE_TERM)
+     or insert a term if it is a single recovery (INSERTION_TERM)  
+  */
    
   get-proposals-erroneous-programs:
     (new-ast, completion-term, topmost-amb, parenthesized) -> (name, description, change) 
     where
-      change      := <calculate-completion-change <+ create-insertion-or-replace(|topmost-amb)> completion-term;
+      change      := <calculate-completion-change-erroneous <+ create-insertion-or-replace(|topmost-amb)> completion-term;
       description := <build-description-incorrect-programs(|parenthesized)> change;
       name        := <get-constructor> completion-term 
    
@@ -32,7 +39,7 @@ rules
               
   wrap-optional = get-parent-non-amb; ?Some(_)
    
-  calculate-completion-change:
+  calculate-completion-change-erroneous:
     completion-term -> change
     where
       parent := <get-parent-non-amb; is-list> completion-term; //is inside a list
@@ -58,9 +65,15 @@ rules
       completion-term-replaced := <topdown(try(match-node-origin(|subterm); <trim-whitespace> replacement))> parenthesized
     
 
-//build description for completion inside lists in incorrect programs
+/*
+  Build description for completion inside lists in incorrect programs  
+  The information about the separator, indentation or leading whitespace is derived from the grammar
+  To get this information for a determined node t, it is necessary to access the parent node(s) of t
+*/
+
 rules
-         
+  
+  // empty list       
   build-description-incorrect-programs(|parenthesized):
     INSERT_AT_END(old-list, completion-term) -> text
     where
@@ -72,7 +85,8 @@ rules
       leading-ws         := <get-leading-ws> (parent, index);
       indent             := <get-indent> (parent, index);
       parent-indent      := <origin-indent <+ !""> parent;
-      reconstructed-text := <parenthesize-completion; construct-text-by-pp(pp-completion, override-reconstruction, resugar)> parenthesized;
+      reconstructed-text := <pp-completion> parenthesized;
+      <debug(!"reconstructed text ")> Foo(reconstructed-text);
       if <is-substring(!"\n")> leading-ws then
         text := <concat-strings> [leading-ws, <replace-indentation(|indent, ""); prefix-lines(|parent-indent)> reconstructed-text]
       else
@@ -83,21 +97,23 @@ rules
     INSERT_AT_END(old-list, completion-term) -> text
     where
       <?[_]> old-list
-    where // two ambiguous lists inside a list
-      parent             := <get-parent-non-amb; is-list> old-list;
+    where // different lists inside an ambiguity node [amb([list_1, list_2])] -> the external list is of the same type of list_1 and list_2
+      parent             := <get-parent-non-amb; is-list; debug(!"parent ")> old-list;
       list-parent        := <get-parent-non-amb> parent;
       index              := <find-position> (parent, list-parent)
     with  
       leading-ws         := <get-leading-ws> (list-parent, index);
       indent             := <get-indent> (list-parent, index);
       parent-indent      := <origin-indent <+ !""> list-parent;
-      reconstructed-text := <parenthesize-completion; construct-text-by-pp(pp-completion, override-reconstruction, resugar)> parenthesized;
+      reconstructed-text := <pp-completion> parenthesized;
+      <debug(!"reconstructed text double amb ")> Foo(reconstructed-text);
       if <is-substring(!"\n")> leading-ws then
         text := <concat-strings> [leading-ws, <replace-indentation(|indent, ""); prefix-lines(|parent-indent)> reconstructed-text]
       else
         text := <concat-strings> [leading-ws, <replace-indentation(|indent, "")> reconstructed-text]
       end    
-   
+  
+  // non-empty list 
   build-description-incorrect-programs(|parenthesized):
     INSERT_AT_END(old-list, completion-term) -> text
     where
@@ -109,7 +125,7 @@ rules
       sep                := <get-separator> (parent, index);
       indent             := <get-indent> (parent, index);
       parent-indent      := <origin-indent <+ !""> parent;
-      reconstructed-text := <parenthesize-completion; construct-text-by-pp(pp-completion, override-reconstruction, resugar)> parenthesized;
+      reconstructed-text := <pp-completion> parenthesized;
       separator          := <concat-strings> [sep, indent];
       if <is-substring(!"\n")> separator then
         text := <concat-strings> [sep, <prefix-lines(|<conc-strings> (indent, parent-indent))> reconstructed-text]
@@ -121,7 +137,7 @@ rules
     INSERT_AT_END(old-list, completion-term) -> text
     where
       <not(?[_])> old-list
-    where // two ambiguous lists inside a list
+    where // different lists inside an ambiguity node [amb([list_1, list_2])] -> the external list is of the same type of list_1 and list_2
       parent             := <get-parent-non-amb; is-list> old-list;
       list-parent        := <get-parent-non-amb> parent;
       index              := <find-position> (parent, list-parent)
@@ -129,7 +145,7 @@ rules
       sep                := <get-separator> (list-parent, index);
       indent             := <get-indent> (list-parent, index);
       parent-indent      := <origin-indent <+ !""> list-parent;
-      reconstructed-text := <parenthesize-completion; construct-text-by-pp(pp-completion, override-reconstruction, resugar)> parenthesized;
+      reconstructed-text := <pp-completion> parenthesized;
       separator          := <concat-strings> [sep, indent];
       if <is-substring(!"\n")> separator then
         text := <concat-strings> [sep, <prefix-lines(|<conc-strings> (indent, parent-indent))> reconstructed-text]
@@ -149,7 +165,7 @@ rules
       indent                := <get-indent> (grandparent, index-parent);  
       leading-ws            := <get-leading-ws> (grandparent, index-parent); 
       grandparent-indent    := <origin-indent <+ !""> grandparent;
-      reconstructed-text    := <parenthesize-completion; construct-text-by-pp(pp-completion, override-reconstruction, resugar)> parenthesized;
+      reconstructed-text    := <pp-completion> parenthesized;
       // indent according to the parent in case there is a new line in the leading ws
       if <is-substring(!"\n")> leading-ws then
         leading-ws-indent := grandparent-indent
@@ -170,10 +186,10 @@ rules
   
   build-description-incorrect-programs(|parenthesized):
     INSERT_BEFORE(old-node, completion-term) -> text
-    where // two ambiguous lists inside a list
-      parent                := <get-parent-non-amb> old-node; // the list in which old node is
-      grandparent           := <get-parent-non-amb; is-list> parent; // the node in which the list is (to get separator, indent and leading ws)
-      grandparent-list      := <get-parent-non-amb> grandparent;
+    where // different lists inside an ambiguity node [amb([list_1, list_2])] -> the external list is of the same type of list_1 and list_2
+      parent                := <get-parent-non-amb> old-node; 
+      grandparent           := <get-parent-non-amb; is-list> parent; 
+      grandparent-list      := <get-parent-non-amb> grandparent; // the node in which the list is (to get separator, indent and leading ws)
       index-parent          := <find-position> (grandparent, grandparent-list)
     with
       index-completion-term := <get-index-origin(|1)> (completion-term, parent);
@@ -181,7 +197,7 @@ rules
       indent                := <get-indent> (grandparent-list, index-parent);  
       leading-ws            := <get-leading-ws> (grandparent-list, index-parent); 
       grandparent-indent    := <origin-indent <+ !""> grandparent-list;
-      reconstructed-text    := <parenthesize-completion; construct-text-by-pp(pp-completion, override-reconstruction, resugar)> parenthesized;
+      reconstructed-text    := <pp-completion> parenthesized;
       // indent according to the parent in case there is a new line in the leading ws
       if <is-substring(!"\n")> leading-ws then
         leading-ws-indent := grandparent-indent
@@ -199,27 +215,33 @@ rules
       else //inserting in the middle of the list
         text := <concat-strings> [sep, <prefix-lines(|separator-indent)> reconstructed-text, sep, separator-indent]
       end
-  
-        
+          
   build-description-incorrect-programs(|parenthesized):
     INSERTION_TERM(completion-term) -> text
     where
-      parent             := <get-parent-non-amb> completion-term;
-      index              := <find-position> (completion-term, parent);
-      leading-ws         := <get-leading-ws> (parent, index);
-      reconstructed-text := <(?Some(<id>) <+ id); parenthesize-completion; construct-text-by-pp(pp-completion, override-reconstruction, resugar)> parenthesized;
-      text               := <conc-strings> (leading-ws, reconstructed-text)
+      <get-parent> completion-term;      
+      parent                := <get-parent-non-amb> completion-term;
+      index                 := <find-position> (completion-term, parent);
+      leading-ws            := <get-leading-ws> (parent, index);
+      indent                := <get-indent> (parent, index);
+      parent-indent         := <origin-indent <+ !""> parent;
+      reconstructed-text    := <(?Some(<id>) <+ id); pp-completion> parenthesized;
+      if <is-substring(!"\n")> leading-ws then
+        text := <concat-strings> [leading-ws, <replace-indentation(|indent, ""); prefix-lines(|parent-indent)> reconstructed-text]
+      else
+        text := <concat-strings> [leading-ws, <replace-indentation(|<conc-strings> (indent, parent-indent), "")> reconstructed-text]
+      end    
   
   build-description-incorrect-programs(|parenthesized):
     INSERTION_TERM(completion-term) -> reconstructed-text
     where //the term is in the root
-      <not(get-parent)> completion-term;
-      reconstructed-text := <parenthesize-completion; construct-text-by-pp(pp-completion, override-reconstruction, resugar)> parenthesized
+      <not(get-parent)> completion-term;      
+      reconstructed-text := <pp-completion> parenthesized
       
   build-description-incorrect-programs(|parenthesized):
     REPLACE_TERM(term, completion-term) -> <replace-indentation(|old-indent, "")> text
     where
-      text       := <parenthesize-completion; construct-text-by-pp(pp-completion, override-reconstruction, resugar)> parenthesized;
+      text       := <pp-completion> parenthesized;
       old-indent := <origin-indent <+ !""> term
       
       
