@@ -86,7 +86,6 @@ rules
       indent             := <get-indent> (parent, index);
       parent-indent      := <origin-indent <+ !""> parent;
       reconstructed-text := <pp-completion> parenthesized;
-      <debug(!"reconstructed text ")> Foo(reconstructed-text);
       if <is-substring(!"\n")> leading-ws then
         text := <concat-strings> [leading-ws, <replace-indentation(|indent, ""); prefix-lines(|parent-indent)> reconstructed-text]
       else
@@ -98,7 +97,7 @@ rules
     where
       <?[_]> old-list
     where // different lists inside an ambiguity node [amb([list_1, list_2])] -> the external list is of the same type of list_1 and list_2
-      parent             := <get-parent-non-amb; is-list; debug(!"parent ")> old-list;
+      parent             := <get-parent-non-amb; is-list> old-list;
       list-parent        := <get-parent-non-amb> parent;
       index              := <find-position> (parent, list-parent)
     with  
@@ -106,7 +105,6 @@ rules
       indent             := <get-indent> (list-parent, index);
       parent-indent      := <origin-indent <+ !""> list-parent;
       reconstructed-text := <pp-completion> parenthesized;
-      <debug(!"reconstructed text double amb ")> Foo(reconstructed-text);
       if <is-substring(!"\n")> leading-ws then
         text := <concat-strings> [leading-ws, <replace-indentation(|indent, ""); prefix-lines(|parent-indent)> reconstructed-text]
       else
