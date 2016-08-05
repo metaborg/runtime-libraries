@@ -6,11 +6,11 @@ imports
   runtime/completion/core
   runtime/completion/interface
   runtime/nabl/utils
+  runtime/editor/annotations
 
 signature constructors 
    INSERTION_TERM    : NewTerm -> AST_CHANGE //Inserting a new term in the completed AST
    REPLACE_TERM_TEXT : OldTerm * String -> AST_CHANGE
-   Foo : any -> any
 
 rules
 
@@ -21,11 +21,13 @@ rules
   */
    
   get-proposals-erroneous-programs:
-    (new-ast, completion-term, topmost-amb, parenthesized) -> (name, description, change) 
+    (new-ast, completion-term, topmost-amb, parenthesized) -> (name, text, additionalInfo, change, completion-term, kind) 
     where
-      change      := <calculate-completion-change-erroneous <+ create-insertion-or-replace(|topmost-amb)> completion-term;
-      description := <build-description-incorrect-programs(|parenthesized)> change;
-      name        := <get-constructor> completion-term 
+      change         := <calculate-completion-change-erroneous <+ create-insertion-or-replace(|topmost-amb)> completion-term;
+      text           := <build-description-incorrect-programs(|parenthesized)> change;
+      name           := <get-constructor> completion-term ;
+      additionalInfo := <pp-completion> parenthesized;
+      kind           := "recovery"
    
   create-insertion-or-replace(|topmost-amb):
     completion-term -> INSERTION_TERM(<try(wrap-optional)> completion-term)
@@ -52,11 +54,12 @@ rules
       end
       
   get-proposals-erroneous-programs-nested:
-    (new-ast, completion-term, nestedCompletionName, replacement, parenthesized) -> (name, description, change)
+    (new-ast, completion-term, nestedCompletionName, replacement, parenthesized) -> (name, text, additionalInfo, change, completion-term)
     where
-      name             := <concat-strings> [<get-constructor> completion-term, "-", nestedCompletionName];
-      change           := <create-change-nested-completion(|parenthesized)> (completion-term, replacement);
-      description      := <build-description-incorrect-programs(|<?REPLACE_TERM(_, <id>)> change)> change
+      name           := <concat-strings> [<get-constructor> completion-term, "-", nestedCompletionName];
+      change         := <create-change-nested-completion(|parenthesized)> (completion-term, replacement);
+      text           := <build-description-incorrect-programs(|<?REPLACE_TERM(_, <id>)> change)> change;
+      additionalInfo := <?REPLACE_TERM(_, <id>); pp-completion> change
 
   create-change-nested-completion(|parenthesized):
     (term, replace-change) -> REPLACE_TERM(term, completion-term-replaced)
@@ -64,7 +67,29 @@ rules
       args* := <get-arguments; ?[subterm, replacement]> replace-change;
       completion-term-replaced := <topdown(try(match-node-origin(|subterm); <trim-whitespace> replacement))> parenthesized
     
-
+  get-proposals-erroneous-single-placeholder:
+    (new-ast, completion-term, topmost-amb, parenthesized, placeholder, placeholder-term) -> proposal'* 
+    where
+      suggestion-is     := <new-iset>;
+      suggestion*       := <try(suggest-completions(|suggestion-is)); <iset-elements> suggestion-is> placeholder;
+      input*            := <map(replace-expansion-completion-term(|new-ast, completion-term, topmost-amb, parenthesized, placeholder-term))> suggestion*;
+      proposal*         := <map(get-proposals-erroneous-programs)> input*;
+      proposal'*        := <zip(rename-proposal)> (proposal*, suggestion*)
+      
+  replace-expansion-completion-term(|new-ast, completion-term, topmost-amb, parenthesized, placeholder-term):
+     (name, expansion) -> (new-ast, completion-term, topmost-amb, parenthesized')
+     where
+        parenthesized' := <topdown(try(origin-track-forced(preserve-annotations-attachments(expand-completion-term(|placeholder-term, expansion)))))> parenthesized
+  
+  rename-proposal:
+    ((name, text, additionalInfo, change, completion-term, kind), suggestion) -> (name', text, additionalInfo, change, completion-term, kind')
+    where
+      <?(name', _)> suggestion;
+      kind' := "expansion"
+      
+  expand-completion-term(|placeholder-term, expansion):
+    placeholder-term -> expansion
+        
 /*
   Build description for completion inside lists in incorrect programs  
   The information about the separator, indentation or leading whitespace is derived from the grammar

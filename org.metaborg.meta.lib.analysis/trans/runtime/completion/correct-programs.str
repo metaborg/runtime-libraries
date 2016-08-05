@@ -8,18 +8,47 @@ imports
 
 rules
 
-  get-proposals-placeholder:
-    placeholder -> proposal* 
+  get-proposals-empty-program:
+    placeholder -> proposal*
     where
       suggestion-is := <new-iset>;
       suggestion*   := <try(suggest-completions(|suggestion-is)); <iset-elements> suggestion-is> placeholder;
-      proposal*     := <map(get-text-from-placeholder-expand(|placeholder))> suggestion*   
-         
-  get-text-from-placeholder-expand(|old-term) :
-    (name, completion-term) ->(name, description, change)
+      proposal*     := <map(get-text-from-placeholder-expand)> suggestion*
+      
+  get-text-from-placeholder-expand:
+    (name, completion-term) -> (name, text)
     where
-      change      := REPLACE_TERM(old-term, completion-term);
-      description := <build-description-placeholder> change             
+      text := <pp-completion> completion-term
+      
+  get-proposals-placeholder:
+    (placeholder, placeholder-parent, placeholder-idx) -> proposal* 
+    where
+      suggestion-is := <new-iset>;
+      suggestion*   := <try(suggest-completions(|suggestion-is)); <iset-elements> suggestion-is> placeholder;
+      proposal*     := <map(get-text-from-placeholder-expand(|placeholder, placeholder-parent, placeholder-idx))> suggestion*   
+         
+  get-text-from-placeholder-expand(|old-term, parent, idx) :
+    (name, completion-term) -> (name, text, additionalInfo, change)
+    where
+      completion-term' := <parenthesize-completion-term <+ !completion-term> (parent, old-term, completion-term, idx);
+      change           := REPLACE_TERM(old-term, completion-term');
+      text             := <build-description-placeholder> change; 
+      additionalInfo   := <pp-completion> completion-term'           
+  
+  parenthesize-completion-term:
+    (parent, old-term, completion-term, idx) -> completion-term'
+    where
+      <not(match-node-origin(|parent))> old-term
+    where
+      expanded-parent           := <topdown(try(match-node-origin(|old-term); !completion-term))> parent;
+      parenthesized-parent      := <parenthesize-completion> expanded-parent;
+      arg-parenthesized-parent* := <get-arguments> parenthesized-parent ; 
+      if <at-index(?completion-term)> (idx, arg-parenthesized-parent*) then
+        completion-term' := completion-term
+        else
+        completion-term' := Parenthetical(completion-term)
+      end
+      
            
   get-proposals-list:
     (list, placeholder, cursor-position) -> proposal* 
@@ -29,10 +58,11 @@ rules
       proposal*     := <map(get-proposals-from-list(|list, cursor-position))> suggestion*      
                 
   get-proposals-from-list(|list, cursor-pos):
-    (name, new-elem) -> (name, description, change)
+    (name, new-elem) -> (name, text, additionalInfo, change)
     where
-      change     := <calculate-completion-change> (cursor-pos, list, new-elem);
-      description := <build-description> change       
+      change         := <calculate-completion-change> (cursor-pos, list, new-elem);
+      text           := <build-description> change;
+      additionalInfo := <pp-completion> new-elem           
     
   calculate-completion-change:
     (cursor-pos, list, new-elem) -> change
@@ -68,10 +98,13 @@ rules
       proposal*     := <map(get-proposals-from-optional(|term))> suggestion*
        
   get-proposals-from-optional(|old-term):
-    (name, new-elem) -> (name, description, change)
+    (name, new-elem) -> (name, text, additionalInfo, change)
     where
-      change      := REPLACE_TERM(old-term, new-elem);
-      description := <build-description> change            
+      change         := REPLACE_TERM(old-term, new-elem);
+      text           := <build-description> change;
+      additionalInfo := <pp-completion> new-elem
+      
+                
 
 //build description for completion inside lists in correct programs
 rules
@@ -148,7 +181,7 @@ rules
       index              := <find-position> (old-term, parent);
       leading-ws         := <get-leading-ws> (parent, index);
       indent             := <get-indent> (parent, index); 
-      reconstructed-text := <construct-text-by-pp(pp-completion, override-reconstruction, resugar)> completion-term;
+      reconstructed-text := <pp-completion> completion-term;
       if <is-substring(!"\n")> leading-ws then
         text := <concat-strings> [leading-ws, <replace-indentation(|indent, "")> reconstructed-text]
       else
@@ -159,7 +192,7 @@ rules
     REPLACE_TERM(old-term, completion-term) -> text
     where
       old-indent := <origin-indent <+ ""> old-term; 
-      reconstructed-text := <construct-text-by-pp(pp-completion, override-reconstruction, resugar)> completion-term;
+      reconstructed-text := <pp-completion> completion-term;
       text := <replace-indentation(|old-indent, "")> reconstructed-text
         
     

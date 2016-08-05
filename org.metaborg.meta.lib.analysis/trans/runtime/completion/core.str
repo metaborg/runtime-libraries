@@ -3,10 +3,14 @@ module runtime/completion/core
 imports
 	runtime/editor/origins
   runtime/completion/interface
+  libstratego-gpp
 
 signature constructors 
    INSERTION_TERM : NewTerm -> AST_CHANGE //Inserting a new term in the completed AST
    REPLACE_TERM   : OldTerm * NewTerm -> AST_CHANGE //Inserting a new term in the completed AST
+
+signature constructors
+   CURSOR_ELEMENT : cursor
 
 rules
 
@@ -19,8 +23,6 @@ rules
   add-list-completions(|suggestion*) = iset-addlist(|suggestion*)   
   wrap-term(|new-cons) = ?t; !new-cons#(t)
   
-  
-   		   		
   // inline completions with only one LHS? 
   inline-completions(|sort) = fail
    		
