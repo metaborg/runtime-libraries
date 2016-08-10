@@ -32,7 +32,7 @@ rules
     where
       completion-term' := <parenthesize-completion-term <+ !completion-term> (parent, old-term, completion-term, idx);
       change           := REPLACE_TERM(old-term, completion-term');
-      text             := <build-description-placeholder> change; 
+      text             := <build-description-simple-replace> change; 
       additionalInfo   := <pp-completion> completion-term'           
   
   parenthesize-completion-term:
@@ -49,7 +49,36 @@ rules
         completion-term' := Parenthetical(completion-term)
       end
       
-           
+  get-proposals-left-recursive:
+    (sort, term) -> proposal* 
+    where
+      suggestion-is := <new-iset>;
+      suggestion*   := <try(suggest-completions-left-rec(|suggestion-is)); <iset-elements> suggestion-is> (sort, term);
+      proposal*     := <map(get-text-from-left-recursive-suggestion(|term))> suggestion*    
+  
+  get-text-from-left-recursive-suggestion(|old-term):
+    (name, expansion) -> (name, text, additionalInfo, change, prefix)
+    where
+      additionalInfo := <pp-completion> expansion;
+      change         := REPLACE_TERM(old-term, expansion);
+      text           := <build-description-simple-replace> change;
+      prefix         := <parenthesize-completion; get-arguments; ?[<id> | tl]; pp-completion> expansion
+  
+  get-proposals-right-recursive:
+    (sort, term) -> proposal* 
+    where
+      suggestion-is := <new-iset>;
+      suggestion*   := <try(suggest-completions-right-rec(|suggestion-is)); <iset-elements> suggestion-is> (sort, term);
+      proposal*     := <map(get-text-from-right-recursive-suggestion(|term))> suggestion*
+      
+  get-text-from-right-recursive-suggestion(|old-term):
+    (name, expansion) -> (name, text, additionalInfo, change, suffix)
+    where
+      additionalInfo := <pp-completion> expansion;
+      change         := REPLACE_TERM(old-term, expansion);
+      text           := <build-description-simple-replace> change;
+      suffix         := <parenthesize-completion; get-arguments; last; pp-completion> expansion
+             
   get-proposals-list:
     (list, placeholder, cursor-position) -> proposal* 
     where
@@ -188,12 +217,10 @@ rules
         text := <concat-strings> [leading-ws, reconstructed-text]
       end        
   
-  build-description-placeholder:
+  build-description-simple-replace:
     REPLACE_TERM(old-term, completion-term) -> text
     where
       old-indent := <origin-indent <+ ""> old-term; 
       reconstructed-text := <pp-completion> completion-term;
       text := <replace-indentation(|old-indent, "")> reconstructed-text
-        
-    
-    
+       
