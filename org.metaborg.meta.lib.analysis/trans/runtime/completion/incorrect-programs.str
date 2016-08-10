@@ -56,25 +56,32 @@ rules
   get-proposals-erroneous-programs-nested:
     (new-ast, completion-term, nestedCompletionName, replacement, parenthesized) -> (name, text, additionalInfo, change, completion-term)
     where
-      name           := <concat-strings> [<get-constructor> completion-term, "-", nestedCompletionName];
-      change         := <create-change-nested-completion(|parenthesized)> (completion-term, replacement);
-      text           := <build-description-incorrect-programs(|<?REPLACE_TERM(_, <id>)> change)> change;
-      additionalInfo := <?REPLACE_TERM(_, <id>); pp-completion> change
+      name                       := <concat-strings> [<get-constructor> completion-term, "-", nestedCompletionName];
+      (completion-term', change) := <create-change-nested-completion(|parenthesized)> (completion-term, replacement);
+      text                       := <build-description-incorrect-programs(|completion-term')> change;
+      additionalInfo             := <pp-completion> completion-term'
 
   create-change-nested-completion(|parenthesized):
-    (term, replace-change) -> REPLACE_TERM(term, completion-term-replaced)
+    (term, replace-change) -> (completion-term-replaced, change)
     where      
       args* := <get-arguments; ?[subterm, replacement]> replace-change;
-      completion-term-replaced := <topdown(try(match-node-origin(|subterm); <trim-whitespace> replacement))> parenthesized
+      completion-term-replaced := <topdown(try(match-node-origin(|subterm); <trim-whitespace> replacement))> parenthesized;
+      change := <calculate-completion-change-erroneous <+ create-insertion-or-replace(|parenthesized)> completion-term-replaced
+      
     
   get-proposals-erroneous-single-placeholder:
     (new-ast, completion-term, topmost-amb, parenthesized, placeholder, placeholder-term) -> proposal'* 
     where
       suggestion-is     := <new-iset>;
       suggestion*       := <try(suggest-completions(|suggestion-is)); <iset-elements> suggestion-is> placeholder;
-      input*            := <map(replace-expansion-completion-term(|new-ast, completion-term, topmost-amb, parenthesized, placeholder-term))> suggestion*;
+      if [] := suggestion* then
+        suggestion'* := [(<get-constructor> placeholder, placeholder)]
+      else 
+        suggestion'* := suggestion*
+      end;
+      input*            := <map(replace-expansion-completion-term(|new-ast, completion-term, topmost-amb, parenthesized, placeholder-term))> suggestion'*;
       proposal*         := <map(get-proposals-erroneous-programs)> input*;
-      proposal'*        := <zip(rename-proposal)> (proposal*, suggestion*)
+      proposal'*        := <zip(rename-proposal)> (proposal*, suggestion'*)
       
   replace-expansion-completion-term(|new-ast, completion-term, topmost-amb, parenthesized, placeholder-term):
      (name, expansion) -> (new-ast, completion-term, topmost-amb, parenthesized')
@@ -85,7 +92,7 @@ rules
     ((name, text, additionalInfo, change, completion-term, kind), suggestion) -> (name', text, additionalInfo, change, completion-term, kind')
     where
       <?(name', _)> suggestion;
-      kind' := "expansion"
+      kind' := "expansionEditing"
       
   expand-completion-term(|placeholder-term, expansion):
     placeholder-term -> expansion

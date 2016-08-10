@@ -13,6 +13,7 @@ rules
     get-separator                        = fail
     pp-completion                        = fail
     parenthesize-completion              = fail
+    is-SDF-placeholder                   = fail
        
 
 
