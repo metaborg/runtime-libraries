@@ -11,7 +11,7 @@ strategies
 	
   prettyprint-analysis-ast =
   	(
-      prettyprint-Start
+      prettyprint-Analysis-Start
     ; !V([], <id>)
     ; box2text-string(|120)
     )
