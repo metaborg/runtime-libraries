@@ -80,12 +80,16 @@ rules
       suffix         := <parenthesize; get-arguments; last; pp> expansion
              
   get-proposals-list(pp, parenthesize, indent, leading-ws, separator):
-    (list, placeholder, cursor-position) -> proposal* 
+    (list, sort, placeholder, cursor-position) -> proposal* 
     where
       suggestion-is := <new-iset>;
       suggestion*   := <try(suggest-completions(|suggestion-is)); <iset-elements> suggestion-is> placeholder;
-      proposal*     := <map(get-proposals-from-list(pp, parenthesize, indent, leading-ws, separator|list, cursor-position))> suggestion*      
-                
+      if [] := suggestion* then
+        proposal*     := <map(get-proposals-from-list(pp, parenthesize, indent, leading-ws, separator|list, cursor-position))> [(sort, placeholder)]
+      else
+        proposal*     := <map(get-proposals-from-list(pp, parenthesize, indent, leading-ws, separator|list, cursor-position))> suggestion*      
+      end   
+             
   get-proposals-from-list(pp, parenthesize, indent, leading-ws, separator|list, cursor-pos):
     (name, new-elem) -> (name, text, additionalInfo, change)
     where
@@ -120,11 +124,15 @@ rules
       <geq> (pos, end-offset)         
             
   get-proposals-optional(pp, parenthesize, indent, leading-ws, separator):
-    (term, placeholder) -> proposal*
+    (term, sort, placeholder) -> proposal*
     where
       suggestion-is := <new-iset>;
       suggestion*   := <try(suggest-completions(|suggestion-is)); <iset-elements> suggestion-is> placeholder;
-      proposal*     := <map(get-proposals-from-optional(pp, parenthesize, indent, leading-ws, separator|term))> suggestion*
+      if [] := suggestion* then
+        proposal*     := <map(get-proposals-from-optional(pp, parenthesize, indent, leading-ws, separator|term))> [(sort, placeholder)]
+      else
+        proposal*     := <map(get-proposals-from-optional(pp, parenthesize, indent, leading-ws, separator|term))> suggestion*    
+      end
        
   get-proposals-from-optional(pp, parenthesize, indent, leading-ws, separator|old-term):
     (name, new-elem) -> (name, text, additionalInfo, change)
