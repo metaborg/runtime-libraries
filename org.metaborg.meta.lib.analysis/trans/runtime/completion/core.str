@@ -110,9 +110,11 @@ rules
       if <eq> (start-offset-term, start-offset-parent) then
         parent' := <get-parent> parent;
         // TODO: proper investigate when parent is a list
-        if <is-list> parent then 
-          result := <leading-ws> (parent, index) 
-          else
+        if <is-list> parent' then 
+          parent-list := <get-parent> parent';
+          index' := <find-position> (parent', parent-list);
+          result := <calculate-leading-ws(leading-ws|parent')> (parent-list, index')
+        else
             index'  := <find-position> (parent, parent');
             result  := <calculate-leading-ws(leading-ws|parent)> (parent', index')
         end

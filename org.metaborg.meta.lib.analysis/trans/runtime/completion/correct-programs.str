@@ -191,10 +191,11 @@ rules
       sep                   := <separator> (grandparent, index-parent);
       indent                := <indent> (grandparent, index-parent);
       leading-ws            := <calculate-leading-ws(leading-ws|parent)> (grandparent, index-parent); 
+      leading-ws-local      := <leading-ws> (grandparent, index-parent); 
       grandparent-indent    := <origin-indent <+ !""> grandparent;
       reconstructed-text    := <construct-text-by-pp(pp, override-reconstruction, resugar)> completion-term;
       // indent according to the parent in case there is a new line in the leading ws
-      if <is-substring(!"\n")> leading-ws then
+      if <is-substring(!"\n")> leading-ws-local then
         leading-ws-indent := grandparent-indent
       else
         leading-ws-indent := ""
