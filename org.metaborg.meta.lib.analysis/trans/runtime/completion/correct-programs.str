@@ -153,7 +153,7 @@ rules
     with
       parent             := <get-parent> old-list; 
       index              := <find-position> (old-list, parent);
-      leading-ws         := <leading-ws> (parent, index); 
+      leading-ws         := <calculate-leading-ws(leading-ws|old-list)> (parent, index); 
       indent             := <indent> (parent, index); 
       parent-indent      := <origin-indent <+ !""> parent; 
       reconstructed-text := <construct-text-by-pp(pp, override-reconstruction, resugar)> completion-term;
@@ -178,7 +178,7 @@ rules
       if <is-substring(!"\n")> separator then
         text := <concat-strings> [sep, <prefix-lines(|<conc-strings> (indent, parent-indent))> reconstructed-text]
       else
-        text := <concat-strings> [sep, <prefix-lines(|indent)> reconstructed-text]
+        text := <concat-strings> [sep, reconstructed-text]
       end
    
   build-description(pp, parenthesize, indent, leading-ws, separator):
@@ -190,7 +190,7 @@ rules
       index-parent          := <find-position> (parent, grandparent);
       sep                   := <separator> (grandparent, index-parent);
       indent                := <indent> (grandparent, index-parent);
-      leading-ws            := <leading-ws> (grandparent, index-parent); 
+      leading-ws            := <calculate-leading-ws(leading-ws|parent)> (grandparent, index-parent); 
       grandparent-indent    := <origin-indent <+ !""> grandparent;
       reconstructed-text    := <construct-text-by-pp(pp, override-reconstruction, resugar)> completion-term;
       // indent according to the parent in case there is a new line in the leading ws
@@ -203,20 +203,20 @@ rules
       if <is-substring(!"\n")> sep then
         separator-indent := <concat-strings> [indent, grandparent-indent]
       else
-        separator-indent := <concat-strings> [indent]
+        separator-indent := ""
       end;       
       if <?1> index-old-term then // inserting at the beginning of the list
         text := <concat-strings> [leading-ws, <replace-indentation(|indent, ""); prefix-lines(|leading-ws-indent)> reconstructed-text, sep]
       else //inserting in the middle of the list
         text := <concat-strings> [sep, <prefix-lines(|separator-indent)> reconstructed-text, sep]
-      end  
+      end 
        
   build-description(pp, parenthesize, indent, leading-ws, separator):       
     REPLACE_TERM(old-term, completion-term) -> text
     where
       parent             := <get-parent> old-term;
       index              := <find-position> (old-term, parent);
-      leading-ws         := <leading-ws> (parent, index);
+      leading-ws         := <calculate-leading-ws(leading-ws|old-term)> (parent, index);
       indent             := <indent> (parent, index); 
       reconstructed-text := <pp> completion-term;
       if <is-substring(!"\n")> leading-ws then
