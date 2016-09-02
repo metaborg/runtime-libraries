@@ -9,7 +9,7 @@ imports
 rules
 
   get-proposals-empty-program(pp, parenthesize, indent, leading-ws, separator):
-    placeholder -> proposal*
+    (sort, placeholder) -> proposal*
     where
       suggestion-is := <new-iset>;
       suggestion*   := <try(suggest-completions(|suggestion-is)); <iset-elements> suggestion-is> placeholder;
@@ -21,7 +21,7 @@ rules
       text := <pp> completion-term
       
   get-proposals-placeholder(pp, parenthesize, indent, leading-ws, separator):
-    (placeholder, placeholder-parent, placeholder-idx) -> proposal* 
+    (sort, placeholder, placeholder-parent, placeholder-idx) -> proposal* 
     where
       suggestion-is := <new-iset>;
       suggestion*   := <try(suggest-completions(|suggestion-is)); <iset-elements> suggestion-is> placeholder;
@@ -32,8 +32,8 @@ rules
     where
       completion-term' := <parenthesize-completion-term(parenthesize) <+ !completion-term> (parent, old-term, completion-term, idx);
       change           := REPLACE_TERM(old-term, completion-term');
-      text             := <build-description-simple-replace(pp, parenthesize, indent, leading-ws, separator)> change; 
-      additionalInfo   := <pp> completion-term'           
+      additionalInfo   := <pp> completion-term'  ;
+      text             := <build-description-simple-replace(pp, parenthesize, indent, leading-ws, separator)> change               
   
   parenthesize-completion-term(parenthesize):
     (parent, old-term, completion-term, idx) -> completion-term'
@@ -80,7 +80,7 @@ rules
       suffix         := <parenthesize; get-arguments; last; pp> expansion
              
   get-proposals-list(pp, parenthesize, indent, leading-ws, separator):
-    (list, sort, placeholder, cursor-position) -> proposal* 
+    (sort, list, placeholder, cursor-position) -> proposal* 
     where
       suggestion-is := <new-iset>;
       suggestion*   := <try(suggest-completions(|suggestion-is)); <iset-elements> suggestion-is> placeholder;
@@ -124,7 +124,7 @@ rules
       <geq> (pos, end-offset)         
             
   get-proposals-optional(pp, parenthesize, indent, leading-ws, separator):
-    (term, sort, placeholder) -> proposal*
+    (sort, term, placeholder) -> proposal*
     where
       suggestion-is := <new-iset>;
       suggestion*   := <try(suggest-completions(|suggestion-is)); <iset-elements> suggestion-is> placeholder;

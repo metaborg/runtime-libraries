@@ -21,7 +21,7 @@ rules
   */
    
   get-proposals-incorrect-programs(pp, parenthesize, indent, leading-ws, separator):
-    (new-ast, completion-term, topmost-amb, parenthesized) -> (name, text, additionalInfo, change, completion-term, kind) 
+    (sort, new-ast, completion-term, topmost-amb, parenthesized) -> (name, text, additionalInfo, change, completion-term, kind) 
     where
       change         := <calculate-completion-change-incorrect <+ create-insertion-or-replace(|topmost-amb)> completion-term;
       text           := <build-description-incorrect-programs(pp, parenthesize, indent, leading-ws, separator|parenthesized)> change;
@@ -54,7 +54,7 @@ rules
       end
       
   get-proposals-incorrect-programs-nested(pp, parenthesize, indent, leading-ws, separator):
-    (new-ast, completion-term, nestedCompletionName, replacement, parenthesized) -> (name, text, additionalInfo, change, completion-term)
+    (sort, new-ast, completion-term, nestedCompletionName, replacement, parenthesized) -> (name, text, additionalInfo, change, completion-term)
     where
       name                       := <concat-strings> [<get-constructor> completion-term, "-", nestedCompletionName];
       (completion-term', change) := <create-change-nested-completion(|parenthesized)> (completion-term, replacement);
@@ -70,7 +70,7 @@ rules
       
     
   get-proposals-incorrect-programs-single-placeholder(pp, parenthesize, indent, leading-ws, separator):
-    (new-ast, completion-term, topmost-amb, parenthesized, placeholder, placeholder-term) -> proposal'* 
+    (sort, new-ast, completion-term, topmost-amb, parenthesized, placeholder, placeholder-term) -> proposal'* 
     where
       suggestion-is     := <new-iset>;
       suggestion*       := <try(suggest-completions(|suggestion-is)); <iset-elements> suggestion-is> placeholder;
@@ -79,12 +79,12 @@ rules
       else 
         suggestion'* := suggestion*
       end;
-      input*            := <map(replace-expansion-completion-term(|new-ast, completion-term, topmost-amb, parenthesized, placeholder-term))> suggestion'*;
+      input*            := <map(replace-expansion-completion-term(|sort, new-ast, completion-term, topmost-amb, parenthesized, placeholder-term))> suggestion'*;
       proposal*         := <map(get-proposals-incorrect-programs(pp, parenthesize, indent, leading-ws, separator))> input*;
       proposal'*        := <zip(rename-proposal)> (proposal*, suggestion'*)
       
-  replace-expansion-completion-term(|new-ast, completion-term, topmost-amb, parenthesized, placeholder-term):
-     (name, expansion) -> (new-ast, completion-term, topmost-amb, parenthesized')
+  replace-expansion-completion-term(|sort, new-ast, completion-term, topmost-amb, parenthesized, placeholder-term):
+     (name, expansion) -> (sort, new-ast, completion-term, topmost-amb, parenthesized')
      where
         parenthesized' := <topdown(try(origin-track-forced(preserve-annotations-attachments(expand-completion-term(|placeholder-term, expansion)))))> parenthesized
   

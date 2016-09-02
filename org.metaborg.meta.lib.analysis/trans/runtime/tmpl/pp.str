@@ -5,6 +5,10 @@ imports
   libstratego-lib
   libstratego-gpp
 
+rules
+
+  ia-get-sort = prim("SSL_EXT_get_sort_imploder_attachment", <id>)
+
 signature constructors
 
   Parenthetical : Unknown -> Unknown
