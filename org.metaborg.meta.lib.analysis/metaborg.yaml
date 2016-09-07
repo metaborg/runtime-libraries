@@ -11,24 +11,4 @@ exports:
 - language: Stratego-Sugar
   directory: trans
 pardonedLanguages:
-- EditorService
 - Stratego-Sugar
-- SDF
-language:
-  stratego:
-    format: ctree
-    args:
-    - -la
-    - stratego-lib
-    - -la
-    - stratego-sglr
-    - -la
-    - stratego-gpp
-    - -la
-    - stratego-xtc
-    - -la
-    - stratego-aterm
-    - -la
-    - stratego-sdf
-    - -la
-    - strc
