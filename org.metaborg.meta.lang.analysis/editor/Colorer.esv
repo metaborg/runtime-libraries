@@ -2,4 +2,4 @@ module Colorer
 
 imports 
 
-  editor/Colorer.generated
+  libspoofax/color/default
