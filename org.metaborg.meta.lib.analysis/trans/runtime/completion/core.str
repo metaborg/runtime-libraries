@@ -103,13 +103,20 @@ rules
   check-blank-line = id
     
   calculate-leading-ws(leading-ws|term):
+    (parent, index)  -> <leading-ws> (parent, index)
+    where
+      <not(get-parent)> parent
+      
+      
+   calculate-leading-ws(leading-ws|term):
     (parent, index)  -> result
+    where
+      parent' := <get-parent> parent
     where
       (start-offset-term, _)   := <origin-offset> term;
       (start-offset-parent, _) := <origin-offset> parent;
       if <eq> (start-offset-term, start-offset-parent) then
-        parent' := <get-parent> parent;
-        // TODO: proper investigate when parent is a list
+        // TODO: properly investigate when parent is a list
         if <is-list> parent' then 
           parent-list := <get-parent> parent';
           index' := <find-position> (parent', parent-list);
@@ -120,8 +127,7 @@ rules
         end
         else
            result := <leading-ws> (parent, index)      
-      end
-      
+      end   
     
     
       
