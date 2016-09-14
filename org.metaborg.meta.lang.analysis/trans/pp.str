@@ -3,8 +3,8 @@ module pp
 imports
 	
 	libstratego-gpp
+	libspoofax/sdf/pp
 	pp/Analysis-parenthesize
-	runtime/tmpl/pp
 	pp/Analysis-pp
 	
 strategies
