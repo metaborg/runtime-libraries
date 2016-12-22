@@ -2,16 +2,19 @@ module outline
 
 imports
 	
-	signatures/Analysis-sig
-	runtime/editor/outline-library
+	signatures/-
+	libspoofax/editor/outline
 
 strategies
+	
+  editor-outline:
+    (node, position, ast, path, project-path) -> outline
+    where
+      outline := <outline> ast
 	
   outline = simple-label-outline(to-outline-label)
 
 rules
-  
-  outline-expand-to-level = !3
-  
+
   to-outline-label: 
   	TaskDef(task-id, _, _, _, _) -> task-id 

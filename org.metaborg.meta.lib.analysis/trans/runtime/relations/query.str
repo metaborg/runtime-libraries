@@ -69,11 +69,28 @@ rules /** @internal */
 
 rules /** @internal */
 
-  get-static-relations(|rel):
-  	t -> val*
-  	with
-      stat-set := <new-iset>
-    ; <try(relation-store-value(store-tuple(|stat-set)))> (rel, t)
-    ; val* := <iset-elements> stat-set
-      
+  get-static-relations(|rel) =
+    if where(<relation-is-transitive> rel) then
+      get-transitive-static-relations(|<new-iset>, rel)
+    else
+      get-static-relations(|<new-iset>, rel)
+    end
+  ; iset-elements
+  
+  get-static-relations(|set, rel):
+    t -> set
+    with
+      <try(relation-store-value(store-tuple(|set)))> (rel, t)
+    
+  get-transitive-static-relations(|set, rel) =
+    get-static-relations(|<new-iset>, rel)
+  ; iset-elements
+  ; list-loop(
+       known-tuple(|set) 
+    <+ try(store-tuple(|set))
+    ;  get-transitive-static-relations(|set, rel)
+    )
+  ; !set
+  
+  known-tuple(|set): elem -> <id> where <iset-contains(|elem)> set  
   store-tuple(|set): elem -> <fail> with <iset-add(|elem)> set

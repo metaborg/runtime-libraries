@@ -5,6 +5,10 @@ imports
   libstratego-lib
   libstratego-gpp
 
+rules
+
+  ia-get-sort = prim("SSL_EXT_get_sort_imploder_attachment", <id>)
+
 signature constructors
 
   Parenthetical : Unknown -> Unknown
@@ -34,8 +38,16 @@ strategies
 
   pp-HZ-list(pp)     = ?[] <+ !HZ([SOpt(HS(), "0")], <map(pp-one-Z(pp))>)
   pp-HZ-list(pp|sep) = ?[] <+ !HZ([SOpt(HS(), "0")], <map(pp-one-Z(pp)); separate-by(|S(sep))>)
+
   
-  prettyprint-origin-term = (?""; ![]) <+ ![S(<is-string>)]
+// rules for code completion
+signature constructors
+   CURSOR_ELEMENT : cursor
+   
+rules
+  prettyprint-origin-term = fail
+  prettyprint-completion-aux = (?CURSOR_ELEMENT(); ![S("##CURSOR##")]) <+ 
+  ((?""; ![]) <+ ![S(<is-string>)])
 
 rules
   

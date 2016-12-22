@@ -2,15 +2,11 @@ module analysis
 
 imports
 
-	libstratego-lib
-	libstratego-gpp
-	libstratego-aterm
-	signatures/Analysis-sig
-	stratego/metaborg
 	runtime/analysis/-
 	runtime/nabl/-
 	runtime/task/-
 	runtime/index/-
+	libspoofax/core/language
 	names/names
 	pp
 	outline

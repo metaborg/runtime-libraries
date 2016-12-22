@@ -5,6 +5,7 @@ imports
   Colorer
   Menus
   Syntax
+  Views
 
 language
 
