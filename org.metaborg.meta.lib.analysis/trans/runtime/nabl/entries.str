@@ -7,7 +7,7 @@ imports
   runtime/nabl/uri
   runtime/nabl/resolve
   runtime/index/core
-  runtime/editor/origins
+  libspoofax/term/origin
   
 signature
 

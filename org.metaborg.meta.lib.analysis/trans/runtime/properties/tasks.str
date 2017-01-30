@@ -8,7 +8,7 @@ imports
 	runtime/properties/eq
   runtime/task/core
   runtime/task/create
-  runtime/editor/annotations
+  libspoofax/term/annotation
 
 signature
   

@@ -3,7 +3,7 @@ module runtime/nabl/uri
 imports
   
   runtime/index/core
-  runtime/editor/annotations
+  libspoofax/term/annotation
   runtime/nabl/interface
   runtime/nabl/query
   

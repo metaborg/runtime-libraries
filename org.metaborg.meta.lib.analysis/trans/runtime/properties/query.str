@@ -9,7 +9,7 @@ imports
   runtime/properties/tasks
   runtime/properties/interface
   runtime/nabl/interface
-  runtime/editor/annotations
+  libspoofax/term/annotation
 
 rules
 

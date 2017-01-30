@@ -15,9 +15,9 @@ imports
   runtime/properties/collect
   runtime/properties/entries
   runtime/properties/tasks
-	runtime/editor/origins
-	runtime/editor/annotations
 	runtime/types/collect
+	libspoofax/term/origin
+	libspoofax/term/annotation
 
 signature 
 

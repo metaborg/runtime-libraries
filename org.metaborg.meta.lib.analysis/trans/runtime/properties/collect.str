@@ -15,8 +15,8 @@ imports
   runtime/nabl/uri
   runtime/nabl/tasks
   runtime/nabl/utils
-  runtime/editor/origins
-  runtime/editor/annotations
+  libspoofax/term/origin
+  libspoofax/term/annotation
   runtime/types/collect
   
 signature

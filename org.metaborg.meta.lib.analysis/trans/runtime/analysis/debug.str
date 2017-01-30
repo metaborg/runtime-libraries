@@ -7,7 +7,7 @@ imports
 	runtime/task/core
 	runtime/task/debug
 	runtime/task/insert
-	runtime/editor/interop
+	libspoofax/core/language
 	runtime/nabl/entries
 	runtime/nabl/uri
 
@@ -20,7 +20,7 @@ rules // Index
     (_, _, _, path, project-path) -> (filename, result)
     with
       result-ast := <index-get-all-sources; map(\f -> (f, <index-get-all-pairs-in-source> f)\)>;
-      if result-index := <foreign-call(|"Analysis", "from-index-debug-str")> result-ast then
+      if result-index := <call-in-language(|"Analysis", "from-index-debug-str")> result-ast then
       	filename := $[[project-path]/[<dirname> path]/project.index];
       	result   := result-index
       else
@@ -33,7 +33,7 @@ rules // Index
     with
       result-ast := <index-get-all-sources; map(\f -> (f, <index-get-all-pairs-in-source> f)\)>;
       result-ast' := <beautify-indices> result-ast;
-	  if result-index := <foreign-call(|"Analysis", "from-index-debug-str")> result-ast' then
+	  if result-index := <call-in-language(|"Analysis", "from-index-debug-str")> result-ast' then
 		filename := $[[project-path]/[<dirname> path]/project.index];
 		result   := result-index
 	  else
@@ -46,7 +46,7 @@ rules // Index
     with
     	partition  := $[[project-path]/[path]];
       result-ast := [(partition, <index-get-all-pairs-in-source> partition)];
-      if result-index := <foreign-call(|"Analysis", "from-index-debug-str")> result-ast then
+      if result-index := <call-in-language(|"Analysis", "from-index-debug-str")> result-ast then
       	filename := <guarantee-extension(|"partition.index")> path;
       	result   := result-index
       else
@@ -60,7 +60,7 @@ rules // Index
     	partition  := $[[project-path]/[path]];
       result-ast := [((partition, []), <index-get-all-pairs-in-source> partition)];
       result-ast' := <beautify-indices> result-ast;
-      if result-index := <foreign-call(|"Analysis", "from-index-debug-str")> result-ast' then
+      if result-index := <call-in-language(|"Analysis", "from-index-debug-str")> result-ast' then
       	filename := <guarantee-extension(|"partition.index")> path;
       	result   := result-index
       else
@@ -77,7 +77,7 @@ rules // Task engine
     (_, _, _, path, project-path) -> (filename, result)
     with
       result-ast := <task-debug-info(|())>;
-      if result-task := <foreign-call(|"Analysis", "from-task-debug-str")> result-ast then
+      if result-task := <call-in-language(|"Analysis", "from-task-debug-str")> result-ast then
       	filename := $[[project-path]/[<dirname> path]/project.task];
       	result   := result-task
       else
@@ -90,7 +90,7 @@ rules // Task engine
     with
     	partition  := $[[project-path]/[path]];
       result-ast := <task-debug-info(|partition)>;
-      if result-task := <foreign-call(|"Analysis", "from-task-debug-str")> result-ast then
+      if result-task := <call-in-language(|"Analysis", "from-task-debug-str")> result-ast then
       	filename := <guarantee-extension(|"partition.task")> path;
       	result   := result-task
       else
@@ -103,7 +103,7 @@ rules // Task engine
     with
     	partition  := $[[project-path]/[path]];
       result-ast := <task-debug-ast> selected;
-      if result-task := <foreign-call(|"Analysis", "from-task-debug-str")> result-ast then
+      if result-task := <call-in-language(|"Analysis", "from-task-debug-str")> result-ast then
       	filename := <guarantee-extension(|"selection.task")> path;
       	result   := result-task
       else
@@ -119,7 +119,7 @@ rules // Index & task engine
       task-debug  := <task-debug-info(|())>;
       index-debug := <index-get-all-sources; map(\f -> (f, <index-get-all-pairs-in-source; sort-index> f)\)>;
       result-ast  := (task-debug, index-debug);
-      if result-analysis := <foreign-call(|"Analysis", "from-debug-str")> result-ast then
+      if result-analysis := <call-in-language(|"Analysis", "from-debug-str")> result-ast then
       	filename := $[[project-path]/[<dirname> path]/project.analysis];
       	result   := result-analysis
       else
@@ -134,7 +134,7 @@ rules // Index & task engine
       task-debug  := <task-debug-info(|partition)>;
       index-debug := [(partition, <index-get-all-pairs-in-source; sort-index> partition)];
       result-ast  := (task-debug, index-debug);
-      if result-analysis := <foreign-call(|"Analysis", "from-debug-str")> result-ast then
+      if result-analysis := <call-in-language(|"Analysis", "from-debug-str")> result-ast then
       	filename := <guarantee-extension(|"partition.analysis")> path;
       	result   := result-analysis
       else

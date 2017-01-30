@@ -7,8 +7,8 @@ imports
 	runtime/nabl/uri
 	runtime/nabl/utils
 	runtime/nabl/interface
-	runtime/editor/origins
-	runtime/editor/annotations
+	libspoofax/term/origin
+	libspoofax/term/annotation
 	runtime/index/core
 	runtime/index/query
 	

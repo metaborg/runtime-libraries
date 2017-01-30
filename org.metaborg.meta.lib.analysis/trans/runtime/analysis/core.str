@@ -11,12 +11,9 @@ imports
   runtime/index/core
   runtime/task/core
   runtime/task/messages
-  runtime/editor/origins
-  runtime/editor/editor
-  runtime/editor/queue
-  runtime/editor/dynrule
-  runtime/editor/time
-  runtime/nabl/utils
+  libspoofax/term/origin
+  libspoofax/stratego/dynrule
+  libspoofax/stratego/debug
 
 signature
 
@@ -68,17 +65,16 @@ rules // Core multi-file analysis that takes File/3 appls, analyzes those files,
     )
     with
       total-progress := <analyze-all-total-progress> file*
-    ; <analysis-set-progress> total-progress
     with
       parse-time := <map(analysis-file-parse-time); foldr(!0.0, addr)> file*
     // Pre-analysis transformation
     ; measure-time(
-        pre-trans-file* := <map(analyze-all-pre-trans(pre-trans); analysis-inc-progress(|total-progress))> file*
+        pre-trans-file* := <map(analyze-all-pre-trans(pre-trans))> file*
       , ?pre-trans-time
       )
     // Collection
     ; measure-time(
-        collect-result* := <map(analysis-collect(collector|language); analysis-inc-progress(|total-progress))> pre-trans-file*
+        collect-result* := <map(analysis-collect(collector|language))> pre-trans-file*
       , ?collect-time
       )
     ; (result*, collect-debug-result*) := <unzip> collect-result*
@@ -87,7 +83,6 @@ rules // Core multi-file analysis that takes File/3 appls, analyzes those files,
         task-evaluate-scheduled => (evaluated-task*, skipped-task*, unevaluated-task*)
       , ?evaluate-time
       )
-    ; analysis-inc-progress(|total-progress)
     // Messages for analyzed sources
     ; messages-result* := <map(analysis-add-messages(pp-message))> result*
     // Messages for non-analyzed but affected sources
@@ -201,9 +196,6 @@ rules // Utility
 
   analysis-file-result-source:
     FileResult(source, _, _, _, _, _) -> source
-
-  analysis-set-progress = try(where(<gt> (<id>, 0)); set-total-work-units)
-  analysis-inc-progress(|total-size) = where(try(<gt> (total-size, 0); complete-work-unit))
 
 rules // Debugging
 
