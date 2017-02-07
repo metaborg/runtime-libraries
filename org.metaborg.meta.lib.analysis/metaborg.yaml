@@ -6,10 +6,21 @@ metaborgBaselineVersion: 2.1.0
 dependencies:
   compile:
   - org.metaborg:org.metaborg.meta.lang.stratego:${metaborgBaselineVersion}
+  - org.metaborg:org.metaborg.meta.lang.template:${metaborgBaselineVersion}
   source:
   - org.metaborg:meta.lib.spoofax:${metaborgVersion}
 exports:
+- language: SDF
+  directory: src-gen/syntax
+  includes: "**/*.sdf"
+- language: TemplateLang
+  directory: syntax
+  includes: "**/*.sdf3"
 - language: Stratego-Sugar
   directory: trans
+  includes: "**/*.str"
+- language: Stratego-Sugar
+  directory: src-gen
+  includes: "**/*.str"
 pardonedLanguages:
 - Stratego-Sugar

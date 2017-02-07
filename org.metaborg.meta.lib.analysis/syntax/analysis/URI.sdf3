@@ -1,9 +1,9 @@
-module URI
+module analysis/URI
 
 imports
 
-  Common  
-  Term
+  analysis/Lexical
+  analysis/Term
 
 context-free syntax
 

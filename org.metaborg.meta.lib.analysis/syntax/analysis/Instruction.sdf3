@@ -1,10 +1,9 @@
-module Instruction
+module analysis/Instruction
 
 imports
-
-  Common  
-  Term  
-  Task
+  
+  analysis/Task
+  analysis/Term  
 
 context-free syntax
 

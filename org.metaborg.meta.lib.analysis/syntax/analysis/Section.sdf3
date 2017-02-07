@@ -1,4 +1,4 @@
-module Analysis
+module analysis/Section
 
 imports
 
@@ -9,8 +9,7 @@ imports
   analysis/Term
   analysis/URI
   analysis/Lexical
-  analysis/Section
 
-context-free start-symbols
+context-free syntax
 
-  Sections
+  Sections.Sections = <<{Section "\n\n"}*>> 
