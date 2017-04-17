@@ -12,9 +12,9 @@ language
   extensions : task, index, analysis
   
   table         : target/metaborg/sdf.tbl
-  start symbols : Start
+  start symbols : Sections
 
-  provider : target/metaborg/stratego.ctree
+  provider : target/metaborg/stratego.jar
   observer : editor-analyze (multifile)
 
 references

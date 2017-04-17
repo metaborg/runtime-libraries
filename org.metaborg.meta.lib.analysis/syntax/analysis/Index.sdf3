@@ -1,8 +1,8 @@
-module Index
+module analysis/Index
 
 imports
 
-  Term
+  analysis/Term
 
 context-free syntax
 

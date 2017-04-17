@@ -2,7 +2,7 @@ module outline
 
 imports
 	
-	signatures/-
+	signatures/analysis/-
 	libspoofax/editor/outline
 
 strategies
@@ -16,5 +16,4 @@ strategies
 
 rules
 
-  to-outline-label: 
-  	TaskDef(task-id, _, _, _, _) -> task-id 
+  to-outline-label: 	TaskDef(task-id, _, _, _, _) -> task-id 

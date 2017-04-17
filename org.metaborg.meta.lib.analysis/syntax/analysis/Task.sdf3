@@ -1,11 +1,11 @@
-module Task
+module analysis/Task
 
 imports
 
-  Common  
-  Term  
-  URI 
-  Instruction
+  analysis/Instruction
+  analysis/Lexical
+  analysis/Term
+  analysis/URI
 
 context-free syntax
 

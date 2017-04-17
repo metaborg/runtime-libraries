@@ -1,8 +1,8 @@
-module Term
+module analysis/Term
 
 imports
 
-  Common
+  analysis/Lexical
 
 context-free syntax
 

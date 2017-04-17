@@ -1,12 +1,12 @@
-module convert
+module runtime/analysis/convert
 
 imports
 	
-	signatures/-
+	signatures/analysis/-
 	runtime/task/tasks
 	runtime/task/messages
 	runtime/nabl/tasks
-	pp
+	runtime/analysis/pp
 
 rules // All
 	
@@ -15,11 +15,11 @@ rules // All
 		with
 			task-section   := <from-task-debug> task-tuple*
 		; index-section* := <from-index-debug> index-tuple*
-		; str            := <prettyprint-analysis-ast> Sections([task-section|index-section*])
+		; str            := <pp-runtime-libraries> Sections([task-section|index-section*])
 
 rules // Task
 	
-	from-task-debug-str = from-task-debug; !Sections([<id>]); prettyprint-analysis-ast
+	from-task-debug-str = from-task-debug; !Sections([<id>]); pp-runtime-libraries
 	
 	from-task-debug:
 		task-tuple* -> task-section
@@ -57,7 +57,7 @@ rules // Task
 
 rules // Index
 	
-	from-index-debug-str = from-index-debug; !Sections(<id>); prettyprint-analysis-ast
+	from-index-debug-str = from-index-debug; !Sections(<id>); pp-runtime-libraries
 	
 	from-index-debug:
 		index-tuple* -> index-section*
@@ -228,16 +228,3 @@ rules // Utilities
 			end
 
 	is-appl = not(is-tuple <+ is-list <+ is-int <+ is-real <+ is-string)
-	
-// 	print-abstract-term =
-// 		switch id
-// 			case ?Appl(cons, terms) : !$[[cons]([<print-abstract-term-list> terms])]
-// 			case ?Tupl(terms)       : !$[([<print-abstract-term-list> terms])]
-// 			case ?List(terms)       : !$[[[<print-abstract-term-list> terms]]]
-// 			case ?Int(int)          : !int
-// 			case ?Real(real)        : !real
-// 			case ?Str(str)          : !str
-// 		end
-// 
-// 	print-abstract-term-list = map(print-abstract-term); separate-by(|", "); concat-strings
-	

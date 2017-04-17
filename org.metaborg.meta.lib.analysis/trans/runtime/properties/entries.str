@@ -6,7 +6,7 @@ imports
   runtime/nabl/utils
   runtime/nabl/uri
   runtime/index/core
-  runtime/editor/origins
+  libspoofax/term/origin
   
 signature
 

@@ -13,7 +13,7 @@ imports
 	runtime/task/core
 	runtime/task/insert
 	runtime/task/utils
-	runtime/editor/origins
+	libspoofax/term/origin
 	
 signature
 

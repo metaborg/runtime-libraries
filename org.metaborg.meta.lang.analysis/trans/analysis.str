@@ -8,9 +8,7 @@ imports
 	runtime/index/-
 	libspoofax/core/language
 	names/names
-	pp
 	outline
-	convert
 
 rules // Analysis
 

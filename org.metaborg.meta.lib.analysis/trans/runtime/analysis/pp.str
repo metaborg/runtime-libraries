@@ -1,17 +1,16 @@
-module pp
+module runtime/analysis/pp
 
 imports
 	
 	libstratego-gpp
 	libspoofax/sdf/pp
-	pp/Analysis-parenthesize
-	pp/Analysis-pp
+	pp/analysis/-
 	
 strategies
 	
-  prettyprint-analysis-ast =
+  pp-runtime-libraries =
   	(
-      prettyprint-Analysis-Start
+      prettyprint-runtime-libraries
     ; !V([], <id>)
     ; box2text-string(|120)
     )
@@ -20,7 +19,7 @@ strategies
     	bottomup(try(
     		not(is-string)
     	; not(is-list)
-    	; not(prettyprint-example)
+    	; not(prettyprint-runtime-libraries)
     	; debug(!"cannot pp ")
   	  ))
 	  ; fail

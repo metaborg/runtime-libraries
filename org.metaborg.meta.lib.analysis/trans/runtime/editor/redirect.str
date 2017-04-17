@@ -1,0 +1,7 @@
+module runtime/editor/redirect
+
+imports // Redirects for baseline NaBL1, which still imports runtime/editor/-
+
+  libspoofax/editor/-
+  libspoofax/term/-
+  libspoofax/stratego/-

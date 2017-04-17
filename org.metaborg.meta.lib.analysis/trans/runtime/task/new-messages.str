@@ -4,7 +4,7 @@ imports
   
   runtime/task/core
   runtime/task/create
-  runtime/editor/origins
+  libspoofax/term/origin
   runtime/task/messages
   
 signature
