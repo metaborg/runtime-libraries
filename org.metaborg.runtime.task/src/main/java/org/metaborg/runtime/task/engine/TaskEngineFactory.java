@@ -72,7 +72,7 @@ public class TaskEngineFactory {
         taskEngine.getDigester().setState(digestState);
 
         final IStrategoTerm tasks = term.getSubterm(1);
-        for(IStrategoTerm taskTerm : tasks) {
+        for(IStrategoTerm taskTerm : tasks.getSubterms()) {
             int i = -1;
 
             final IStrategoTerm taskID = taskTerm.getSubterm(++i);
@@ -101,7 +101,7 @@ public class TaskEngineFactory {
             if(!isNull(instructionOverride))
                 task.overrideInstruction((IStrategoAppl) instructionOverride);
             if(!isNull(results))
-                task.results().set(results);
+                task.results().set(results.getSubterms());
             task.setStatus(TaskStatus.get(status.intValue()));
             if(!isNull(message))
                 task.setMessage(message);
@@ -109,12 +109,12 @@ public class TaskEngineFactory {
             task.setEvaluations(takeShort(evaluations));
             taskEngine.addPersistedTask(taskID, task, initialDependencies);
 
-            for(final IStrategoTerm source : sources)
+            for(final IStrategoTerm source : sources.getSubterms())
                 taskEngine.addToSource(taskID, source);
-            for(final IStrategoTerm dependency : dependencies)
+            for(final IStrategoTerm dependency : dependencies.getSubterms())
                 taskEngine.addDependency(taskID, dependency);
-            taskEngine.setDynamicDependencies(taskID, dynamicDependencies);
-            for(final IStrategoTerm read : reads)
+            taskEngine.setDynamicDependencies(taskID, dynamicDependencies.getSubterms());
+            for(final IStrategoTerm read : reads.getSubterms())
                 taskEngine.addRead(taskID, read);
         }
 

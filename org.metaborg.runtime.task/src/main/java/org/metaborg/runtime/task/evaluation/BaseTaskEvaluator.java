@@ -15,6 +15,7 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.terms.util.TermUtils;
 
 public class BaseTaskEvaluator implements ITaskEvaluator {
     private final ITermFactory factory;
@@ -113,7 +114,7 @@ public class BaseTaskEvaluator implements ITaskEvaluator {
         if(result == null)
             return TaskResultType.Fail; // The task failed to produce a result.
 
-        if(Tools.isTermAppl(result)) {
+        if(TermUtils.isAppl(result)) {
             final IStrategoAppl resultAppl = (IStrategoAppl) result;
             if(resultAppl.getConstructor().equals(higherOrderConstructor)) {
                 // The task is a higher order task and has produced new tasks.
@@ -122,11 +123,11 @@ public class BaseTaskEvaluator implements ITaskEvaluator {
 
                 task.overrideInstruction(newInstruction);
 
-                for(IStrategoTerm createdTaskID : createdTasks)
+                for(IStrategoTerm createdTaskID : createdTasks.getSubterms())
                     evaluationQueue.queueOrDefer(createdTaskID);
 
-                if(createdTasks.iterator().hasNext()) {
-                    evaluationQueue.delayed(taskID, createdTasks);
+                if(createdTasks.getSubterms().iterator().hasNext()) {
+                    evaluationQueue.delayed(taskID, createdTasks.getSubterms());
                 } else {
                     evaluationQueue.queue(taskID);
                 }
@@ -135,7 +136,7 @@ public class BaseTaskEvaluator implements ITaskEvaluator {
             } else if(resultAppl.getConstructor().equals(higherOrderFailConstructor)) {
                 // The task is a higher order task and has produced new tasks, but failed.
                 IStrategoTerm createdTasks = resultAppl.getSubterm(0);
-                for(IStrategoTerm createdTaskID : createdTasks)
+                for(IStrategoTerm createdTaskID : createdTasks.getSubterms())
                     evaluationQueue.queueOrDefer(createdTaskID);
 
                 return TaskResultType.Fail;
@@ -145,9 +146,9 @@ public class BaseTaskEvaluator implements ITaskEvaluator {
                 task.setStatus(TaskStatus.Success);
                 return TaskResultType.Success;
             }
-        } else if(Tools.isTermList(result)) {
+        } else if(TermUtils.isList(result)) {
             // The task produced multiple results.
-            task.results().addAll(result);
+            task.results().addAll(result.getSubterms());
             task.setStatus(TaskStatus.Success);
             return TaskResultType.Success;
         } else {

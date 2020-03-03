@@ -152,7 +152,7 @@ public class TaskEngine implements ITaskEngine {
         taskCollection.keepTask(taskID);
 
         addToSource(taskID, source);
-        for(final IStrategoTerm dependency : dependencies)
+        for(final IStrategoTerm dependency : dependencies.getSubterms())
             addDependency(taskID, dependency);
 
         return createResult(taskID);
@@ -182,7 +182,7 @@ public class TaskEngine implements ITaskEngine {
         final ITask task = getTask(taskID); // Don't use wrapper, cannot remove from parent in this task engine.
         if(task == null)
             return; // Task is not in this task engine but might be in a parent one.
-        toTaskID.remove(task.initialInstruction(), TermTools.makeList(factory, task.initialDependencies()));
+        toTaskID.remove(task.initialInstruction(), TermTools.makeList(factory, task.initialDependencies().getSubterms()));
         toTask.remove(taskID);
     }
 
@@ -247,7 +247,7 @@ public class TaskEngine implements ITaskEngine {
         // Use work list to prevent recursion, keep collection of seen task ID's to prevent loops.
         final Set<IStrategoTerm> seen = Sets.newHashSet();
         final Queue<IStrategoTerm> workList = Lists.newLinkedList();
-        for(final IStrategoTerm changedRead : changedReads) {
+        for(final IStrategoTerm changedRead : changedReads.getSubterms()) {
             Iterables.addAll(seen, getReaders(changedRead));
         }
         workList.addAll(seen);

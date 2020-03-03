@@ -6,6 +6,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
 import com.google.common.collect.ImmutableList;
+import org.spoofax.terms.util.TermUtils;
 
 public final class TermTools {
 	public static IStrategoList makeList(ITermFactory factory, Iterable<? extends IStrategoTerm> terms) {
@@ -21,7 +22,7 @@ public final class TermTools {
 	}
 
 	public static boolean takeBool(IStrategoTerm term) {
-		return term.getTermType() == IStrategoTerm.INT && ((IStrategoInt) term).intValue() != 0;
+		return TermUtils.isInt(term) && ((IStrategoInt) term).intValue() != 0;
 	}
 
 
@@ -36,7 +37,7 @@ public final class TermTools {
 	}
 
 	public static boolean isNull(IStrategoTerm term) {
-		return term.getTermType() == IStrategoTerm.TUPLE && term.getSubtermCount() == 0;
+		return TermUtils.isTuple(term) && term.getSubtermCount() == 0;
 	}
 
 
@@ -45,7 +46,7 @@ public final class TermTools {
 	}
 
 	public static short takeShort(IStrategoTerm term) {
-		if(term.getTermType() != IStrategoTerm.INT)
+		if(!TermUtils.isInt(term))
 			return 0;
 		return (short) ((IStrategoInt) term).intValue();
 	}
@@ -57,7 +58,7 @@ public final class TermTools {
 	}
 
 	public static long takeLong(IStrategoTerm term) {
-		if(term.getTermType() != IStrategoTerm.INT)
+		if(!TermUtils.isInt(term))
 			return 0;
 		return ((IStrategoInt) term).intValue();
 	}

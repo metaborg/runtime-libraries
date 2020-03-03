@@ -13,6 +13,7 @@ import org.spoofax.interpreter.terms.IStrategoInt;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.terms.util.TermUtils;
 
 public class task_api_debug_info_0_1 extends TaskEnginePrimitive {
     public static task_api_debug_info_0_1 instance = new task_api_debug_info_0_1();
@@ -26,9 +27,9 @@ public class task_api_debug_info_0_1 extends TaskEnginePrimitive {
         final ITermFactory factory = env.getFactory();
         final IStrategoTerm tupleOrSourceOrID = tvars[0];
 
-        if(Tools.isTermTuple(tupleOrSourceOrID) && tupleOrSourceOrID.getSubtermCount() == 0) {
+        if(TermUtils.isTuple(tupleOrSourceOrID) && tupleOrSourceOrID.getSubtermCount() == 0) {
             env.setCurrent(createDebugTuples(taskEngine.getTaskIDs(), taskEngine, factory));
-        } else if(Tools.isTermString(tupleOrSourceOrID)) {
+        } else if(TermUtils.isString(tupleOrSourceOrID)) {
             env.setCurrent(createDebugTuples(taskEngine.getFromSource(tupleOrSourceOrID), taskEngine, factory));
         } else {
             env.setCurrent(createDebugTuple(tupleOrSourceOrID, taskEngine, factory));

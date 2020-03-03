@@ -11,6 +11,7 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
+import org.spoofax.terms.util.TermUtils;
 
 public class task_api_sources_of_0_1 extends TaskEnginePrimitive {
     public static task_api_sources_of_0_1 instance = new task_api_sources_of_0_1();
@@ -24,8 +25,8 @@ public class task_api_sources_of_0_1 extends TaskEnginePrimitive {
         final IStrategoTerm taskIDOrTaskIDS = tvars[0];
 
         final Set<IStrategoTerm> sources = Sets.newHashSet();
-        if(Tools.isTermList(taskIDOrTaskIDS)) {
-            for(IStrategoTerm taskID : taskIDOrTaskIDS) {
+        if(TermUtils.isList(taskIDOrTaskIDS)) {
+            for(IStrategoTerm taskID : taskIDOrTaskIDS.getSubterms()) {
                 Iterables.addAll(sources, taskEngine.getSourcesOf(taskID));
             }
         } else {
