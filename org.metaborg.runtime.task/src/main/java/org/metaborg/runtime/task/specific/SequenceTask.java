@@ -83,7 +83,7 @@ public class SequenceTask implements ITaskFactory, ITaskQueuer, ITaskEvaluator {
         boolean cycle) {
         Iterator<IStrategoTerm> iter = iterators.get(taskID);
         if(iter == null) {
-            iter = task.instruction().getSubterm(0).getSubterms().iterator();
+            iter = task.instruction().getSubterm(0).iterator();
             iterators.put(taskID, iter);
         }
 

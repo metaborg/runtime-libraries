@@ -123,11 +123,11 @@ public class BaseTaskEvaluator implements ITaskEvaluator {
 
                 task.overrideInstruction(newInstruction);
 
-                for(IStrategoTerm createdTaskID : createdTasks.getSubterms())
+                for(IStrategoTerm createdTaskID : createdTasks)
                     evaluationQueue.queueOrDefer(createdTaskID);
 
-                if(createdTasks.getSubterms().iterator().hasNext()) {
-                    evaluationQueue.delayed(taskID, createdTasks.getSubterms());
+                if(createdTasks.iterator().hasNext()) {
+                    evaluationQueue.delayed(taskID, createdTasks);
                 } else {
                     evaluationQueue.queue(taskID);
                 }
@@ -136,7 +136,7 @@ public class BaseTaskEvaluator implements ITaskEvaluator {
             } else if(resultAppl.getConstructor().equals(higherOrderFailConstructor)) {
                 // The task is a higher order task and has produced new tasks, but failed.
                 IStrategoTerm createdTasks = resultAppl.getSubterm(0);
-                for(IStrategoTerm createdTaskID : createdTasks.getSubterms())
+                for(IStrategoTerm createdTaskID : createdTasks)
                     evaluationQueue.queueOrDefer(createdTaskID);
 
                 return TaskResultType.Fail;
@@ -148,7 +148,7 @@ public class BaseTaskEvaluator implements ITaskEvaluator {
             }
         } else if(TermUtils.isList(result)) {
             // The task produced multiple results.
-            task.results().addAll(result.getSubterms());
+            task.results().addAll(result);
             task.setStatus(TaskStatus.Success);
             return TaskResultType.Success;
         } else {

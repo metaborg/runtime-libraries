@@ -315,7 +315,7 @@ public final class TaskInsertion {
 
 
     private static Iterable<IStrategoTerm> getResultIDs(IContext context, Strategy collect, IStrategoTerm term) {
-        return invoke(context, collect, term).getSubterms();
+        return invoke(context, collect, term);
     }
 
     private static IStrategoTerm insertResults(IContext context, Strategy insertResults, IStrategoTerm instruction,

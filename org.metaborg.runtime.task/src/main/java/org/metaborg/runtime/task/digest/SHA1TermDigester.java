@@ -60,19 +60,19 @@ public class SHA1TermDigester implements ITermDigester {
 				intBuffer.position(0);
 				digest.update(intBuffer.putInt(t.getConstructor().getArity()).array());
 
-				for(IStrategoTerm subterm : t.getSubterms())
+				for(IStrategoTerm subterm : t)
 					digestTop(subterm);
 				break;
 			}
 			case IStrategoTerm.TUPLE: {
 				final IStrategoTuple t = (IStrategoTuple) term;
-				for(IStrategoTerm subterm : t.getSubterms())
+				for(IStrategoTerm subterm : t)
 					digestTop(subterm);
 				break;
 			}
 			case IStrategoTerm.LIST: {
 				final IStrategoList t = (IStrategoList) term;
-				for(IStrategoTerm subterm : t.getSubterms())
+				for(IStrategoTerm subterm : t)
 					digestTop(subterm);
 				break;
 			}

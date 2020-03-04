@@ -24,7 +24,7 @@ public class task_api_delay_0_1 extends TaskEnginePrimitive {
         if(taskID == null)
             throw new RuntimeException("Cannot delay task while no task evaluation is in progress.");
 
-        evaluator.delayed(taskID, dependencies.getSubterms());
+        evaluator.delayed(taskID, dependencies);
         return false;
     }
 }

@@ -23,7 +23,7 @@ public class task_api_evaluate_now_3_1 extends TaskEnginePrimitive {
         IStrategoTerm taskIDs = tvars[0];
         if(!TermUtils.isList(taskIDs))
             taskIDs = env.getFactory().makeList(taskIDs);
-        env.setCurrent(taskEngine.evaluateNow(env, collect, insert, perform, taskIDs.getSubterms()));
+        env.setCurrent(taskEngine.evaluateNow(env, collect, insert, perform, taskIDs));
         return true;
     }
 }

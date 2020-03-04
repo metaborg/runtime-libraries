@@ -36,7 +36,7 @@ public class BaseTaskFactory implements ITaskFactory {
                     innerResults = factory.makeList(innerResults);
 
                 final Collection<IStrategoTerm> results = new LinkedList<IStrategoTerm>();
-                for(IStrategoTerm result : innerResults.getSubterms()) {
+                for(IStrategoTerm result : innerResults) {
                     if(TermUtils.isAppl(result) && TermUtils.isAppl((IStrategoAppl) result, "Result", 1)) {
                         results.add(result.getSubterm(0));
                     }

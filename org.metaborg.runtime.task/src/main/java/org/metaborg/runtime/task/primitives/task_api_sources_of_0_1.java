@@ -26,7 +26,7 @@ public class task_api_sources_of_0_1 extends TaskEnginePrimitive {
 
         final Set<IStrategoTerm> sources = Sets.newHashSet();
         if(TermUtils.isList(taskIDOrTaskIDS)) {
-            for(IStrategoTerm taskID : taskIDOrTaskIDS.getSubterms()) {
+            for(IStrategoTerm taskID : taskIDOrTaskIDS) {
                 Iterables.addAll(sources, taskEngine.getSourcesOf(taskID));
             }
         } else {

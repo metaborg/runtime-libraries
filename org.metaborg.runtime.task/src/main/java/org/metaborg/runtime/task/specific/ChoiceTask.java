@@ -101,7 +101,7 @@ public class ChoiceTask implements ITaskFactory, ITaskQueuer, ITaskEvaluator {
 
 		Iterator<IStrategoTerm> iter = iterators.get(taskID);
 		if(iter == null) {
-			iter = task.instruction().getSubterm(0).getSubterms().iterator();
+			iter = task.instruction().getSubterm(0).iterator();
 			iterators.put(taskID, iter);
 		}
 

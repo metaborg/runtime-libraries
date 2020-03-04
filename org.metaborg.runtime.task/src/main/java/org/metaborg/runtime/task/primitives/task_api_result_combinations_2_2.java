@@ -30,7 +30,7 @@ public class task_api_result_combinations_2_2 extends TaskEnginePrimitive {
 
         final IStrategoTerm resultIDs = InvokeStrategy.invoke(env, collect, term);
         final PermsOrDeps result = TaskInsertion.insertResultCombinations(taskEngine, env, collect, insert, term,
-            resultIDs.getSubterms(), Iterables2.empty(), singleLevel);
+            resultIDs, Iterables2.empty(), singleLevel);
         if(result == null || result.permsOrDeps == null) {
             return false; // No combinations could be constructed because a dependency failed or had no results.
         }
