@@ -9,6 +9,7 @@ import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.terms.util.TermUtils;
 
 public class BaseTaskFactory implements ITaskFactory {
     private final ITermFactory factory;
@@ -31,12 +32,12 @@ public class BaseTaskFactory implements ITaskFactory {
         switch(actualStorageType) {
             case Auto: {
                 IStrategoTerm innerResults = instruction.getSubterm(0);
-                if(innerResults.getTermType() != IStrategoTerm.LIST)
+                if(!TermUtils.isList(innerResults))
                     innerResults = factory.makeList(innerResults);
 
                 final Collection<IStrategoTerm> results = new LinkedList<IStrategoTerm>();
                 for(IStrategoTerm result : innerResults) {
-                    if(Tools.isTermAppl(result) && Tools.hasConstructor((IStrategoAppl) result, "Result", 1)) {
+                    if(TermUtils.isAppl(result) && TermUtils.isAppl((IStrategoAppl) result, "Result", 1)) {
                         results.add(result.getSubterm(0));
                     }
                 }

@@ -273,9 +273,7 @@ public final class TaskInsertion {
             mapping.put(resultID, makeList(factory, task.results()));
         }
 
-        final IStrategoTerm insertedTerm = insertResults(context, insert, term, mapping);
-
-        return insertedTerm;
+        return insertResults(context, insert, term, mapping);
     }
 
     /**
@@ -283,12 +281,12 @@ public final class TaskInsertion {
      * product is returned as a collection of maps that map task identifiers to one result.
      */
     public static Collection<StrategoHashMap> cartesianProduct(Multimap<IStrategoTerm, IStrategoTerm> results) {
-        Collection<StrategoHashMap> result = new ArrayList<StrategoHashMap>();
+        Collection<StrategoHashMap> result = new ArrayList<>();
         if(results.size() > 0)
             result.add(new StrategoHashMap());
 
         for(Entry<IStrategoTerm, Collection<IStrategoTerm>> entry : results.asMap().entrySet()) {
-            Collection<StrategoHashMap> newResults = new ArrayList<StrategoHashMap>();
+            Collection<StrategoHashMap> newResults = new ArrayList<>();
             for(StrategoHashMap map : result) {
                 for(IStrategoTerm val : entry.getValue()) {
                     StrategoHashMap mapping = new StrategoHashMap();

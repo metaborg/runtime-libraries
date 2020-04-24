@@ -1,8 +1,8 @@
 package org.metaborg.runtime.task.digest;
 
-import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
+import org.spoofax.terms.util.TermUtils;
 
 public class NonDeterministicCountingTermDigester implements ITermDigester {
 	private static int RESET_COUNT = 0;
@@ -21,7 +21,7 @@ public class NonDeterministicCountingTermDigester implements ITermDigester {
 	}
 
 	public void setState(IStrategoTerm state) {
-		count = Tools.asJavaInt(state);
+		count = TermUtils.toJavaInt(state);
 	}
 
 	public void reset() {

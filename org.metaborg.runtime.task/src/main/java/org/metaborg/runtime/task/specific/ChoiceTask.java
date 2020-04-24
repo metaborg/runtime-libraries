@@ -29,6 +29,7 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.spoofax.terms.util.TermUtils;
 
 public class ChoiceTask implements ITaskFactory, ITaskQueuer, ITaskEvaluator {
 	private final ITermFactory factory;
@@ -152,7 +153,7 @@ public class ChoiceTask implements ITaskFactory, ITaskQueuer, ITaskEvaluator {
 	 * Gets the task identifier for given result term.
 	 */
 	private IStrategoTerm getTaskID(IStrategoTerm resultTerm) {
-		if(Tools.isTermAppl(resultTerm) && Tools.hasConstructor((IStrategoAppl) resultTerm, "Result", 1))
+		if(TermUtils.isAppl(resultTerm) && TermUtils.isAppl((IStrategoAppl) resultTerm, "Result", 1))
 			return resultTerm.getSubterm(0);
 		return null;
 	}
@@ -241,7 +242,7 @@ public class ChoiceTask implements ITaskFactory, ITaskQueuer, ITaskEvaluator {
 
 
 	private static boolean isChoice(IStrategoTerm instruction) {
-		return Tools.isTermAppl(instruction) && Tools.hasConstructor((IStrategoAppl) instruction, "Choice", 1);
+		return TermUtils.isAppl(instruction) && TermUtils.isAppl((IStrategoAppl) instruction, "Choice", 1);
 	}
 
 	public static ChoiceTask register(ITaskEngine taskEngine, ITaskEvaluationFrontend evaluationFrontend,

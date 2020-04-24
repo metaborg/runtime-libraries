@@ -6,6 +6,7 @@ import org.spoofax.interpreter.core.InterpreterException;
 import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoTerm;
+import org.spoofax.terms.util.TermUtils;
 
 public class task_api_evaluate_now_3_1 extends TaskEnginePrimitive {
     public static task_api_evaluate_now_3_1 instance = new task_api_evaluate_now_3_1();
@@ -20,7 +21,7 @@ public class task_api_evaluate_now_3_1 extends TaskEnginePrimitive {
         final Strategy insert = svars[1];
         final Strategy perform = svars[2];
         IStrategoTerm taskIDs = tvars[0];
-        if(!Tools.isTermList(taskIDs))
+        if(!TermUtils.isList(taskIDs))
             taskIDs = env.getFactory().makeList(taskIDs);
         env.setCurrent(taskEngine.evaluateNow(env, collect, insert, perform, taskIDs));
         return true;
