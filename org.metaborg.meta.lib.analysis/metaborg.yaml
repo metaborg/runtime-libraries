@@ -9,6 +9,9 @@ dependencies:
   - org.metaborg:org.metaborg.meta.lang.template:${metaborgBaselineVersion}
   source:
   - org.metaborg:meta.lib.spoofax:${metaborgVersion}
+language:
+  sdf:
+    sdf2table: c
 exports:
 - language: SDF
   directory: src-gen/syntax
