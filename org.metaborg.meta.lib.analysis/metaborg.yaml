@@ -1,7 +1,7 @@
 ---
 id: org.metaborg:org.metaborg.meta.lib.analysis:${metaborgVersion}
 name: runtime-libraries
-metaborgVersion: 2.5.8
+metaborgVersion: 2.6.0-SNAPSHOT
 metaborgBaselineVersion: 2.3.0
 dependencies:
   compile:
@@ -9,6 +9,9 @@ dependencies:
   - org.metaborg:org.metaborg.meta.lang.template:${metaborgBaselineVersion}
   source:
   - org.metaborg:meta.lib.spoofax:${metaborgVersion}
+language:
+  sdf:
+    sdf2table: c
 exports:
 - language: SDF
   directory: src-gen/syntax
