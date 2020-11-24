@@ -51,12 +51,9 @@ public class TaskManager {
 
     private static void writeTerm(FileObject file, IStrategoTerm term) throws IOException {
         file.createFile();
-        final OutputStream output = file.getContent().getOutputStream();
-        try {
-            SAFWriter.writeTermToSAFStream(term, output);
+        try(final OutputStream output = file.getContent().getOutputStream()) {
+            new SAFWriter().write(term, output);
             output.flush();
-        } finally {
-            output.close();
         }
     }
 }
