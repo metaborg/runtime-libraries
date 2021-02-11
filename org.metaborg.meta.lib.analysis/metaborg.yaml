@@ -11,14 +11,15 @@ dependencies:
   - org.metaborg:meta.lib.spoofax:${metaborgVersion}
 language:
   sdf:
-    sdf2table: c
+    enabled: false
+    sdf2table: java
 exports:
-- language: SDF
-  directory: src-gen/syntax
-  includes: "**/*.sdf"
 - language: TemplateLang
   directory: syntax
   includes: "**/*.sdf3"
+- language: ATerm
+  directory: src-gen/syntax
+  includes: "**/*.aterm"
 - language: Stratego-Sugar
   directory: trans
   includes: "**/*.str"

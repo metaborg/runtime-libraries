@@ -16,7 +16,7 @@ pardonedLanguages:
 - SDF
 language:
   sdf:
-    sdf2table: c
+    sdf2table: java
   stratego:
     format: jar
     args:
