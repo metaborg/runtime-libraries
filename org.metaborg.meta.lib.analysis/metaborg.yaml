@@ -13,6 +13,8 @@ language:
   sdf:
     enabled: false
     sdf2table: java
+  stratego:
+    enabled: false
 exports:
 - language: TemplateLang
   directory: syntax
