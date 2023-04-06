@@ -1,31 +1,30 @@
 package org.metaborg.runtime.task.engine;
 
+import java.util.HashSet;
 import java.util.Set;
 
+import org.metaborg.util.iterators.Iterables2;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 
 public class TaskCollection {
 	/** New tasks that have been added since last call to {@link #startCollection}. */
-	private final Set<IStrategoTerm> addedTasks = Sets.newHashSet();
+	private final Set<IStrategoTerm> addedTasks = new HashSet<>();
 
-	/** Tasks that have been removed when calling {@link #stopCollection(IStrategoTerm)}. */
-	private final Set<IStrategoTerm> removedTasks = Sets.newHashSet();
+    /** Tasks that have been removed when calling {@link #stopCollection(IStrategoTerm)}. */
+	private final Set<IStrategoTerm> removedTasks = new HashSet<>();
 
-	/** Partitions that are in process of task collection. */
-	private final Set<IStrategoTerm> inCollection = Sets.newHashSet();
+    /** Partitions that are in process of task collection. */
+	private final Set<IStrategoTerm> inCollection = new HashSet<>();
 
 
-	public void startCollection(IStrategoTerm source, Iterable<IStrategoTerm> tasksIDsInSource) {
+    public void startCollection(IStrategoTerm source, Iterable<IStrategoTerm> tasksIDsInSource) {
 		if(inCollection.contains(source))
 			throw new IllegalStateException(
 				"Collection has already been started. Call task-stop-collection(|source) before starting a new collection.");
 
 		addedTasks.clear();
 		removedTasks.clear();
-		Iterables.addAll(removedTasks, tasksIDsInSource);
+		Iterables2.addAll(removedTasks, tasksIDsInSource);
 		inCollection.add(source);
 	}
 

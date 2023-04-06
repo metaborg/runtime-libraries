@@ -8,12 +8,10 @@ import java.util.Map.Entry;
 
 import org.junit.Test;
 import org.metaborg.runtime.task.TaskInsertion;
+import org.metaborg.util.collection.ListMultimap;
 import org.spoofax.interpreter.library.ssl.StrategoHashMap;
 import org.spoofax.interpreter.terms.IStrategoInt;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Multimap;
 
 public class UtilsTest extends TaskTest {
 	@SuppressWarnings("unchecked")
@@ -25,7 +23,7 @@ public class UtilsTest extends TaskTest {
 		IStrategoTerm d = def("Java", segment("Class", "D"));
 		IStrategoTerm e = def("Java", segment("Class", "E"));
 
-		Multimap<IStrategoTerm, IStrategoTerm> results = LinkedHashMultimap.create();
+		ListMultimap<IStrategoTerm, IStrategoTerm> results = new ListMultimap<>();
 		results.put(i(1), a);
 		results.put(i(1), b);
 		results.put(i(2), c);
@@ -60,7 +58,7 @@ public class UtilsTest extends TaskTest {
 		IStrategoTerm e = def("Java", segment("Class", "E"));
 		IStrategoTerm f = def("Java", segment("Class", "F"));
 
-		Multimap<IStrategoTerm, IStrategoTerm> results = LinkedHashMultimap.create();
+		ListMultimap<IStrategoTerm, IStrategoTerm> results = new ListMultimap<>();
 		results.put(i(1), a);
 		results.put(i(1), b);
 		results.put(i(2), c);
@@ -103,7 +101,7 @@ public class UtilsTest extends TaskTest {
 		IStrategoTerm a = def("Java", segment("Class", "A"));
 		IStrategoTerm b = def("Java", segment("Class", "B"));
 
-		Multimap<IStrategoTerm, IStrategoTerm> results = LinkedHashMultimap.create();
+		ListMultimap<IStrategoTerm, IStrategoTerm> results = new ListMultimap<>();
 		results.put(i(1), a);
 		results.put(i(2), b);
 
@@ -117,7 +115,7 @@ public class UtilsTest extends TaskTest {
 
 	@Test
 	public void testCartesianProduct4() {
-		Multimap<IStrategoTerm, IStrategoTerm> results = LinkedHashMultimap.create();
+		ListMultimap<IStrategoTerm, IStrategoTerm> results = new ListMultimap<>();
 		Collection<StrategoHashMap> product = TaskInsertion.cartesianProduct(results);
 		assertEquals(0, product.size());
 	}

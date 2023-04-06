@@ -5,10 +5,14 @@ import static org.metaborg.runtime.task.util.TermTools.makeList;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.metaborg.runtime.task.engine.ITaskEngine;
+import org.metaborg.util.Ref;
+import org.metaborg.util.collection.ListMultimap;
 import org.metaborg.util.iterators.Iterables2;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.library.ssl.StrategoHashMap;
@@ -16,12 +20,6 @@ import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 
 public final class TaskInsertion {
     /**
@@ -42,11 +40,11 @@ public final class TaskInsertion {
      * Data class representing a result map or dynamic dependencies.
      */
     private static class ResultMapOrDeps {
-        public final Multimap<IStrategoTerm, IStrategoTerm> resultMap;
+        public final ListMultimap<IStrategoTerm, IStrategoTerm> resultMap;
         public final Iterable<IStrategoTerm> deps;
 
 
-        public ResultMapOrDeps(Multimap<IStrategoTerm, IStrategoTerm> resultMap) {
+        public ResultMapOrDeps(ListMultimap<IStrategoTerm, IStrategoTerm> resultMap) {
             this.resultMap = resultMap;
             this.deps = null;
         }
@@ -57,7 +55,7 @@ public final class TaskInsertion {
         }
 
 
-        public static ResultMapOrDeps resultMap(Multimap<IStrategoTerm, IStrategoTerm> resultMap) {
+        public static ResultMapOrDeps resultMap(ListMultimap<IStrategoTerm, IStrategoTerm> resultMap) {
             return new ResultMapOrDeps(resultMap);
         }
 
@@ -121,7 +119,7 @@ public final class TaskInsertion {
                 if(dependencyFailure(taskEngine, allDependencies))
                     return null;
 
-                if(Iterables.isEmpty(actualDependencies)) {
+                if(Iterables2.isEmpty(actualDependencies)) {
                     return new PermsOrDeps(Iterables2.singleton(instruction), false);
                 } else {
                     return insertResultCombinations(taskEngine, context, collect, insert, instruction,
@@ -170,7 +168,7 @@ public final class TaskInsertion {
     public static PermsOrDeps insertResultCombinations(ITaskEngine taskEngine, IContext context, Strategy collect,
         Strategy insert, IStrategoTerm term, Iterable<IStrategoTerm> dependencies, Iterable<IStrategoTerm> initialSeen,
         boolean singleLevel) {
-        final Set<IStrategoTerm> seen = Sets.newHashSet(initialSeen);
+        final Set<IStrategoTerm> seen = Iterables2.toHashSet(initialSeen);
         final ResultMapOrDeps result =
             createResultMapping(taskEngine, context, collect, insert, dependencies, seen, singleLevel);
 
@@ -185,8 +183,8 @@ public final class TaskInsertion {
 
     private static ResultMapOrDeps createResultMapping(ITaskEngine taskEngine, IContext context, Strategy collect,
         Strategy insert, Iterable<IStrategoTerm> resultIDs, Set<IStrategoTerm> seen, boolean singleLevel) {
-        final Multimap<IStrategoTerm, IStrategoTerm> resultsMap = ArrayListMultimap.create();
-        final Collection<IStrategoTerm> dynamicDependencies = Lists.newLinkedList();
+        final ListMultimap<IStrategoTerm, IStrategoTerm> resultsMap = new ListMultimap<>();
+        final Collection<IStrategoTerm> dynamicDependencies = new ArrayList<>();
 
         for(final IStrategoTerm resultID : resultIDs) {
             if(seen.contains(resultID)) {
@@ -195,14 +193,14 @@ public final class TaskInsertion {
             }
 
             final ResultsOrDeps results =
-                getResultsOf(taskEngine, context, collect, insert, resultID, Sets.newHashSet(seen), singleLevel);
+                getResultsOf(taskEngine, context, collect, insert, resultID, new HashSet<>(seen), singleLevel);
 
             if(results == null) {
                 return null;
             } else if(results.hasDeps()) {
-                Iterables.addAll(dynamicDependencies, results.deps);
+                Iterables2.addAll(dynamicDependencies, results.deps);
             } else {
-                resultsMap.putAll(resultID, results.results);
+                results.results.forEach(r -> resultsMap.put(resultID, r));
             }
         }
 
@@ -223,12 +221,12 @@ public final class TaskInsertion {
             return null; // If a dependency does not have any results, the task cannot be executed.
         }
 
-        final Collection<IStrategoTerm> results = Lists.newLinkedList();
-        final Collection<IStrategoTerm> dynamicDependencies = Lists.newLinkedList();
+        final Collection<IStrategoTerm> results = new ArrayList<>();
+        final Collection<IStrategoTerm> dynamicDependencies = new ArrayList<>();
 
         for(final IStrategoTerm result : task.results()) {
             final Iterable<IStrategoTerm> nestedResultIDs = getResultIDs(context, collect, result);
-            if(singleLevel || Iterables.isEmpty(nestedResultIDs)) {
+            if(singleLevel || Iterables2.isEmpty(nestedResultIDs)) {
                 results.add(result);
             } else {
                 final ResultMapOrDeps resultMapping =
@@ -237,7 +235,7 @@ public final class TaskInsertion {
                 if(resultMapping == null) {
                     return null;
                 } else if(resultMapping.hasDeps()) {
-                    Iterables.addAll(dynamicDependencies, resultMapping.deps);
+                    Iterables2.addAll(dynamicDependencies, resultMapping.deps);
                 } else {
                     final Collection<IStrategoTerm> insertedResults =
                         insertCarthesianProduct(context, insert, result, resultMapping.resultMap);
@@ -253,9 +251,9 @@ public final class TaskInsertion {
     }
 
     private static Collection<IStrategoTerm> insertCarthesianProduct(IContext context, Strategy insert,
-        IStrategoTerm term, Multimap<IStrategoTerm, IStrategoTerm> resultMapping) {
+        IStrategoTerm term, ListMultimap<IStrategoTerm, IStrategoTerm> resultMapping) {
         final Collection<StrategoHashMap> resultCombinations = cartesianProduct(resultMapping);
-        final Collection<IStrategoTerm> instructions = Lists.newLinkedList();
+        final Collection<IStrategoTerm> instructions = new ArrayList<>();
         for(StrategoHashMap mapping : resultCombinations) {
             instructions.add(insertResults(context, insert, term, mapping));
         }
@@ -280,24 +278,24 @@ public final class TaskInsertion {
      * Given a multimap from task identifiers to their results, returns the cartesian product of that mapping. The
      * product is returned as a collection of maps that map task identifiers to one result.
      */
-    public static Collection<StrategoHashMap> cartesianProduct(Multimap<IStrategoTerm, IStrategoTerm> results) {
-        Collection<StrategoHashMap> result = new ArrayList<>();
+    public static Collection<StrategoHashMap> cartesianProduct(ListMultimap<IStrategoTerm, IStrategoTerm> results) {
+        final Ref<Collection<StrategoHashMap>> result = new Ref<>(new ArrayList<>());
         if(results.size() > 0)
-            result.add(new StrategoHashMap());
+            result.get().add(new StrategoHashMap());
 
-        for(Entry<IStrategoTerm, Collection<IStrategoTerm>> entry : results.asMap().entrySet()) {
+        results.forEach((IStrategoTerm k, List<IStrategoTerm> v) -> {
             Collection<StrategoHashMap> newResults = new ArrayList<>();
-            for(StrategoHashMap map : result) {
-                for(IStrategoTerm val : entry.getValue()) {
+            for(StrategoHashMap map : result.get()) {
+                for(IStrategoTerm val : v) {
                     StrategoHashMap mapping = new StrategoHashMap();
                     mapping.putAll(map);
-                    mapping.put(entry.getKey(), val);
+                    mapping.put(k, val);
                     newResults.add(mapping);
                 }
             }
-            result = newResults;
-        }
-        return result;
+            result.set(newResults);
+        });
+        return result.get();
     }
 
     /**

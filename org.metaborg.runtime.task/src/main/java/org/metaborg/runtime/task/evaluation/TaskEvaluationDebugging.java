@@ -7,9 +7,8 @@ import org.metaborg.runtime.task.ITask;
 import org.metaborg.runtime.task.engine.ITaskEngine;
 import org.metaborg.runtime.task.util.Debug;
 import org.metaborg.util.collection.BiSetMultimap;
+import org.metaborg.util.iterators.Iterables2;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-
-import com.google.common.collect.Iterables;
 
 public final class TaskEvaluationDebugging {
 	/**
@@ -73,7 +72,7 @@ public final class TaskEvaluationDebugging {
 		if(Debug.DEBUGGING) {
 			final ITask task = taskEngine.getTask(taskID);
 
-			if(Iterables.size(dependencies) == 0)
+			if(Iterables2.isEmpty(dependencies))
 				System.err.println("Task " + taskID + ": " + task + " reported a dynamic dependency on nothing.");
 
 			for(IStrategoTerm dependencyID : dependencies) {

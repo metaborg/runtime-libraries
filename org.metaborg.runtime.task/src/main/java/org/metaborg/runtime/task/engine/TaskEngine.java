@@ -1,5 +1,8 @@
 package org.metaborg.runtime.task.engine;
 
+import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
@@ -15,7 +18,9 @@ import org.metaborg.runtime.task.evaluation.ITaskEvaluationFrontend;
 import org.metaborg.runtime.task.util.TermTools;
 import org.metaborg.util.collection.BiLinkedHashMultimap;
 import org.metaborg.util.collection.BiSetMultimap;
+import org.metaborg.util.collection.Sets;
 import org.metaborg.util.collection.UniqueQueue;
+import org.metaborg.util.iterators.Iterables2;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -27,10 +32,6 @@ import org.spoofax.interpreter.terms.ITermFactory;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.common.collect.Table;
 
 public class TaskEngine implements ITaskEngine {
@@ -41,7 +42,7 @@ public class TaskEngine implements ITaskEngine {
     private final IStrategoConstructor resultConstructor;
 
     /** Mapping of instruction constructors to their factory. */
-    private final Map<IStrategoConstructor, ITaskFactory> taskFactories = Maps.newHashMap();
+    private final Map<IStrategoConstructor, ITaskFactory> taskFactories = new HashMap<>();
 
     /** Bidirectional mapping between task identifiers and tasks. */
     private final BiMap<IStrategoTerm, ITask> toTask = HashBiMap.create();
@@ -67,7 +68,7 @@ public class TaskEngine implements ITaskEngine {
     private final Queue<IStrategoTerm> garbage = new UniqueQueue<IStrategoTerm>();
 
     /** Set of task that are scheduled for evaluation the next time evaluate is called. */
-    private final Set<IStrategoTerm> scheduled = Sets.newHashSet();
+    private final Set<IStrategoTerm> scheduled = new HashSet<>();
 
 
     private final TaskCollection taskCollection;
@@ -173,7 +174,7 @@ public class TaskEngine implements ITaskEngine {
     @Override public void removeTask(IStrategoTerm taskID) {
         // Thrash higher-order tasks that were created by this task. Make a copy of the result of getFromSource because
         // that collection will be changed by trashUnreferencedTasks, which would result in a concurrent modification.
-        trashUnreferencedTasks(Lists.newArrayList(getFromSource(taskID)), taskID);
+        trashUnreferencedTasks(Iterables2.toArrayList(getFromSource(taskID)), taskID);
 
         removeSourcesOf(taskID);
         removeDependencies(taskID);
@@ -245,10 +246,10 @@ public class TaskEngine implements ITaskEngine {
 
     @Override public Set<IStrategoTerm> invalidateTaskReads(IStrategoList changedReads) {
         // Use work list to prevent recursion, keep collection of seen task ID's to prevent loops.
-        final Set<IStrategoTerm> seen = Sets.newHashSet();
-        final Queue<IStrategoTerm> workList = Lists.newLinkedList();
+        final Set<IStrategoTerm> seen = new HashSet<>();
+        final Queue<IStrategoTerm> workList = new ArrayDeque<>();
         for(final IStrategoTerm changedRead : changedReads) {
-            Iterables.addAll(seen, getReaders(changedRead));
+            Iterables2.addAll(seen, getReaders(changedRead));
         }
         workList.addAll(seen);
 
@@ -283,7 +284,7 @@ public class TaskEngine implements ITaskEngine {
 
     @Override public IStrategoTerm evaluateNow(IContext context, Strategy collect, Strategy insert, Strategy perform,
         Iterable<IStrategoTerm> taskIDs) {
-        final Set<IStrategoTerm> scheduled = Sets.newHashSet(taskIDs);
+        final Set<IStrategoTerm> scheduled = Iterables2.toHashSet(taskIDs);
         for(IStrategoTerm taskID : taskIDs)
             scheduled.addAll(getTransitiveDependencies(taskID));
         return evaluationFrontend.evaluate(scheduled, context, collect, insert, perform);
@@ -317,7 +318,7 @@ public class TaskEngine implements ITaskEngine {
 
 
     @Override public Set<IStrategoTerm> getAllSources() {
-        return Sets.newHashSet(toSource.values());
+        return new HashSet<>(toSource.values());
     }
 
     @Override public Set<IStrategoTerm> getSourcesOf(IStrategoTerm taskID) {
@@ -353,8 +354,8 @@ public class TaskEngine implements ITaskEngine {
     }
 
     @Override public Set<IStrategoTerm> getTransitiveDependencies(IStrategoTerm taskID) {
-        final Set<IStrategoTerm> seen = Sets.newHashSet();
-        final Queue<IStrategoTerm> queue = Lists.newLinkedList();
+        final Set<IStrategoTerm> seen = new HashSet<>();
+        final Queue<IStrategoTerm> queue = new ArrayDeque<>();
 
         queue.add(taskID);
         seen.add(taskID);
@@ -382,8 +383,8 @@ public class TaskEngine implements ITaskEngine {
     }
 
     @Override public boolean becomesCyclic(IStrategoTerm taskIDFrom, IStrategoTerm taskIDTo) {
-        final Set<IStrategoTerm> seen = Sets.newHashSet();
-        final Queue<IStrategoTerm> queue = Lists.newLinkedList();
+        final Set<IStrategoTerm> seen = new HashSet<>();
+        final Queue<IStrategoTerm> queue = new ArrayDeque<>();
 
         queue.add(taskIDTo);
         seen.add(taskIDTo);
