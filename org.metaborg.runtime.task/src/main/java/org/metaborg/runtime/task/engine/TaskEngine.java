@@ -22,6 +22,7 @@ import org.metaborg.util.collection.BiSetMultimap;
 import org.metaborg.util.collection.Sets;
 import org.metaborg.util.collection.UniqueQueue;
 import org.metaborg.util.iterators.Iterables2;
+import org.metaborg.util.tuple.Tuple2;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -29,10 +30,6 @@ import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
-
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Table;
 
 public class TaskEngine implements ITaskEngine {
     private final ITermFactory factory;
@@ -48,7 +45,7 @@ public class TaskEngine implements ITaskEngine {
     private final BiMap2<IStrategoTerm, ITask> toTask = new BiMap2<>();
 
     /** Mapping table of instructions and dependencies to task identifiers. */
-    private final Table<IStrategoAppl, IStrategoList, IStrategoTerm> toTaskID = HashBasedTable.create();
+    private final Map<Tuple2<IStrategoAppl, IStrategoList>, IStrategoTerm> toTaskID = new HashMap<>();
 
 
     /** Origins of tasks. */
@@ -118,7 +115,7 @@ public class TaskEngine implements ITaskEngine {
         if(taskID != null)
             return taskID;
         taskID = digester.digest(factory, instruction, dependencies);
-        toTaskID.put(instruction, dependencies, taskID);
+        toTaskID.put(Tuple2.of(instruction, dependencies), taskID);
         final ITask task = getTask(taskID);
         if(task == null)
             return taskID;
@@ -168,7 +165,7 @@ public class TaskEngine implements ITaskEngine {
             throw new RuntimeException("Trying to add a persisted task that already exists.");
 
         toTask.put(taskID, task);
-        toTaskID.put(task.initialInstruction(), initialDependencies, taskID);
+        toTaskID.put(Tuple2.of(task.initialInstruction(), initialDependencies), taskID);
     }
 
     @Override public void removeTask(IStrategoTerm taskID) {
@@ -183,7 +180,7 @@ public class TaskEngine implements ITaskEngine {
         final ITask task = getTask(taskID); // Don't use wrapper, cannot remove from parent in this task engine.
         if(task == null)
             return; // Task is not in this task engine but might be in a parent one.
-        toTaskID.remove(task.initialInstruction(), TermTools.makeList(factory, task.initialDependencies()));
+        toTaskID.remove(Tuple2.of(task.initialInstruction(), TermTools.makeList(factory, task.initialDependencies())));
         toTask.remove(taskID);
     }
 
@@ -300,7 +297,7 @@ public class TaskEngine implements ITaskEngine {
     }
 
     @Override public IStrategoTerm getTaskID(IStrategoAppl instruction, IStrategoList dependencies) {
-        return toTaskID.get(instruction, dependencies);
+        return toTaskID.get(Tuple2.of(instruction, dependencies));
     }
 
 
