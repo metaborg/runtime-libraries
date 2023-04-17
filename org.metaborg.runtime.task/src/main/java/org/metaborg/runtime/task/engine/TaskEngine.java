@@ -17,6 +17,7 @@ import org.metaborg.runtime.task.digest.ITermDigester;
 import org.metaborg.runtime.task.evaluation.ITaskEvaluationFrontend;
 import org.metaborg.runtime.task.util.TermTools;
 import org.metaborg.util.collection.BiLinkedHashMultimap;
+import org.metaborg.util.collection.BiMap2;
 import org.metaborg.util.collection.BiSetMultimap;
 import org.metaborg.util.collection.Sets;
 import org.metaborg.util.collection.UniqueQueue;
@@ -29,7 +30,6 @@ import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
-import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Table;
@@ -45,7 +45,7 @@ public class TaskEngine implements ITaskEngine {
     private final Map<IStrategoConstructor, ITaskFactory> taskFactories = new HashMap<>();
 
     /** Bidirectional mapping between task identifiers and tasks. */
-    private final BiMap<IStrategoTerm, ITask> toTask = HashBiMap.create();
+    private final BiMap2<IStrategoTerm, ITask> toTask = new BiMap2<>();
 
     /** Mapping table of instructions and dependencies to task identifiers. */
     private final Table<IStrategoAppl, IStrategoList, IStrategoTerm> toTaskID = HashBasedTable.create();
