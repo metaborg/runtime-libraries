@@ -1,14 +1,14 @@
 package org.metaborg.runtime.task;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.metaborg.util.iterators.Iterables2;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import com.google.common.collect.Sets;
-
 public class SetTaskResults implements ITaskResults {
-    private Set<IStrategoTerm> results = Sets.newHashSet();
+    private Set<IStrategoTerm> results = new HashSet<>();
 
 
     public SetTaskResults() {
@@ -16,7 +16,7 @@ public class SetTaskResults implements ITaskResults {
     }
 
     public SetTaskResults(ITaskResults results) {
-        this.results = Sets.newHashSet(results);
+        this.results = Iterables2.toHashSet(results);
     }
 
 
@@ -33,7 +33,7 @@ public class SetTaskResults implements ITaskResults {
     }
 
     @Override public void set(Iterable<IStrategoTerm> results) {
-        this.results = Sets.newHashSet(results);
+        this.results = Iterables2.toHashSet(results);
     }
 
     @Override public void addAll(Iterable<IStrategoTerm> results) {

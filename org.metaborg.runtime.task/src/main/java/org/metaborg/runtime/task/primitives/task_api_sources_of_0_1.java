@@ -1,16 +1,15 @@
 package org.metaborg.runtime.task.primitives;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.metaborg.runtime.task.engine.ITaskEngine;
+import org.metaborg.util.iterators.Iterables2;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.core.InterpreterException;
-import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
 import org.spoofax.terms.util.TermUtils;
 
 public class task_api_sources_of_0_1 extends TaskEnginePrimitive {
@@ -24,13 +23,13 @@ public class task_api_sources_of_0_1 extends TaskEnginePrimitive {
         throws InterpreterException {
         final IStrategoTerm taskIDOrTaskIDS = tvars[0];
 
-        final Set<IStrategoTerm> sources = Sets.newHashSet();
+        final Set<IStrategoTerm> sources = new HashSet<>();
         if(TermUtils.isList(taskIDOrTaskIDS)) {
             for(IStrategoTerm taskID : taskIDOrTaskIDS) {
-                Iterables.addAll(sources, taskEngine.getSourcesOf(taskID));
+                Iterables2.addAll(sources, taskEngine.getSourcesOf(taskID));
             }
         } else {
-            Iterables.addAll(sources, taskEngine.getSourcesOf(taskIDOrTaskIDS));
+            Iterables2.addAll(sources, taskEngine.getSourcesOf(taskIDOrTaskIDS));
         }
 
         env.setCurrent(env.getFactory().makeList(sources));

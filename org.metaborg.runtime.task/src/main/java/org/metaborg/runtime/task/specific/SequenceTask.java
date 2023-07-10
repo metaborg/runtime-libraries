@@ -1,5 +1,8 @@
 package org.metaborg.runtime.task.specific;
 
+import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
@@ -18,7 +21,6 @@ import org.metaborg.runtime.task.evaluation.ITaskEvaluationQueue;
 import org.metaborg.runtime.task.evaluation.ITaskEvaluator;
 import org.metaborg.runtime.task.evaluation.ITaskQueuer;
 import org.spoofax.interpreter.core.IContext;
-import org.spoofax.interpreter.core.Tools;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoConstructor;
@@ -26,9 +28,6 @@ import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import org.spoofax.terms.util.TermUtils;
 
 public class SequenceTask implements ITaskFactory, ITaskQueuer, ITaskEvaluator {
@@ -38,13 +37,13 @@ public class SequenceTask implements ITaskFactory, ITaskQueuer, ITaskEvaluator {
      * Maps task identifiers from sequence tasks to an iterator that holds the next subtask inside the sequence to
      * evaluate.
      */
-    private final Map<IStrategoTerm, Iterator<IStrategoTerm>> iterators = Maps.newHashMap();
+    private final Map<IStrategoTerm, Iterator<IStrategoTerm>> iterators = new HashMap<>();
 
     /**
      * Maps task identifiers of sequence tasks to task identifiers of subtasks that the sequence tasks are currently
      * evaluating.
      */
-    private final Map<IStrategoTerm, IStrategoTerm> subtaskIDs = Maps.newHashMap();
+    private final Map<IStrategoTerm, IStrategoTerm> subtaskIDs = new HashMap<>();
 
 
     public SequenceTask(ITermFactory factory) {
@@ -217,8 +216,8 @@ public class SequenceTask implements ITaskFactory, ITaskQueuer, ITaskEvaluator {
      * Returns the set of transitive dependencies for given task identifier, but filters out sequence tasks.
      */
     private Set<IStrategoTerm> transitiveDependenciesNoSequence(IStrategoTerm taskID, ITaskEngine taskEngine) {
-        final Set<IStrategoTerm> seen = Sets.newHashSet();
-        final Queue<IStrategoTerm> queue = Lists.newLinkedList();
+        final Set<IStrategoTerm> seen = new HashSet<>();
+        final Queue<IStrategoTerm> queue = new ArrayDeque<>();
 
         queue.add(taskID);
         seen.add(taskID);
