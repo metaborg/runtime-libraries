@@ -1,7 +1,7 @@
 module runtime/analysis/convert
 
 imports
-	
+
 	signatures/analysis/-
 	runtime/task/tasks
 	runtime/task/messages
@@ -9,7 +9,7 @@ imports
 	runtime/analysis/pp
 
 rules // All
-	
+
 	from-debug-str:
 		(task-tuple*, index-tuple*) -> str
 		with
@@ -18,15 +18,15 @@ rules // All
 		; str            := <pp-runtime-libraries> Sections([task-section|index-section*])
 
 rules // Task
-	
+
 	from-task-debug-str = from-task-debug; !Sections([<id>]); pp-runtime-libraries
-	
+
 	from-task-debug:
 		task-tuple* -> task-section
 		with
 			task-def*    := <map(from-task-debug-tuple)> task-tuple*
 		; task-section := Tasks(task-def*)
-			
+
 	from-task-debug-tuple:
 		(tid, instr, sdep*, ddep*, read*, res, msg, execs, time) -> TaskDef(<to-tid> tid, <to-deps> (sdep*, ddep*), <to-instruction <+ make-abstract> instr, <to-res> res, reads)
 		where
@@ -35,10 +35,10 @@ rules // Task
 			else
 				reads := Reads(<make-abstract> read*)
 			end
-		
+
 	to-tid:
 		tid -> <try(int-to-string)> tid
-		
+
 	to-deps:
 		(sdep*, ddep*) -> result
 		where
@@ -48,161 +48,161 @@ rules // Task
 				case ([]     , not([])): !DDeps(<map(to-taskref)> ddep*)
 				case (not([]), not([])): !SDDeps(<map(to-taskref)> sdep*, <map(to-taskref)> ddep*)
 			end => result
-		
+
 	to-taskref:
 		tid -> TaskRef(<to-tid> tid)
-		
+
 	to-res:
 		res -> <to-abstract-terms; (result-to-fail <+ result-to-depfail <+ result-to-empty <+ convert-terms)> res
 
 rules // Index
-	
+
 	from-index-debug-str = from-index-debug; !Sections(<id>); pp-runtime-libraries
-	
+
 	from-index-debug:
 		index-tuple* -> index-section*
 		with
 			index-section* := <map(from-index-partition-debug-tuple)> index-tuple*
-	
+
   from-index-partition-debug-tuple:
   	(partition, entry*) -> Index(<make-abstract> partition, entry'*)
   	with
   		entry'* := <map(make-abstract)> entry*
 
 rules // Instructions
-	
+
 	to-message-trigger: Success() -> Succ()
 	to-message-trigger: Failure() -> Fail()
 	to-message-trigger: Multiple() -> Mult()
-	
+
 	to-instruction:
 		Message(task, trigger, _, Note(_, term, message)) -> Msg(Note(), <make-abstract> message, <make-abstract> term, <make-abstract> task, <to-message-trigger> trigger)
-		
+
 	to-instruction:
 		Message(task, trigger, _, Warning(_, term, message)) -> Msg(Warn(), <make-abstract> message, <make-abstract> term, <make-abstract> task, <to-message-trigger> trigger)
-		
+
 	to-instruction:
 		Message(task, trigger, _, Error(_, term, message)) -> Msg(Err(), <make-abstract> message, <make-abstract> term, <make-abstract> task, <to-message-trigger> trigger)
-		
+
 	to-instruction = Choice(map(make-abstract))
-	
+
 	to-instruction = Sequence(map(make-abstract))
-	
+
 	to-instruction = Combine(map(make-abstract))
-	
+
 	to-instruction = Id(make-abstract)
-	
+
 	to-instruction = PropLookup(make-abstract, make-abstract)
-	
+
 	to-instruction = PropsLookup(make-abstract, make-abstract)
-	
+
 	to-instruction:
 		PropCheck(kind, relation, expected, input) -> PropCheck(<make-abstract> kind, <make-abstract> expected, <make-abstract> input, <make-abstract> relation)
-	
+
 	to-instruction:
 		Rewrite(relation, term) -> Rewrite(<make-abstract> term, <make-abstract> relation)
-		
+
 	to-instruction:
 		Match(relation, term, binding*) -> Match(<make-abstract> term, <make-abstract> relation, <make-abstract> binding*)
-		
+
 	to-instruction:
 		ResolveDefs(scope, namespace, name, prop*) -> ResolveDefs(<make-abstract> namespace, <make-abstract> name, <make-abstract> scope, <make-abstract> prop*)
-		
+
 	to-instruction:
 		CheckDefs(ns, def*) -> CheckDefs(<make-abstract> def*, <make-abstract> ns)
-		
+
 rules // Task result terms
-	
+
 	term-to-taskref:
 		Appl("Result", [Int(tid)]) -> <to-taskref> tid
-		
+
 	all-terms-to-taskrefs = topdown-annos(try(term-to-taskref))
 
 rules // Index entries
-	
+
 	to-entry:
 		Appl("Def", [uri]) -> Def(uri)
 	to-entry:
 		Tupl([Appl("Def", [uri]), _]) -> Def(uri)
-		
+
 	to-entry:
 		Appl("Use", [res]) -> Use(res)
-		
+
 	to-entry:
 		Appl("Prop", [uri, kind, val]) -> Prop(uri, kind, val)
 	to-entry:
 		Tupl([Appl("Prop", [uri, kind]), val]) -> Prop(uri, kind, val)
-		
+
 	to-entry:
 		Appl("Alias", [uri1, uri2]) -> Alias(uri1, uri2)
 	to-entry:
 		Tupl([Appl("Alias", [uri1]), uri2]) -> Alias(uri1, uri2)
-		
+
 	to-entry:
 		Appl("InverseAlias", [uri1, uri2]) -> IAlias(uri1, uri2)
 	to-entry:
 		Tupl([Appl("InverseAlias", [uri1]), uri2]) -> Alias(uri1, uri2)
-		
+
 	to-entry:
 		Appl("RelTuple", [l, rel, r]) -> Rel(l, rel, r)
 	to-entry:
 		Tupl([Appl("RelTuple", [l, rel]), r]) -> Rel(l, rel, r)
-		
+
 	all-to-entry = topdown-annos(try(to-entry))
-	
+
 rules // URIs
-	
+
 	term-to-uri:
 		Appl("URI", [_, List(segment*)]) -> URI(<map(term-to-segment)> segment*)
-		
+
 	term-to-segment:
 		Appl("ID", [Appl(ns, []), term]) -> Id(<namespace-remove-nablns> ns, term)
 
 	term-to-segment:
 		Appl("ID", [Appl(ns, []), term, Appl("NonUnique", [])]) -> Id(<namespace-remove-nablns> ns, term)
-		
+
 	term-to-segment:
 		Appl("ID", [Appl(ns, []), term, Tupl([])]) -> Id(<namespace-remove-nablns> ns, term, "*")
-		
+
 	term-to-segment:
 		Appl("ID", [Appl(ns, []), term, Appl("Unique", [Str(u)])]) -> Id(<namespace-remove-nablns> ns, term, <qualifier-remove-partition> u)
-		
+
 	term-to-segment:
 		Appl("Anonymous", [Str(a)]) -> Anon(<qualifier-remove-partition> a)
-		
+
 	term-to-segment:
 		Appl("Subsequent", [Str(a)]) -> Subsq(<qualifier-remove-partition> a)
-		
+
 	qualifier-remove-partition = explode-string; last; ![<id>]; implode-string
-	
+
 	namespace-remove-nablns = explode-string; drop(|6); implode-string
-		
+
 	all-terms-to-uris = topdown-annos(try(term-to-uri))
-	
+
 rules // Special results
-	
+
 	result-to-fail:
 		Appl("Fail", []) -> Fail()
 
 	result-to-depfail:
 		Appl("DepFail", []) -> DepFail()
-		
+
 	result-to-empty:
 		Appl("None", []) -> NotExec()
-	
+
 rules // Postprocessing
-	
+
 	quote-string:
 		Str(str) -> Str(<try(double-quote)> str)
-	
+
 	all-quote-strings = topdown-annos(try(quote-string))
-	
+
 	convert-terms = all-to-entry; all-terms-to-taskrefs; all-terms-to-uris; all-quote-strings
-	
+
 	make-abstract = to-abstract-terms; convert-terms
-	
+
 rules // Utilities
-	
+
 	topdown-annos(s) =
 		switch id
 			case has-annos  : ?t; !(<s; all(topdown-annos(s))> t, <get-annos; topdown-annos(s)> t); set-annos
@@ -228,3 +228,13 @@ rules // Utilities
 			end
 
 	is-appl = not(is-tuple <+ is-list <+ is-int <+ is-real <+ is-string)
+
+
+rules
+
+  // Ugly hack
+  // Sometimes the Stratego compilation to Java get ambiguous references to `$Id_1_0`.
+  // Therefore redefine it locally here.
+  // Occurs in e.g. template.lang build in Spoofax 3
+
+  internal Id(x) = ?Id(a){a*}; !Id(<x> a){a*}
