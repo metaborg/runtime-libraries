@@ -7,11 +7,10 @@ import org.junit.Test;
 import org.metaborg.runtime.task.TaskStorageType;
 import org.metaborg.runtime.task.TaskType;
 import org.metaborg.runtime.task.engine.TaskEngineFactory;
+import org.metaborg.util.iterators.Iterables2;
 import org.spoofax.interpreter.terms.IStrategoAppl;
 import org.spoofax.interpreter.terms.IStrategoString;
 import org.spoofax.interpreter.terms.IStrategoTerm;
-
-import com.google.common.collect.Iterables;
 
 public class TaskEngineTest extends TaskTest {
     private final IStrategoString partition1 = str("String.java");
@@ -64,14 +63,14 @@ public class TaskEngineTest extends TaskTest {
         assertFalse(assertContains(taskEngine.getFromSource(partition2), resolveImportID));
         assertTrue(assertContains(taskEngine.getFromSource(partition2), choiceID));
 
-        assertEquals(0, Iterables.size(taskEngine.getDependencies(resolveID, false)));
-        assertEquals(0, Iterables.size(taskEngine.getDependencies(resolveImportID, false)));
+        assertEquals(0, Iterables2.size(taskEngine.getDependencies(resolveID, false)));
+        assertEquals(0, Iterables2.size(taskEngine.getDependencies(resolveImportID, false)));
         assertTrue(assertContains(taskEngine.getDependencies(choiceID, false), resolveID));
         assertTrue(assertContains(taskEngine.getDependencies(choiceID, false), resolveImportID));
 
         assertTrue(assertContains(taskEngine.getDependents(resolveID, false), choiceID));
         assertTrue(assertContains(taskEngine.getDependents(resolveImportID, false), choiceID));
-        assertEquals(0, Iterables.size(taskEngine.getDependents(choiceID, false)));
+        assertEquals(0, Iterables2.size(taskEngine.getDependents(choiceID, false)));
     }
 
     @Test public void testNoDuplicates() {
@@ -132,22 +131,22 @@ public class TaskEngineTest extends TaskTest {
         choiceID = resultID(choiceResult);
         taskEngine.stopCollection(partition2);
 
-        assertEquals(2, Iterables.size(taskEngine.getSourcesOf(resolveID)));
-        assertEquals(1, Iterables.size(taskEngine.getSourcesOf(resolveID2)));
-        assertEquals(2, Iterables.size(taskEngine.getSourcesOf(resolveImportID)));
-        assertEquals(2, Iterables.size(taskEngine.getSourcesOf(choiceID)));
+        assertEquals(2, Iterables2.size(taskEngine.getSourcesOf(resolveID)));
+        assertEquals(1, Iterables2.size(taskEngine.getSourcesOf(resolveID2)));
+        assertEquals(2, Iterables2.size(taskEngine.getSourcesOf(resolveImportID)));
+        assertEquals(2, Iterables2.size(taskEngine.getSourcesOf(choiceID)));
 
-        assertEquals(4, Iterables.size(taskEngine.getFromSource(partition1)));
-        assertEquals(3, Iterables.size(taskEngine.getFromSource(partition2)));
+        assertEquals(4, Iterables2.size(taskEngine.getFromSource(partition1)));
+        assertEquals(3, Iterables2.size(taskEngine.getFromSource(partition2)));
 
-        assertEquals(0, Iterables.size(taskEngine.getDependencies(resolveID, false)));
-        assertEquals(1, Iterables.size(taskEngine.getDependencies(resolveID2, false)));
-        assertEquals(0, Iterables.size(taskEngine.getDependencies(resolveImportID, false)));
-        assertEquals(2, Iterables.size(taskEngine.getDependencies(choiceID, false)));
+        assertEquals(0, Iterables2.size(taskEngine.getDependencies(resolveID, false)));
+        assertEquals(1, Iterables2.size(taskEngine.getDependencies(resolveID2, false)));
+        assertEquals(0, Iterables2.size(taskEngine.getDependencies(resolveImportID, false)));
+        assertEquals(2, Iterables2.size(taskEngine.getDependencies(choiceID, false)));
 
-        assertEquals(2, Iterables.size(taskEngine.getDependents(resolveID, false)));
-        assertEquals(1, Iterables.size(taskEngine.getDependents(resolveImportID, false)));
-        assertEquals(0, Iterables.size(taskEngine.getDependents(choiceID, false)));
+        assertEquals(2, Iterables2.size(taskEngine.getDependents(resolveID, false)));
+        assertEquals(1, Iterables2.size(taskEngine.getDependents(resolveImportID, false)));
+        assertEquals(0, Iterables2.size(taskEngine.getDependents(choiceID, false)));
     }
 
     // Adding a task without starting collection.

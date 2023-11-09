@@ -1,14 +1,14 @@
 package org.metaborg.runtime.task;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.metaborg.util.iterators.Iterables2;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 
-import com.google.common.collect.Lists;
-
 public class ListTaskResults implements ITaskResults {
-    private List<IStrategoTerm> results = Lists.newLinkedList();
+    private List<IStrategoTerm> results = new ArrayList<>();
 
 
     public ListTaskResults() {
@@ -16,7 +16,7 @@ public class ListTaskResults implements ITaskResults {
     }
 
     public ListTaskResults(ITaskResults results) {
-        this.results = Lists.newLinkedList(results);
+        this.results = Iterables2.toArrayList(results);
     }
 
 
@@ -29,7 +29,7 @@ public class ListTaskResults implements ITaskResults {
     }
 
     @Override public void set(Iterable<IStrategoTerm> results) {
-        this.results = Lists.newLinkedList(results);
+        this.results = Iterables2.toArrayList(results);
     }
 
     @Override public void addAll(Iterable<IStrategoTerm> results) {

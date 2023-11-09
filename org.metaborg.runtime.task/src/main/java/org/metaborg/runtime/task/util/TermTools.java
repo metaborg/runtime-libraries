@@ -1,17 +1,19 @@
 package org.metaborg.runtime.task.util;
 
+import org.metaborg.util.collection.ImList;
+import org.metaborg.util.iterators.Iterables2;
+import org.metaborg.util.iterators.Iterators2;
+import org.metaborg.util.iterators.ReverseListIterator;
 import org.spoofax.interpreter.terms.IStrategoInt;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
-
-import com.google.common.collect.ImmutableList;
 import org.spoofax.terms.util.TermUtils;
 
 public final class TermTools {
 	public static IStrategoList makeList(ITermFactory factory, Iterable<? extends IStrategoTerm> terms) {
 		IStrategoList list = factory.makeList();
-		for(IStrategoTerm term : ImmutableList.copyOf(terms).reverse())
+		for(IStrategoTerm term : ReverseListIterator.reverse(ImList.Immutable.copyOf(terms)))
 			list = factory.makeListCons(term, list);
 		return list;
 	}

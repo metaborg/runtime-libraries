@@ -1,5 +1,8 @@
 package org.metaborg.runtime.task.engine;
 
+import java.util.ArrayDeque;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
@@ -14,8 +17,12 @@ import org.metaborg.runtime.task.digest.ITermDigester;
 import org.metaborg.runtime.task.evaluation.ITaskEvaluationFrontend;
 import org.metaborg.runtime.task.util.TermTools;
 import org.metaborg.util.collection.BiLinkedHashMultimap;
+import org.metaborg.util.collection.BiMap2;
 import org.metaborg.util.collection.BiSetMultimap;
+import org.metaborg.util.collection.Sets;
 import org.metaborg.util.collection.UniqueQueue;
+import org.metaborg.util.iterators.Iterables2;
+import org.metaborg.util.tuple.Tuple2;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -23,15 +30,6 @@ import org.spoofax.interpreter.terms.IStrategoConstructor;
 import org.spoofax.interpreter.terms.IStrategoList;
 import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.ITermFactory;
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Table;
 
 public class TaskEngine implements ITaskEngine {
     private final ITermFactory factory;
@@ -41,13 +39,13 @@ public class TaskEngine implements ITaskEngine {
     private final IStrategoConstructor resultConstructor;
 
     /** Mapping of instruction constructors to their factory. */
-    private final Map<IStrategoConstructor, ITaskFactory> taskFactories = Maps.newHashMap();
+    private final Map<IStrategoConstructor, ITaskFactory> taskFactories = new HashMap<>();
 
     /** Bidirectional mapping between task identifiers and tasks. */
-    private final BiMap<IStrategoTerm, ITask> toTask = HashBiMap.create();
+    private final BiMap2<IStrategoTerm, ITask> toTask = new BiMap2<>();
 
     /** Mapping table of instructions and dependencies to task identifiers. */
-    private final Table<IStrategoAppl, IStrategoList, IStrategoTerm> toTaskID = HashBasedTable.create();
+    private final Map<Tuple2<IStrategoAppl, IStrategoList>, IStrategoTerm> toTaskID = new HashMap<>();
 
 
     /** Origins of tasks. */
@@ -67,7 +65,7 @@ public class TaskEngine implements ITaskEngine {
     private final Queue<IStrategoTerm> garbage = new UniqueQueue<IStrategoTerm>();
 
     /** Set of task that are scheduled for evaluation the next time evaluate is called. */
-    private final Set<IStrategoTerm> scheduled = Sets.newHashSet();
+    private final Set<IStrategoTerm> scheduled = new HashSet<>();
 
 
     private final TaskCollection taskCollection;
@@ -117,7 +115,7 @@ public class TaskEngine implements ITaskEngine {
         if(taskID != null)
             return taskID;
         taskID = digester.digest(factory, instruction, dependencies);
-        toTaskID.put(instruction, dependencies, taskID);
+        toTaskID.put(Tuple2.of(instruction, dependencies), taskID);
         final ITask task = getTask(taskID);
         if(task == null)
             return taskID;
@@ -167,13 +165,13 @@ public class TaskEngine implements ITaskEngine {
             throw new RuntimeException("Trying to add a persisted task that already exists.");
 
         toTask.put(taskID, task);
-        toTaskID.put(task.initialInstruction(), initialDependencies, taskID);
+        toTaskID.put(Tuple2.of(task.initialInstruction(), initialDependencies), taskID);
     }
 
     @Override public void removeTask(IStrategoTerm taskID) {
         // Thrash higher-order tasks that were created by this task. Make a copy of the result of getFromSource because
         // that collection will be changed by trashUnreferencedTasks, which would result in a concurrent modification.
-        trashUnreferencedTasks(Lists.newArrayList(getFromSource(taskID)), taskID);
+        trashUnreferencedTasks(Iterables2.toArrayList(getFromSource(taskID)), taskID);
 
         removeSourcesOf(taskID);
         removeDependencies(taskID);
@@ -182,7 +180,7 @@ public class TaskEngine implements ITaskEngine {
         final ITask task = getTask(taskID); // Don't use wrapper, cannot remove from parent in this task engine.
         if(task == null)
             return; // Task is not in this task engine but might be in a parent one.
-        toTaskID.remove(task.initialInstruction(), TermTools.makeList(factory, task.initialDependencies()));
+        toTaskID.remove(Tuple2.of(task.initialInstruction(), TermTools.makeList(factory, task.initialDependencies())));
         toTask.remove(taskID);
     }
 
@@ -245,10 +243,10 @@ public class TaskEngine implements ITaskEngine {
 
     @Override public Set<IStrategoTerm> invalidateTaskReads(IStrategoList changedReads) {
         // Use work list to prevent recursion, keep collection of seen task ID's to prevent loops.
-        final Set<IStrategoTerm> seen = Sets.newHashSet();
-        final Queue<IStrategoTerm> workList = Lists.newLinkedList();
+        final Set<IStrategoTerm> seen = new HashSet<>();
+        final Queue<IStrategoTerm> workList = new ArrayDeque<>();
         for(final IStrategoTerm changedRead : changedReads) {
-            Iterables.addAll(seen, getReaders(changedRead));
+            Iterables2.addAll(seen, getReaders(changedRead));
         }
         workList.addAll(seen);
 
@@ -283,7 +281,7 @@ public class TaskEngine implements ITaskEngine {
 
     @Override public IStrategoTerm evaluateNow(IContext context, Strategy collect, Strategy insert, Strategy perform,
         Iterable<IStrategoTerm> taskIDs) {
-        final Set<IStrategoTerm> scheduled = Sets.newHashSet(taskIDs);
+        final Set<IStrategoTerm> scheduled = Iterables2.toHashSet(taskIDs);
         for(IStrategoTerm taskID : taskIDs)
             scheduled.addAll(getTransitiveDependencies(taskID));
         return evaluationFrontend.evaluate(scheduled, context, collect, insert, perform);
@@ -299,7 +297,7 @@ public class TaskEngine implements ITaskEngine {
     }
 
     @Override public IStrategoTerm getTaskID(IStrategoAppl instruction, IStrategoList dependencies) {
-        return toTaskID.get(instruction, dependencies);
+        return toTaskID.get(Tuple2.of(instruction, dependencies));
     }
 
 
@@ -317,7 +315,7 @@ public class TaskEngine implements ITaskEngine {
 
 
     @Override public Set<IStrategoTerm> getAllSources() {
-        return Sets.newHashSet(toSource.values());
+        return new HashSet<>(toSource.values());
     }
 
     @Override public Set<IStrategoTerm> getSourcesOf(IStrategoTerm taskID) {
@@ -353,8 +351,8 @@ public class TaskEngine implements ITaskEngine {
     }
 
     @Override public Set<IStrategoTerm> getTransitiveDependencies(IStrategoTerm taskID) {
-        final Set<IStrategoTerm> seen = Sets.newHashSet();
-        final Queue<IStrategoTerm> queue = Lists.newLinkedList();
+        final Set<IStrategoTerm> seen = new HashSet<>();
+        final Queue<IStrategoTerm> queue = new ArrayDeque<>();
 
         queue.add(taskID);
         seen.add(taskID);
@@ -382,8 +380,8 @@ public class TaskEngine implements ITaskEngine {
     }
 
     @Override public boolean becomesCyclic(IStrategoTerm taskIDFrom, IStrategoTerm taskIDTo) {
-        final Set<IStrategoTerm> seen = Sets.newHashSet();
-        final Queue<IStrategoTerm> queue = Lists.newLinkedList();
+        final Set<IStrategoTerm> seen = new HashSet<>();
+        final Queue<IStrategoTerm> queue = new ArrayDeque<>();
 
         queue.add(taskIDTo);
         seen.add(taskIDTo);

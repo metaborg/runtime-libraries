@@ -30,6 +30,12 @@ signature
     Rewrite  : ID * Result         -> Instruction
     MakeSet  : Term                -> Instruction 
 
+strategies
+
+  // HACK: Need to locally redefine the congruence for Id/1 which is defined in both libstrc and lib-java-front
+
+  internal Id(x) = ?Id(a){a*}; !Id(<x> a){a*}
+
 rules
   
   /**

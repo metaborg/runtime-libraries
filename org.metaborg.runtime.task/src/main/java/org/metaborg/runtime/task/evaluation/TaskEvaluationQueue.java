@@ -1,13 +1,21 @@
 package org.metaborg.runtime.task.evaluation;
 
+import java.util.ArrayDeque;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
 import org.metaborg.runtime.task.ITask;
+import org.metaborg.runtime.task.ITaskResults;
 import org.metaborg.runtime.task.engine.ITaskEngine;
 import org.metaborg.util.collection.BiLinkedHashMultimap;
 import org.metaborg.util.collection.BiSetMultimap;
+import org.metaborg.util.collection.ListMultimap;
+import org.metaborg.util.collection.MultiSet;
+import org.metaborg.util.iterators.Iterables2;
 import org.spoofax.interpreter.core.IContext;
 import org.spoofax.interpreter.stratego.Strategy;
 import org.spoofax.interpreter.terms.IStrategoAppl;
@@ -16,14 +24,6 @@ import org.spoofax.interpreter.terms.IStrategoTerm;
 import org.spoofax.interpreter.terms.IStrategoTuple;
 import org.spoofax.interpreter.terms.ITermFactory;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multiset;
-import com.google.common.collect.Multisets;
-import com.google.common.collect.Sets;
 
 public class TaskEvaluationQueue implements ITaskEvaluationQueue, ITaskEvaluationFrontend {
 	private final ITaskEngine taskEngine;
@@ -31,24 +31,24 @@ public class TaskEvaluationQueue implements ITaskEvaluationQueue, ITaskEvaluatio
 
 
 	/** Queue of task that are scheduled for evaluation. */
-	private final Queue<IStrategoTerm> evaluationQueue = Lists.newLinkedList();
+	private final Queue<IStrategoTerm> evaluationQueue = new ArrayDeque<>();
 
 	/** Set of tasks in the queue. **/
-	private final Set<IStrategoTerm> queued = Sets.newHashSet();
+	private final Set<IStrategoTerm> queued = new HashSet<>();
 
-	/** Dependencies of tasks which are updated during evaluation. */
+    /** Dependencies of tasks which are updated during evaluation. */
 	private BiSetMultimap<IStrategoTerm, IStrategoTerm> runtimeDependencies =
 		BiLinkedHashMultimap.create();
 
 
 	/** Maps the constructor of an instruction to the queuer that can queue the task. */
-	private final Map<IStrategoConstructor, ITaskQueuer> taskQueuers = Maps.newLinkedHashMap();
+	private final Map<IStrategoConstructor, ITaskQueuer> taskQueuers = new LinkedHashMap<>();
 
 	/** The default task queuer that is used to queue tasks for which there is no specific queuer. */
 	private final ITaskQueuer baseTaskQueuer;
 
 	/** Maps the constructor of an instruction to the evaluator that can evaluate the task. */
-	private final Map<IStrategoConstructor, ITaskEvaluator> taskEvaluators = Maps.newLinkedHashMap();
+	private final Map<IStrategoConstructor, ITaskEvaluator> taskEvaluators = new LinkedHashMap<>();
 
 	/** The default task evaluator that is used to evaluate tasks for which there is no specific evaluator. */
 	private final ITaskEvaluator baseTaskEvaluator;
@@ -58,11 +58,11 @@ public class TaskEvaluationQueue implements ITaskEvaluationQueue, ITaskEvaluatio
 
 
 	private Set<IStrategoTerm> scheduled;
-	private final Set<IStrategoTerm> skipped = Sets.newHashSet();
-	private final Set<IStrategoTerm> evaluated = Sets.newHashSet();
+	private final Set<IStrategoTerm> skipped = new HashSet<>();
+    private final Set<IStrategoTerm> evaluated = new HashSet<>();
 
 
-	public TaskEvaluationQueue(ITaskEngine taskEngine, ITermFactory factory) {
+    public TaskEvaluationQueue(ITaskEngine taskEngine, ITermFactory factory) {
 		this.taskEngine = taskEngine;
 		this.factory = factory;
 		this.baseTaskQueuer = new BaseTaskQueuer();
@@ -80,7 +80,7 @@ public class TaskEvaluationQueue implements ITaskEvaluationQueue, ITaskEvaluatio
 	@Override
 	public void queueOrDefer(IStrategoTerm taskID) {
 		final Iterable<IStrategoTerm> dependencies = taskEngine.getDependencies(taskID, false);
-		final Set<IStrategoTerm> dependenciesSet = Sets.newHashSet(dependencies);
+		final Set<IStrategoTerm> dependenciesSet = Iterables2.toHashSet(dependencies);
 
 		// TODO: this could be done in constant time if task engine keeps a set of solved tasks.
 		for(final IStrategoTerm dependency : dependencies) {
@@ -101,7 +101,7 @@ public class TaskEvaluationQueue implements ITaskEvaluationQueue, ITaskEvaluatio
 	@Override
 	public void solved(IStrategoTerm taskID) {
 		// Retrieve dependent tasks of the solved task.
-		final Set<IStrategoTerm> dependents = Sets.newHashSet(taskEngine.getDependents(taskID, false));
+		final Set<IStrategoTerm> dependents = Iterables2.toHashSet(taskEngine.getDependents(taskID, false));
 		dependents.addAll(runtimeDependencies.getInverse(taskID));
 
 		for(final IStrategoTerm dependentTaskID : dependents) {
@@ -200,7 +200,7 @@ public class TaskEvaluationQueue implements ITaskEvaluationQueue, ITaskEvaluatio
 		// Make a copy of the dynamic dependency graph for later use.
 		final BiSetMultimap<IStrategoTerm, IStrategoTerm> copiedRuntimeDependencies =
 			BiLinkedHashMultimap.create(runtimeDependencies);
-		final Set<IStrategoTerm> taskIDs = Sets.newHashSet(copiedRuntimeDependencies.keySet());
+		final Set<IStrategoTerm> taskIDs = new HashSet<>(copiedRuntimeDependencies.keySet());
 
 		// Evaluate all tasks left in the dependency graph using a special strategy to break cycles.
 		for(final IStrategoTerm taskID : taskIDs) {
@@ -209,11 +209,11 @@ public class TaskEvaluationQueue implements ITaskEvaluationQueue, ITaskEvaluatio
 		evaluateQueuedTasks(context, collect, insert, perform, true);
 
 		// Store values
-		final Multimap<IStrategoTerm, IStrategoTerm> values = ArrayListMultimap.create();
+		final ListMultimap<IStrategoTerm, IStrategoTerm> values = new ListMultimap<>();
 		for(final IStrategoTerm taskID : taskIDs) {
 			final ITask task = taskEngine.getTask(taskID);
 			if(!task.failed())
-				values.putAll(taskID, task.results());
+				task.results().forEach(r -> values.put(taskID, r));
 		}
 
 		// Do fixpoint evaluation until the results of tasks stop changing.
@@ -244,11 +244,19 @@ public class TaskEvaluationQueue implements ITaskEvaluationQueue, ITaskEvaluatio
 					break;
 				}
 
+				final List<IStrategoTerm> oldValues = values.get(taskID);
+				final ITaskResults newValues = task.results();
+				if(oldValues.size() != newValues.size()) {
+					done = false;
+					break;
+				}
 				// TODO: creating two sets and taking the symmetric difference is VERY expensive?
-				final Multiset<IStrategoTerm> oldValues = HashMultiset.create(values.get(taskID));
-				final Multiset<IStrategoTerm> newValues = HashMultiset.create(task.results());
-				final Multiset<IStrategoTerm> diff1 = Multisets.difference(newValues, oldValues);
-				final Multiset<IStrategoTerm> diff2 = Multisets.difference(oldValues, newValues);
+				final MultiSet.Transient<IStrategoTerm> diff1 = MultiSet.Transient.of();
+				diff1.addAll(newValues);
+				diff1.removeAll(oldValues);
+				final MultiSet.Transient<IStrategoTerm> diff2 = MultiSet.Transient.of();
+				diff2.addAll(oldValues);
+				diff2.removeAll(newValues);
 
 				if(!diff1.isEmpty() || !diff2.isEmpty()) {
 					done = false;
@@ -265,7 +273,7 @@ public class TaskEvaluationQueue implements ITaskEvaluationQueue, ITaskEvaluatio
 			for(final IStrategoTerm taskID : taskIDs) {
 				final ITask task = taskEngine.getTask(taskID);
 				if(!task.failed())
-					values.putAll(taskID, task.results());
+					task.results().forEach(r -> values.put(taskID, r));
 			}
 		}
 	}
